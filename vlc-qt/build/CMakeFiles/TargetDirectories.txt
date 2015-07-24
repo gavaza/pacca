@@ -1,0 +1,7 @@
+/Users/alexsantana/Projetos/Pacca2/code/trunk/vlc-qt/build/CMakeFiles/uninstall.dir
+/Users/alexsantana/Projetos/Pacca2/code/trunk/vlc-qt/build/src/core/CMakeFiles/vlc-qt.dir
+/Users/alexsantana/Projetos/Pacca2/code/trunk/vlc-qt/build/src/qml/CMakeFiles/vlc-qt-qml.dir
+/Users/alexsantana/Projetos/Pacca2/code/trunk/vlc-qt/build/src/qml/CMakeFiles/vlc-qt-qml_automoc.dir
+/Users/alexsantana/Projetos/Pacca2/code/trunk/vlc-qt/build/src/widgets/CMakeFiles/vlc-qt-widgets.dir
+/Users/alexsantana/Projetos/Pacca2/code/trunk/vlc-qt/build/src/widgets/CMakeFiles/vlc-qt-widgets_automoc.dir
+/Users/alexsantana/Projetos/Pacca2/code/trunk/vlc-qt/build/src/core/CMakeFiles/vlc-qt_automoc.dir

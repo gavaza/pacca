@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ViewTableStats</class>
+ <widget class="QWidget" name="ViewTableStats">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Estatísticas</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QListWidget" name="list">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QTableWidget" name="table">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>Sessão</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Observado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Média Observado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Variância</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Esperado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Média Esperado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Variância</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Resíduo</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Média Resíduo</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Variância</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>P-Valor</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

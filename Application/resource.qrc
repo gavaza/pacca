@@ -1,0 +1,46 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="play24x24.png">icons/Play24x24.png</file>
+        <file alias="pause24x24.png">icons/Pause24x24.png</file>
+        <file alias="stop24x24.png">icons/Stop24x24.png</file>
+        <file alias="remove24x24.png">icons/remove24x24.png</file>
+        <file alias="remove16x16.png">icons/remove16x16.png</file>
+        <file alias="save24x24.png">icons/save24x24.png</file>
+        <file alias="save16x16.png">icons/save16x16.png</file>
+        <file alias="add24x24.png">icons/add24x24.png</file>
+        <file alias="add16x16.png">icons/add16x16.png</file>
+        <file alias="net16x16.png">icons/net16x16.png</file>
+        <file alias="net24x24.png">icons/net24x24.png</file>
+        <file alias="gear16x16.png">icons/gear16x16.png</file>
+        <file alias="gear24x24.png">icons/gear24x24.png</file>
+        <file alias="stats16x16.png">icons/stats16x16.png</file>
+        <file alias="stats24x24.png">icons/stats24x24.png</file>
+        <file alias="csv48x48.png">icons/csv48x48.png</file>
+        <file alias="jpg48x48.png">icons/jpg48x48.png</file>
+        <file alias="pdf48x48.png">icons/pdf48x48.png</file>
+        <file alias="png48x48.png">icons/png48x48.png</file>
+        <file alias="dict24x24.png">icons/dict24x24.png</file>
+        <file alias="dict32x32.png">icons/dict32x32.png</file>
+        <file alias="numbers24x24.png">icons/numbers24x24.png</file>
+        <file alias="numbers48x48.png">icons/numbers48x48.png</file>
+        <file alias="p24x24.png">icons/p24x24.png</file>
+        <file alias="p48x48.png">icons/p48x48.png</file>
+        <file alias="scale24x24.png">icons/scale24x24.png</file>
+        <file alias="scale48x48.png">icons/scale48x48.png</file>
+        <file alias="logo48x48.png">icons/logo48x48.png</file>
+        <file alias="logo1024x1024.png">icons/logo1024x1024.png</file>
+        <file alias="logo.icns">icons/logo.icns</file>
+        <file alias="dice24x24.png">icons/dice24x24.png</file>
+        <file alias="dice32x32.png">icons/dice32x32.png</file>
+        <file alias="h24x24.png">icons/h24x24.png</file>
+        <file alias="h48x48.png">icons/h48x48.png</file>
+        <file alias="refresh48x48.png">icons/refresh48x48.png</file>
+        <file alias="refresh16x16.png">icons/refresh16x16.png</file>
+        <file alias="file48x48.png">icons/file48x48.png</file>
+        <file alias="file24x24.png">icons/file24x24.png</file>
+        <file alias="filter32x32.png">icons/filter32x32.png</file>
+        <file alias="splash.png">icons/splash.png</file>
+        <file alias="up16x16.png">icons/up16x16.png</file>
+        <file alias="down16x16.png">icons/down16x16.png</file>
+    </qresource>
+</RCC>
