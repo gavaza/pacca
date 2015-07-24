@@ -1,0 +1,63 @@
+#### Pontos
+
+#ANALISE
+- Na exibição dos grafos, colocar as opções de filtros com base nas variáveis (pvalor, resíduo ...)
+
+#Matrizes filogenéticas
+- Estudar o formato de arquivo NEXUS.
+
+#GERAL
+- Colocar menu de tradução.
+- Completar a doucmentação.
+
+#A DEFINIR
+- Verificar como será exibido o size de cada nó.
+- verificar sobre método de adição de arestas, uma vez que a ideia será pecorrer a matriz adicionando as arestas com os respectivos pesos, sem necessidade de manter controle de somatório de peso.
+- verificar se existe algum informação relevante a incluir como "nome" de arestas.
+- avaliar quais informações existirão nos menus de contexto e duplo clique para nós e arestas.
+
+#Pedencias da reunião do dia 25/03/2015
+- Observar que em novas versões em caso de mudanças no BD será preciso refazer as tabelas
+  de que já possuía uma versão instalada.
+- CRASH: O programa falhou na importação de um MDF, provavelmente por possuir formatação
+  ou encoding não reconhecido.
+- Rever informações do cálculo de "P", a média e a variância.
+
+#pendencias da reunião do dia 10/06/2015
+- Salvar sessões para algum arquivo, algo semelhante ao mdf e odf.
+- Atalhos para inserir Estados, usar o mesmo esquema de dicionários.
+- Verificar idioma, parece que a pasta Language não está no repositório, olhar o caminho em main.cpp
+- No linux não consegui fazer o teste porque deu pau no vlc (possivelmente algum problema de intalação).
+- Header das tabelas em ctl spc, usr...  revisar jnl de ctl.
+- Verificar questão sobre versões de mac, a versão de Hilton ficou muito instável.
+
+#PENDENCIAS IMPORTANTES
+- No mac de Alex, quando a tela de vídeo é fechada as novas telas abertas ficam
+  inacessíveis (apesar de visíveis). 11/07/2015
+- Testatdo a inserção de várias entradas (+60) no dicionário (vários tamanhos, repetidos etc),
+  ocorre o crash de maneira ainda não determinada.
+
+##### DONE
+FEITO - Testar inserir dicionário com vários verbetes mais de 15, travamento geral.
+FEITO - Não salvou sessões de vídeos.
+FEITO - Não abrir as telas de cadastro/controle quando já existe uma aberta, pode ocorrer erros
+        em manipular a mesma info em janelas separadas.
+FEITO - Incluir opção para interromper processo em background.
+FEITO - Incluir opção de exibir novamente os cálculos da opção "P" sem precisar rodar novamente.
+        Guardar os resultados e questionar se deseja recalculcar.
+FEITO - Diminuir o tamanho do splash ou colocar uma forma de demonstrar que está processando.
+FEITO - Reformatar o texto do "Sobre Pacca"
+FEITO - Definir o p-valor como a menor área
+BLOQUEADO ABRIR NOVAS JANELAS, VIDEO CONSOME MUITO RECURSO - Programa trava se durante uma codificação vc abrir outra janela de gerenciamento.
+FEITO - Autorolagem tabela de eventos na tela de codificação, de forma a sempre exibir os itens novos. 
+FEITO - Adaptar atalhos teclado para cada SO.
+FEITO, NAO EXISTIRAM MULT JANELAS USANDO BD - Travou na hora de exibir multiplas janelas.
+FEITO - Fazer simplified do campo input eventos dos dicionários.
+FEITO - Remover o splash da Pacca da frente do FileSaveDialog na hora de salvar o csv.
+FEITO - Quando vc cancela a escolha do dicionário (import video), por exemplo, automaticamente chama a janela de controle.
+  Talvez somente fechar a janela sem abrir o controle.
+
+##### ABORTED
+NAO PRIORITRARIO - Locale de tradução na barra de velocidades.
+SEM MULT JANELS NÃO É MAIS NECESSÁRIO - Botoes de refresh nas telas de controle.
+
