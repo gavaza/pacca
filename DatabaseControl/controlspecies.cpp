@@ -23,7 +23,6 @@ ControlSpecies::~ControlSpecies()
 
 void ControlSpecies::refreshList()
 {
-    this->ui->listSpecies->clear();
     this->ui->listSpecies->setRowCount(0);
     Database db;
     QList<Species> species = db.getAllSpecies();

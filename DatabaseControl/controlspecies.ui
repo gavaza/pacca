@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>686</width>
-    <height>190</height>
+    <height>199</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,7 +58,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="resource.qrc">
+         <iconset resource="../Application/resource.qrc">
           <normaloff>:/icons/file48x48.png</normaloff>:/icons/file48x48.png</iconset>
         </property>
        </widget>
@@ -93,7 +93,7 @@
         <string>Excluir</string>
        </property>
        <property name="icon">
-        <iconset resource="resource.qrc">
+        <iconset resource="../Application/resource.qrc">
          <normaloff>:/icons/remove16x16.png</normaloff>:/icons/remove16x16.png</iconset>
        </property>
       </widget>
@@ -142,7 +142,14 @@
   </layout>
  </widget>
  <resources>
-  <include location="resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
  </resources>
  <connections/>
 </ui>

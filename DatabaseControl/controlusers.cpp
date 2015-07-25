@@ -22,7 +22,6 @@ ControlUsers::~ControlUsers()
 
 void ControlUsers::refreshList()
 {
-    this->ui->listUsers->clear();
     this->ui->listUsers->setRowCount(0);
     Database db;
     QList<Users> users = db.getAllUsers();

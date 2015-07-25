@@ -30,3 +30,4 @@ SOURCES += \
     connections.cpp
 
 
+RESOURCES += ../Application/resource.qrc

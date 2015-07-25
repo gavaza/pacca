@@ -79,7 +79,7 @@
         <string>Excluir</string>
        </property>
        <property name="icon">
-        <iconset resource="resource.qrc">
+        <iconset resource="../Application/resource.qrc">
          <normaloff>:/icons/remove16x16.png</normaloff>:/icons/remove16x16.png</iconset>
        </property>
       </widget>
@@ -128,7 +128,14 @@
   </layout>
  </widget>
  <resources>
-  <include location="resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
  </resources>
  <connections/>
 </ui>

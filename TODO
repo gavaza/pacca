@@ -23,7 +23,6 @@
 #pendencias da reunião do dia 10/06/2015
 - Salvar sessões para algum arquivo, algo semelhante ao mdf e odf.
 - No linux não consegui fazer o teste porque deu pau no vlc (possivelmente algum problema de intalação).
-- Header das tabelas em ctl spc, usr...  revisar jnl de ctl.
 
 #PENDENCIAS IMPORTANTES
 - No mac de Alex, quando a tela de vídeo é fechada as novas telas abertas ficam
@@ -54,6 +53,7 @@ FEITO - Atalhos para inserir Estados, usar o mesmo esquema de dicionários.
 FEITO - Rever informações do cálculo de "P", a média e a variância.
 FEITO - O problema está no deploy, precisa incluir que ele copie a pasta language para
 dentro do pacote - Verificar idioma, parece que a pasta Language não está no repositório, olhar o caminho em main.cpp
+FEITO - Header das tabelas em ctl spc, usr...  revisar jnl de ctl.
 
 ##### ABORTED
 NAO PRIORITRARIO - Locale de tradução na barra de velocidades.

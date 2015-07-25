@@ -17,3 +17,5 @@ LIBS += -L$$OUT_PWD/../lib/ -lStatistics
 INCLUDEPATH += $$PWD/../Statistics
 
 FORMS +=
+
+RESOURCES += ../Application/resource.qrc

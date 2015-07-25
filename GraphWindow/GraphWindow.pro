@@ -38,4 +38,4 @@ HEADERS  += \
 FORMS    += \
     GraphWindow.ui
 
-RESOURCES +=
+RESOURCES += ../Application/resource.qrc

@@ -19,3 +19,5 @@ SOURCES += \
 
 FORMS += \
     videowindow.ui
+
+RESOURCES += ../Application/resource.qrc
