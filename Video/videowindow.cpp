@@ -206,10 +206,13 @@ void VideoWindow::newEntry()
         return;
     }
     QString codeState = this->ui->in_state->text().simplified();
-    QString state = this->dictionary.value(codeState,"");
-    if(state.size() == 0){
-        QMessageBox::critical(this,tr("Erro"),tr("Código do estado não encontrado no dicionário."));
-        return;
+    QString state = "";
+    if(codeState != ""){
+        state = this->dictionary.value(codeState,"");
+        if(state.size() == 0){
+            QMessageBox::critical(this,tr("Erro"),tr("Código do estado não encontrado no dicionário."));
+            return;
+        }
     }
     QTableWidgetItem *item_time = new QTableWidgetItem;
     QTableWidgetItem *item_state = new QTableWidgetItem;
@@ -282,12 +285,10 @@ void VideoWindow::review()
 void VideoWindow::edit(int row, int col)
 {
     disconnect(this->ui->sequence,SIGNAL(cellChanged(int,int)),this,SLOT(edit(int,int)));
-    if(col==2){
-        QString code = this->ui->sequence->item(row,col)->text();
-        QString event = this->dictionary.value(code,"");
-        this->ui->sequence->item(row,col)->setText("("+code+") "+event);
-    }
-    if(this->ui->sequence->item(row,col)->text().size() == 0 && col==2){
+    QString code = this->ui->sequence->item(row,col)->text();
+    QString event = this->dictionary.value(code,"").simplified();
+    this->ui->sequence->item(row,col)->setText("("+code+") "+event);
+    if(event == "" && col==2){
         this->ui->sequence->item(row,col)->setText(this->origText);
         this->origText="";
     }
