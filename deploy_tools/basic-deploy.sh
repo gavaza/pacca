@@ -5,8 +5,9 @@ APP_NAME=${1}
 LOCAL_PATH_=`pwd`
 
 mkdir -p ${APP_NAME}/Contents/Frameworks
-cp ../../trunk/vlc-qt/build/prefix/lib/libvlc-qt.dylib ${APP_NAME}/Contents/Frameworks/
-cp ../../trunk/vlc-qt/build/prefix/lib/libvlc-qt-widgets.dylib ${APP_NAME}/Contents/Frameworks/
+cp ../../vlc-qt/build/prefix/lib/libvlc-qt.dylib ${APP_NAME}/Contents/Frameworks/
+cp ../../vlc-qt/build/prefix/lib/libvlc-qt-widgets.dylib ${APP_NAME}/Contents/Frameworks/
+cp -r ../../Application/languages ${APP_NAME}/Contents/Languages
 cp -f ../lib/libQGVCore.1.dylib ${APP_NAME}/Contents/Frameworks/
 cp -f ../lib/libGraphWindow.1.dylib ${APP_NAME}/Contents/Frameworks/
 cp -f ../lib/libPhylogenetic.1.dylib ${APP_NAME}/Contents/Frameworks/

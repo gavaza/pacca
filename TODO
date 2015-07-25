@@ -17,19 +17,13 @@
 - avaliar quais informações existirão nos menus de contexto e duplo clique para nós e arestas.
 
 #Pedencias da reunião do dia 25/03/2015
-- Observar que em novas versões em caso de mudanças no BD será preciso refazer as tabelas
-  de que já possuía uma versão instalada.
 - CRASH: O programa falhou na importação de um MDF, provavelmente por possuir formatação
   ou encoding não reconhecido.
-- Rever informações do cálculo de "P", a média e a variância.
 
 #pendencias da reunião do dia 10/06/2015
 - Salvar sessões para algum arquivo, algo semelhante ao mdf e odf.
-- Atalhos para inserir Estados, usar o mesmo esquema de dicionários.
-- Verificar idioma, parece que a pasta Language não está no repositório, olhar o caminho em main.cpp
 - No linux não consegui fazer o teste porque deu pau no vlc (possivelmente algum problema de intalação).
 - Header das tabelas em ctl spc, usr...  revisar jnl de ctl.
-- Verificar questão sobre versões de mac, a versão de Hilton ficou muito instável.
 
 #PENDENCIAS IMPORTANTES
 - No mac de Alex, quando a tela de vídeo é fechada as novas telas abertas ficam
@@ -55,9 +49,15 @@ FEITO, NAO EXISTIRAM MULT JANELAS USANDO BD - Travou na hora de exibir multiplas
 FEITO - Fazer simplified do campo input eventos dos dicionários.
 FEITO - Remover o splash da Pacca da frente do FileSaveDialog na hora de salvar o csv.
 FEITO - Quando vc cancela a escolha do dicionário (import video), por exemplo, automaticamente chama a janela de controle.
-  Talvez somente fechar a janela sem abrir o controle.
+        Talvez somente fechar a janela sem abrir o controle.
+FEITO - Atalhos para inserir Estados, usar o mesmo esquema de dicionários.
+FEITO - Rever informações do cálculo de "P", a média e a variância.
+FEITO - O problema está no deploy, precisa incluir que ele copie a pasta language para
+dentro do pacote - Verificar idioma, parece que a pasta Language não está no repositório, olhar o caminho em main.cpp
 
 ##### ABORTED
 NAO PRIORITRARIO - Locale de tradução na barra de velocidades.
 SEM MULT JANELS NÃO É MAIS NECESSÁRIO - Botoes de refresh nas telas de controle.
+Após a versão final o banco não será modificado - Observar que em novas versões em caso de mudanças no BD será preciso refazer as tabelas
+  de que já possuía uma versão instalada.
 
