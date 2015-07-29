@@ -32,10 +32,13 @@ bool Connections::makeDatabaseTables(){
     query.exec("DROP TABLE IF EXISTS Dictionary;");
     query.exec("DROP TABLE IF EXISTS EntryDict;");
     query.exec("DROP TABLE IF EXISTS Species;");
+    query.exec("DROP TABLE IF EXISTS Subjects;");
 
     query.exec("CREATE TABLE Users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);");
 
     query.exec("CREATE TABLE Species (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);");
+
+    query.exec("CREATE TABLE Subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);");
 
     query.exec("CREATE TABLE Sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, "
            " datesession DATETIME, datedecoding DATETIME, "
@@ -43,7 +46,8 @@ bool Connections::makeDatabaseTables(){
            " decoder INTEGER, "
            " observer INTEGER, "
            " description TEXT, "
-           " subject TEXT, "
+           " subject INTEGER, "
+           " FOREIGN KEY(subject) REFERENCES Subjects(id), "
            " FOREIGN KEY(specie) REFERENCES Species(id), "
            " FOREIGN KEY(observer) REFERENCES Users(id), "
            " FOREIGN KEY(decoder) REFERENCES Users(id));");

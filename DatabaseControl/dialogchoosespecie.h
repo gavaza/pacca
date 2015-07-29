@@ -5,6 +5,7 @@
 #include <QPushButton>
 
 #include "species.h"
+#include "subject.h"
 #include "database.h"
 
 namespace Ui {
@@ -20,6 +21,8 @@ public:
     ~DialogChooseSpecie();
     QString getSpecieName();
     QVariant getSpecie();
+    QString getSubjectName();
+    QVariant getSubject();
 
 private:
     Ui::DialogChooseSpecie *ui;

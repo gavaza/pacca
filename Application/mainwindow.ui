@@ -70,6 +70,7 @@
     <addaction name="separator"/>
     <addaction name="actionDicion_rio"/>
     <addaction name="actionSpecies"/>
+    <addaction name="actionIndiv_duos"/>
     <addaction name="actionSess_es"/>
     <addaction name="actionUsuario"/>
     <addaction name="separator"/>
@@ -214,9 +215,20 @@
     <string>Lado a Lado</string>
    </property>
   </action>
+  <action name="actionIndiv_duos">
+   <property name="text">
+    <string>Indivíduos</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
   <include location="resource.qrc"/>
   <include location="resource.qrc"/>
  </resources>

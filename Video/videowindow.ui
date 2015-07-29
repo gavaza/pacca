@@ -195,16 +195,6 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="2">
-        <widget class="QLineEdit" name="subject">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="2">
         <widget class="QLabel" name="label">
          <property name="text">
@@ -228,6 +218,9 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item row="2" column="2">
+        <widget class="QComboBox" name="subject"/>
        </item>
       </layout>
      </item>
@@ -493,7 +486,6 @@
  <tabstops>
   <tabstop>observer</tabstop>
   <tabstop>description</tabstop>
-  <tabstop>subject</tabstop>
   <tabstop>in_state</tabstop>
   <tabstop>in_event</tabstop>
   <tabstop>sequence</tabstop>
@@ -507,6 +499,12 @@
   <tabstop>speed</tabstop>
  </tabstops>
  <resources>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
   <include location="../Application/resource.qrc"/>
   <include location="../Application/resource.qrc"/>
  </resources>

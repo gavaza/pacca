@@ -19,6 +19,7 @@
 #include "states.h"
 #include "events.h"
 #include "dictionary.h"
+#include "subject.h"
 
 /*!
  * \brief Interface wiht the sqlite database
@@ -38,6 +39,12 @@ public:
     Species getSpecies(unsigned int id);
     Species getSpecies(QVariant name);
     QList<Species> getAllSpecies();
+    int insertSubject(Subjects s);
+    int editSubjects(Subjects s);
+    Subjects getSubjects(unsigned int id);
+    Subjects getSubjects(QVariant name);
+    QList<Subjects> getAllSubjects();
+    bool removeSubject(unsigned int id);
     bool removeSpecie(unsigned int id);
     int insertEvent(Events e);
     int insertState(States s);
@@ -68,11 +75,13 @@ private:
     Sessions fillSession();
     Users fillUser();
     Species fillSpecie();
+    Subjects fillSubject();
     Events fillEvent();
     States fillState();
 
     int userExist(QVariant name);
     int specieExist(QVariant name);
+    int subjectExist(QVariant name);
     int stateExist(QVariant name);
     int dictExist(QVariant name);
     int dictEntryExist(QVariant name, QString code);

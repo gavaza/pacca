@@ -25,6 +25,7 @@ VideoWindow::VideoWindow(QString typeMedia,QWidget *parent) :
     this->ui->progress->setMediaPlayer(this->_player);
 
     this->loadSpeceis();
+    this->loadSubjects();
     this->createConnections();
 }
 
@@ -69,7 +70,20 @@ void VideoWindow::loadSpeceis()
         QVariant id = sp.getId();
         this->ui->species->addItem(name,id);
     }
- }
+}
+
+void VideoWindow::loadSubjects()
+{
+    Database db;
+    QList<Subjects> subjects = db.getAllSubjects();
+    this->ui->subject->clear();
+    for(int l = 0; l < subjects.size(); l++){
+        Subjects s = subjects.at(l);
+        QString name = s.getName().toString();
+        QVariant id = s.getId();
+        this->ui->subject->addItem(name,id);
+    }
+}
 
 void VideoWindow::saveOrigText(int row, int col)
 {
@@ -94,7 +108,6 @@ void VideoWindow::checkSaveCondition()
     bool check = true;
     if(this->ui->sequence->rowCount() == 0) check = false;
     if(this->ui->description->text().isEmpty()) check = false;
-    if(this->ui->subject->text().isEmpty()) check = false;
 
     if(check){
         this->ui->b_save->setToolTip(tr("Salvar sessão!"));
@@ -120,7 +133,7 @@ void VideoWindow::saveSession()
     s.setObserver(this->ui->observer->text());
     if(this->ui->observer->text().isEmpty()) s.setObserver(user);
     s.setDescription(this->ui->description->text());
-    s.setSubject(this->ui->subject->text());
+    s.setSubject(this->ui->subject->currentData());
     s.setSpecies(this->ui->species->currentData());
     for(int i = 0; i < this->ui->sequence->rowCount(); i++){
         Actions a;

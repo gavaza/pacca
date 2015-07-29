@@ -35,6 +35,7 @@ void MainWindow::linkSignals(){
     connect(this->ui->actionDicion_rio,SIGNAL(triggered()),this,SLOT(managerDict()));
     connect(this->ui->actionSess_es,SIGNAL(triggered()),this,SLOT(managerSessions()));
     connect(this->ui->actionSpecies,SIGNAL(triggered()),this,SLOT(managerSpecies()));
+    connect(this->ui->actionIndiv_duos,SIGNAL(triggered()),this,SLOT(managerSubjects()));
     connect(this->ui->aboutQt,SIGNAL(triggered()),this,SLOT(aboutQt()));
     connect(this->ui->aboutPacca,SIGNAL(triggered()),this,SLOT(aboutPacca()));
     connect(this->ui->actionIdioma,SIGNAL(triggered()),this,SLOT(changeLanguage()));
@@ -53,6 +54,7 @@ void MainWindow::adjustShortcuts()
     this->ui->actionSess_es->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
     this->ui->actionSpecies->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
     this->ui->actionUsuario->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_U));
+    this->ui->actionIndiv_duos->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
 }
 void MainWindow::saveSession(Sessions session)
 {
@@ -142,6 +144,7 @@ void MainWindow::executeImportText(bool append /*true is default */){
     DialogChooseSpecie spc;
     if(spc.exec()){
         int specie = spc.getSpecie().toInt();
+        int subject = spc.getSubject().toInt();
         /* import from text */
         QString filename = QFileDialog::getOpenFileName(this, tr("Importar análise do arquivo"), QDir::homePath());
         QFile file(filename);
@@ -266,6 +269,7 @@ void MainWindow::executeImportText(bool append /*true is default */){
                 this->sessions.last().setDescription(filename);
                 this->sessions.last().setActions(actions);
                 this->sessions.last().setSpecies(specie);
+                this->sessions.last().setSubject(subject);
                 db.saveSession(this->sessions.last());
                 //                qDebug() << "Session size = " << actions.size();
             }
@@ -340,6 +344,18 @@ void MainWindow::managerSpecies()
     this->ui->mdiArea->setActiveSubWindow(this->swSpc);
 }
 
+void MainWindow::managerSubjects()
+{
+    if(this->ctl_subjects == NULL){
+        this->ctl_subjects = new ControlSubjects(this->ui->mdiArea);
+        connect(this->ctl_subjects,SIGNAL(destroyed(QObject*)),this,SLOT(subjectsClosed()));
+        this->ctl_subjects->setWindowModality(Qt::ApplicationModal);
+        this->swSpc = this->ui->mdiArea->addSubWindow(this->ctl_subjects);
+    }
+    this->ctl_subjects->show();
+    this->ui->mdiArea->setActiveSubWindow(this->swSpc);
+}
+
 void MainWindow::dictClosed()
 {
     this->dict_ui = NULL;
@@ -353,6 +369,11 @@ void MainWindow::sessionsClosed()
 void MainWindow::speciesClosed()
 {
     this->ctl_species = NULL;
+}
+
+void MainWindow::subjectsClosed()
+{
+    this->ctl_subjects = NULL;
 }
 
 void MainWindow::usersClosed()

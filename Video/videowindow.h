@@ -30,6 +30,7 @@
 #include "events.h"
 #include "dictionary.h"
 #include "species.h"
+#include "subject.h"
 
 namespace Ui {
 class VideoWindow;
@@ -70,6 +71,7 @@ private:
 
     void createConnections();
     void loadSpeceis();
+    void loadSubjects();
 
 private slots:
     void newEntry();

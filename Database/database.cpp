@@ -39,6 +39,16 @@ Species Database::fillSpecie()
     return s;
 }
 
+Subjects Database::fillSubject()
+{
+    Subjects s;
+    this->query.first();
+    this->record = this->query.record();
+    s.setId(this->query.value(this->record.indexOf("id")));
+    s.setName(this->query.value(this->record.indexOf("name")));
+    return s;
+}
+
 States Database::fillState()
 {
     States s;
@@ -81,6 +91,21 @@ int Database::userExist(QVariant name)
 int Database::specieExist(QVariant name)
 {
     this->query.prepare("Select id FROM Species WHERE Species.name=?");
+    this->query.addBindValue(name.toString().toLower());
+    if(!this->query.exec()){
+        this->showError(this->query.lastError());
+        return -1;
+    }
+    if(this->query.next()){
+        int id = this->query.value("id").toInt();
+        return id;
+    }
+    return 0;
+}
+
+int Database::subjectExist(QVariant name)
+{
+    this->query.prepare("Select id FROM Subjects WHERE Subjects.name=?");
     this->query.addBindValue(name.toString().toLower());
     if(!this->query.exec()){
         this->showError(this->query.lastError());
@@ -197,6 +222,22 @@ int Database::insertSpecie(Species s)
     return 0;
 }
 
+int Database::insertSubject(Subjects s)
+{
+    QVariant name = s.getName().toString().toLower();
+    if(!this->subjectExist(name)){
+        this->query.prepare("INSERT INTO Subjects (name) VALUES (:name);");
+        this->query.bindValue(":name",name);
+        if(!this->query.exec()){
+            this->showError(this->query.lastError());
+            return -1;
+        }
+        return this->query.lastInsertId().toInt();
+    }
+    this->showError(QMessageBox::tr("Essa espécie já existe!"));
+    return 0;
+}
+
 int Database::insertState(States s)
 {
     QVariant name = s.getDescription().toLower();
@@ -292,8 +333,29 @@ int Database::editSpecies(Species s)
         this->showError(QMessageBox::tr("Esta espécie já existe"));
         return 0;
     }
-    if(this->specieExist(name) >= 0){
+    if(this->specieExist(name) <= 0){
         this->query.prepare("UPDATE Species SET name=? WHERE Species.id=?;");
+        this->query.addBindValue(name);
+        this->query.addBindValue(s.getId());
+        if(!this->query.exec()){
+            this->showError(this->query.lastError());
+            return -1;
+        }
+        return 1;
+    }
+    QMessageBox::information(0, QMessageBox::tr("Erro"),QMessageBox::tr("Espécie não encontrada!"));
+    return 0;
+}
+
+int Database::editSubjects(Subjects s)
+{
+    QVariant name = s.getName().toString().toLower();
+    if(this->subjectExist(name) > 0){
+        this->showError(QMessageBox::tr("Esta espécie já existe"));
+        return 0;
+    }
+    if(this->subjectExist(name) <= 0){
+        this->query.prepare("UPDATE Subjects SET name=? WHERE Subjects.id=?;");
         this->query.addBindValue(name);
         this->query.addBindValue(s.getId());
         if(!this->query.exec()){
@@ -418,11 +480,68 @@ bool Database::removeSpecie(unsigned int id)
     return true;
 }
 
+Subjects Database::getSubjects(unsigned int id)
+{
+    Subjects s;
+    s.setId(-1);
+    this->query.prepare("Select * FROM Subjects WHERE Subjects.id=? LIMIT 1;");
+    this->query.addBindValue(QVariant(id));
+    if(!this->query.exec()){
+        this->showError(this->query.lastError());
+        return s;
+    }
+    s = this->fillSubject();
+    return s;
+}
+
+Subjects Database::getSubjects(QVariant name)
+{
+    Subjects s;
+    s.setId(-1);
+    this->query.prepare("Select id, name FROM Subjects WHERE Subjects.name=? LIMIT 1;");
+    this->query.addBindValue(name);
+    if(!this->query.exec()){
+        this->showError(this->query.lastError());
+        return s;
+    }
+    s = this->fillSubject();
+    return s;
+}
+
+QList<Subjects> Database::getAllSubjects()
+{
+    QList<Subjects> subjects;
+    this->query.prepare("Select * FROM Subjects ORDER BY Subjects.name;");
+    if(!this->query.exec()){
+        this->showError(this->query.lastError());
+        return subjects;
+    }
+    while(this->query.next()){
+        Subjects s;
+        s.setId(this->query.value(0));
+        s.setName(this->query.value(1));
+        subjects.push_back(s);
+    }
+    return subjects;
+}
+
+bool Database::removeSubject(unsigned int id)
+{
+    this->query.prepare("DELETE FROM Subjects WHERE Subjects.id=?");
+    this->query.addBindValue(QVariant(id));
+    if(!this->query.exec()){
+        this->showError(this->query.lastError());
+        return false;
+    }
+    return true;
+}
+
 QList<Sessions> Database::getAllSessions()
 {
     QList<Sessions> sessions;
-    this->query.prepare("Select S.id, S.datesession, s.datedecoding, Spc.name as specie, "
-                        "O.name as obs, D.name as dec, S.description, S.subject FROM Sessions as S "
+    this->query.prepare("Select S.id, S.datesession, s.datedecoding, Spc.name as specie, Sub.name as subject, "
+                        "O.name as obs, D.name as dec, S.description FROM Sessions as S "
+                        "JOIN Subjects as Sub ON S.subject = Sub.id "
                         "JOIN Species as Spc ON S.specie = Spc.id "
                         "JOIN Users as O ON S.observer = O.id "
                         "JOIN Users as D ON S.decoder = D.id "
@@ -437,10 +556,10 @@ QList<Sessions> Database::getAllSessions()
         s.setDateSession(QDateTime::fromString(this->query.value(1).toString(),"yyyy-MM-dd HH:mm:ss"));
         s.setDateDecoding(QDateTime::fromString(this->query.value(2).toString(),"yyyy-MM-dd HH:mm:ss"));
         s.setSpecies(this->query.value(3));
-        s.setObserver(this->query.value(4));
-        s.setDecoder(this->query.value(5));
-        s.setDescription(this->query.value(6));
-        s.setSubject(this->query.value(7));
+        s.setSubject(this->query.value(4));
+        s.setObserver(this->query.value(5));
+        s.setDecoder(this->query.value(6));
+        s.setDescription(this->query.value(7));
         sessions.push_back(s);
     }
     return sessions;
@@ -449,8 +568,9 @@ QList<Sessions> Database::getAllSessions()
 Sessions Database::getSession(unsigned int id)
 {
     Sessions s;
-    this->query.prepare("Select S.id, S.datesession, s.datedecoding, Spc.name as specie, "
-                        "O.name as obs, D.name as dec, S.description, S.subject FROM Sessions as S "
+    this->query.prepare("Select S.id, S.datesession, s.datedecoding, Spc.name as specie, Sub.name as subject, "
+                        "O.name as obs, D.name as dec, S.description FROM Sessions as S "
+                        "JOIN Subjects as Sub ON S.subject = Sub.id "
                         "JOIN Species as Spc ON S.specie = Spc.id "
                         "JOIN Users as O ON S.observer = O.id "
                         "JOIN Users as D ON S.decoder = D.id "
@@ -465,10 +585,10 @@ Sessions Database::getSession(unsigned int id)
     s.setDateSession(QDateTime::fromString(this->query.value(1).toString(),"yyyy-MM-dd HH:mm:ss"));
     s.setDateDecoding(QDateTime::fromString(this->query.value(2).toString(),"yyyy-MM-dd HH:mm:ss"));
     s.setSpecies(this->query.value(3));
-    s.setObserver(this->query.value(4));
-    s.setDecoder(this->query.value(5));
-    s.setDescription(this->query.value(6));
-    s.setSubject(this->query.value(7));
+    s.setSubject(this->query.value(4));
+    s.setObserver(this->query.value(5));
+    s.setDecoder(this->query.value(6));
+    s.setDescription(this->query.value(7));
     return s;
 }
 
@@ -619,10 +739,10 @@ int Database::saveSession(Sessions session)
         this->cacheUserId.insert(session.getObserver().toString(),observerId);
     }
     int specieId = session.getSpecies().toInt();
-    if(session.getSpecies().type() != QVariant::LongLong)
-        specieId = this->getSpecies(session.getSpecies()).getId().toInt();
+    int subjectId = session.getSubject().toInt();
+
     int sessionId = this->insertSession(decoderId, session.getDateDecoding(),
-                                        observerId, session.getSubject(), specieId,
+                                        observerId, subjectId, specieId,
                                         session.getDateSession(), session.getDescription());
     if(sessionId <= 0) return -3;
     QList<Actions> sequence = session.getActions();
@@ -642,9 +762,9 @@ int Database::saveSession(Sessions session)
         }
         if(this->insertAction(action.getTimeAction(), sessionId, stateId, eventId) <= 0) return -6;
     }
-    qDebug() << this->query.lastQuery();
-    qDebug() << this->query.lastError();
-    qDebug() << sessionId;
+//    qDebug() << this->query.lastQuery();
+//    qDebug() << this->query.lastError();
+//    qDebug() << sessionId;
     return sessionId;
 }
 
@@ -657,13 +777,17 @@ int Database::editSession(Sessions session)
         this->cacheUserId.insert(session.getObserver().toString(),observerId);
     }
     QVariant specieId = session.getSpecies();
-    if(session.getSpecies().type() != QVariant::Int)
+    if(session.getSpecies().type() == QVariant::String)
         specieId = this->getSpecies(session.getSpecies()).getId();
     if(specieId <= 0) return -1;
+    QVariant subjectId = session.getSubject();
+    if(session.getSubject().type() == QVariant::String)
+        subjectId = this->getSubjects(session.getSubject()).getId();
+    if(subjectId <= 0) return -1;
     this->query.prepare("UPDATE Sessions SET observer = :observer, subject = :subject, specie = :specie, description = :description "
                         "WHERE id = :id;");
     this->query.bindValue(":observer",observerId);
-    this->query.bindValue(":subject",session.getSubject());
+    this->query.bindValue(":subject",subjectId);
     this->query.bindValue(":specie",specieId);
     this->query.bindValue(":description",session.getDescription());
     this->query.bindValue(":id",session.getId());

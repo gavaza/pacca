@@ -36,6 +36,7 @@ const int TITLE_SESSION_SIZE_COMPLEX=7;
 #include "dialogchoosespecie.h"
 #include "controlsessions.h"
 #include "controlspecies.h"
+#include "controlsubject.h"
 #include "dialogchooselanguage.h"
 
 #include "GraphWindow.h"
@@ -67,6 +68,7 @@ private:
     QList<Sessions> sessions;
     ControlSessions *ctl_sessions;
     ControlSpecies *ctl_species;
+    ControlSubjects *ctl_subjects;
     void saveSession(Sessions session);
     AnalysisWindow *analysis_ui;
     unsigned int countAnalysis;
@@ -91,10 +93,12 @@ private slots:
     void managerDict();
     void managerSessions();
     void managerSpecies();
+    void managerSubjects();
 
     void dictClosed();
     void sessionsClosed();
     void speciesClosed();
+    void subjectsClosed();
     void usersClosed();
 
     void aboutQt();

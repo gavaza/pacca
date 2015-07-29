@@ -75,6 +75,7 @@ void ControlSessions::load()
             item_id->setText(s.getId().toString());
             item_id->setFlags(item_id->flags() & ~Qt::ItemIsEditable);
             item_sub->setText(s.getSubject().toString());
+            item_sub->setFlags(item_sub->flags() & ~Qt::ItemIsEditable);
             item_spc->setText(s.getSpecies().toString());
             item_spc->setFlags(item_spc->flags() & ~Qt::ItemIsEditable);
             item_dd->setText(s.getDateDecoding().toDateTime().toString("dd/MM/yyyy hh:mm:ss"));
@@ -96,14 +97,23 @@ void ControlSessions::load()
 
 void ControlSessions::saveOrigText(int r, int c)
 {
-    if(c!=3){
+    if(c!=3 && c!=2){
         this->origText = this->ui->sessions->item(r,c)->text();
         connect(this->ui->sessions,SIGNAL(cellChanged(int,int)),this,SLOT(save(int,int)));
     } else {
         DialogChooseSpecie spc;
         if(spc.exec()){
-            this->ui->sessions->item(r,c)->setText(spc.getSpecieName());
-            this->save(r,c);
+            if(c==3){
+                this->ui->sessions->item(r,c-1)->setText(spc.getSubjectName());
+                this->ui->sessions->item(r,c)->setText(spc.getSpecieName());
+                this->save(r,c-1);
+                this->save(r,c);
+            } else {
+                this->ui->sessions->item(r,c)->setText(spc.getSubjectName());
+                this->ui->sessions->item(r,c+1)->setText(spc.getSpecieName());
+                this->save(r,c);
+                this->save(r,c+1);
+            }
         }
     }
 }

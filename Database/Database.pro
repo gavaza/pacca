@@ -15,7 +15,8 @@ HEADERS += \
     events.h \
     database.h \
     dictionary.h \
-    connections.h
+    connections.h \
+    subject.h
 
 
 SOURCES += \
@@ -27,7 +28,8 @@ SOURCES += \
     events.cpp \
     database.cpp \
     dictionary.cpp \
-    connections.cpp
+    connections.cpp \
+    subject.cpp
 
 
 RESOURCES += ../Application/resource.qrc

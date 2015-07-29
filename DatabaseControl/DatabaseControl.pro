@@ -14,6 +14,7 @@ HEADERS += \
     controldictionary.h \
     dialogchoosespecie.h \
     dialogselectsession.h \
+    controlsubject.h
 
 SOURCES += \
     controlusers.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
     controldictionary.cpp \
     dialogchoosespecie.cpp \
     dialogselectsession.cpp \
+    controlsubject.cpp
 
 
 FORMS += \
@@ -31,6 +33,7 @@ FORMS += \
     controlsessions.ui \
     controlspecies.ui \
     dialogselectsession.ui \
+    controlsubject.ui
 
 
 LIBS += -L$$OUT_PWD/../lib -lDatabase
