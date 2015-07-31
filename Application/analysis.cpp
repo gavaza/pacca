@@ -399,7 +399,7 @@ void AnalysisWindow::showSequenceStats()
                 QString ev = act.getEventDescription();
                 behavior_session.push_back(ev);
             }
-            behaivors.list.push_back(behavior_session);
+            behaivors.push_back(behavior_session);
             sessionsLabels.push_back("S:"+QString::number(idSession));
             sessionsTicks.push_back(s+2);
             infos.push_back(db.getSession(idSession).getDescription().toString());
@@ -415,7 +415,7 @@ void AnalysisWindow::showSequenceStats()
                 QString ev = act.getEventDescription();
                 behavior_session.push_back(ev);
             }
-            behaivors.list.push_back(behavior_session);
+            behaivors.push_back(behavior_session);
             sessionsLabels.push_back("S:"+QString::number(idSession));
             sessionsTicks.push_back(s+2);
             infos.push_back(db.getSession(idSession).getDescription().toString());
@@ -424,7 +424,7 @@ void AnalysisWindow::showSequenceStats()
     for(int s=0; s < this->sequences.size(); s++){
         list_behavior set_us;
         for(int l=0; l < this->sequences.at(s)->count(); l++){
-            set_us.list.push_back(QVariantList());
+            set_us.push_back(QVariantList());
             QString line = this->sequences.at(s)->item(l)->text();
             line.remove(0,line.indexOf("{")+1);
             line.remove("}");
@@ -432,7 +432,7 @@ void AnalysisWindow::showSequenceStats()
             QStringList us = line.split(",",QString::SkipEmptyParts);
             QString u;
             foreach (u, us) {
-                set_us.list.last().push_back(u);
+                set_us.last().push_back(u);
             }
         }
         QList<double> E = stats.E(set_us,behaivors);
@@ -499,7 +499,7 @@ void AnalysisWindow::showPermutationStats()
                 }
                 events.push_back(tmp_ev);
                 indexes.push_back(tmp_idx);
-                behaivors.list.push_back(behavior_session);
+                behaivors.push_back(behavior_session);
             }
         } else {
             int sizeCollumns = this->ui->sessions->columnCount();
@@ -518,7 +518,7 @@ void AnalysisWindow::showPermutationStats()
                 }
                 events.push_back(tmp_ev);
                 indexes.push_back(tmp_idx);
-                behaivors.list.push_back(behavior_session);
+                behaivors.push_back(behavior_session);
             }
         }
         this->statsModule->setEvents(events);
@@ -913,8 +913,8 @@ void AnalysisWindow::statisticsTests(){
                 events.push_back(ev);
             }
             this->bootstrap_list = this->statsModule->bootstrap(events,indexes,this->nPermutations);
-            random_behavior.list.append(this->bootstrap_list);
-            behaivors.list.push_back(behavior_session);
+            random_behavior.append(this->bootstrap_list);
+            behaivors.push_back(behavior_session);
             tmp_sessionsLabels.push_back("S:"+QString::number(idSession));
             tmp_infos.push_back(db.getSession(idSession).getDescription().toString());
         }
@@ -934,8 +934,8 @@ void AnalysisWindow::statisticsTests(){
                 events.push_back(ev);
             }
             this->bootstrap_list = this->statsModule->bootstrap(events,indexes,this->nPermutations);
-            random_behavior.list.append(this->bootstrap_list);
-            behaivors.list.push_back(behavior_session);
+            random_behavior.append(this->bootstrap_list);
+            behaivors.push_back(behavior_session);
             tmp_sessionsLabels.push_back("S:"+QString::number(idSession));
             tmp_infos.push_back(db.getSession(idSession).getDescription().toString());
         }
@@ -943,7 +943,7 @@ void AnalysisWindow::statisticsTests(){
     for(int s=0; s < this->sequences.size(); s++){
         list_behavior set_us;
         for(int l=0; l < this->sequences.at(s)->count(); l++){
-            set_us.list.push_back(QVariantList());
+            set_us.push_back(QVariantList());
             QString line = this->sequences.at(s)->item(l)->text();
             line.remove(0,line.indexOf("{")+1);
             line.remove("}");
@@ -951,7 +951,7 @@ void AnalysisWindow::statisticsTests(){
             QStringList us = line.split(",",QString::SkipEmptyParts);
             QString u;
             foreach (u, us) {
-                set_us.list.last().push_back(u);
+                set_us.last().push_back(u);
             }
         }
         QList<double> tmp_Rs = stats.R(set_us,behaivors);

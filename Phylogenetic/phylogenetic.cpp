@@ -41,7 +41,7 @@ void Phylogenetic::calcData()
     for(int i=0; i < nRows; i++){
         QString spc = this->species.at(i).toString();
         QList< QVariantList > sessions = this->sessions.value(spc);
-        list_behavior s; s.list = sessions;
+        list_behavior s = sessions;
         QList< QPair<double, double> > tmpMO, tmpME, tmpMR, tmpMP;
         QList< QList<QVariantList> > randomized = this->ramdomize(sessions,this->indexes.value(spc));
         for(int j=0; j < nCols; j++){
@@ -51,13 +51,13 @@ void Phylogenetic::calcData()
                 return;
             }
             counter++;
-            list_behavior us; us.list.push_back(this->behavior.at(j));
+            list_behavior us; us.push_back(this->behavior.at(j));
             QPair<double,double> O = this->statsModule->V(us,s,Observed);
             QPair<double,double> E = this->statsModule->V(us,s,Expected);
             QPair<double,double> R = this->statsModule->V(us,s,Residue);
             QList<double> dist;
             for(int r=0; r<randomized.size(); r++){
-                list_behavior rand_behavior; rand_behavior.list = randomized.at(r);
+                list_behavior rand_behavior; rand_behavior = randomized.at(r);
                 switch (st) {
                 case observed:
                     dist.push_back(this->statsModule->V(us,rand_behavior,Observed).first);

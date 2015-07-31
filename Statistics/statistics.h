@@ -20,9 +20,7 @@ const char SEPARATE_REGEX=';';
 #define STATISTICS_VARIABLES
 #endif // STATISTICS_VARIABLES
 
-typedef struct list_behavior{
-    QList<QVariantList> list;
-} list_behavior;
+typedef  QList<QVariantList> list_behavior;
 
 enum types_of_variances{
     Residue,

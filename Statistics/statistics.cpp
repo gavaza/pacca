@@ -194,9 +194,9 @@ double Statistics::P(QVariantList u,
     for (int i=0; i<u.size(); i++){
         int n = 0;
         double p = 0;
-        for(int b=0; b<behavior.list.size(); b++){
-            p+= behavior.list.at(b).count(u.at(i));
-            n+= behavior.list.at(b).size();
+        for(int b=0; b<behavior.size(); b++){
+            p+= behavior.at(b).count(u.at(i));
+            n+= behavior.at(b).size();
         }
         Pu+=p/n;
     }
@@ -206,16 +206,16 @@ double Statistics::P(QVariantList u,
 // investigated = one
 // behavior = one
 double Statistics::P(list_behavior u, QVariantList behavior){
-    return this->O(u, behavior)/this->elements(u.list.size(),behavior.size());
+    return this->O(u, behavior)/this->elements(u.size(),behavior.size());
 }
 
 // investigated = one
 // behavior = multiple
 QList<double> Statistics::P(list_behavior u, list_behavior behavior){
     QList<double> Pu;
-    for (int i=0; i<behavior.list.size(); i++){
-        int n = this->elements(u.list.size(),behavior.list.at(i).size());
-        Pu.push_back(this->O(u,behavior.list.at(i))/n);
+    for (int i=0; i<behavior.size(); i++){
+        int n = this->elements(u.size(),behavior.at(i).size());
+        Pu.push_back(this->O(u,behavior.at(i))/n);
     }
     return Pu;
 }
@@ -225,8 +225,8 @@ QList<double> Statistics::P(list_behavior u, list_behavior behavior){
 double Statistics::E(list_behavior u,
                      QVariantList behavior){
     double Eu = 1.0;
-    for (int i=0; i<u.list.size(); i++){
-        Eu *= this->P(u.list.at(i), behavior);
+    for (int i=0; i<u.size(); i++){
+        Eu *= this->P(u.at(i), behavior);
     }
     if (this->absolute){
         Eu *= behavior.size();
@@ -238,8 +238,8 @@ double Statistics::E(list_behavior u,
 // behavior = multiple
 QList<double> Statistics::E(list_behavior u, list_behavior behavior){
     QList<double> Eu;
-    for (int i=0; i<behavior.list.size(); i++){
-        Eu.push_back(this->E(u,behavior.list.at(i)));
+    for (int i=0; i<behavior.size(); i++){
+        Eu.push_back(this->E(u,behavior.at(i)));
     }
     return Eu;
 }
@@ -252,13 +252,13 @@ double Statistics::E_all(list_behavior u, list_behavior behavior)
     double Eu = 1.0;
     int n = 0;
 
-    for (int i=0; i<u.list.size(); i++){
-        Eu *= this->P(u.list.at(i), behavior);
+    for (int i=0; i<u.size(); i++){
+        Eu *= this->P(u.at(i), behavior);
     }
 
     if (this->absolute){
-        for (int i=0; i<behavior.list.size(); i++){
-            n += behavior.list.at(i).size();
+        for (int i=0; i<behavior.size(); i++){
+            n += behavior.at(i).size();
         }
         Eu *= n;
     }
@@ -283,8 +283,8 @@ double Statistics::R(list_behavior u, QVariantList behavior){
 // behavior = multiple
 QList<double> Statistics::R(list_behavior u, list_behavior behavior){
     QList<double> Ru;
-    for (int i=0; i<behavior.list.size(); i++){
-        Ru.push_back(this->R(u, behavior.list.at(i)));
+    for (int i=0; i<behavior.size(); i++){
+        Ru.push_back(this->R(u, behavior.at(i)));
     }
     return Ru;
 }
@@ -333,14 +333,14 @@ unsigned int Statistics::elements(int size_u, int size_behavior){
 // behavior = one
 double Statistics::O(list_behavior u, QVariantList behavior){
     int qw = behavior.size();
-    int k = u.list.size();
+    int k = u.size();
     QVariantList last_found;
     int last_found_indx;
     double freq = 0;
     for (int l=this->stepStart; l<=(qw-k); l+=this->stepSize){
         bool founded = true;
         for(int j=0; j < k; j++){
-            if((!u.list[j].contains(behavior[l+j])) && (!u.list[j].contains("*"))){
+            if((!u[j].contains(behavior[l+j])) && (!u[j].contains("*"))){
                 founded = false;
                 break;
             }
@@ -384,9 +384,9 @@ double Statistics::O(list_behavior u, QVariantList behavior){
 // behavior = multiple
 QList<double> Statistics::O(list_behavior u, list_behavior behavior){
     QList<double> freq;
-    int w = behavior.list.size();
+    int w = behavior.size();
     for (int i=0; i<w; i++){
-        freq.push_back(this->O(u, behavior.list.at(i)));
+        freq.push_back(this->O(u, behavior.at(i)));
     }
     return freq;
 }
@@ -395,10 +395,10 @@ QList<double> Statistics::O(list_behavior u, list_behavior behavior){
 // behavior = multiple
 // WHAT : sum of all observed in the all list of behaviors
 double Statistics::O_all(list_behavior u, list_behavior behavior){
-    int w = behavior.list.size();
+    int w = behavior.size();
     double freq = 0;
     for (int i=0; i<w; i++){
-        freq += this->O(u, behavior.list[i]);
+        freq += this->O(u, behavior[i]);
     }
     return freq;
 }
@@ -407,11 +407,11 @@ double Statistics::O_all(list_behavior u, list_behavior behavior){
 // behavior = multiple
 // WHAT : probability in the all lists of behaviors
 double Statistics::P_all(list_behavior u, list_behavior behavior){
-    int w = behavior.list.size();
+    int w = behavior.size();
     QPair<double,double> freq(0,0);
     for (int i=0; i<w; i++){
-        freq.first += this->O(u, behavior.list[i]);
-        freq.second += behavior.list[i].size()-u.list.size()+1;
+        freq.first += this->O(u, behavior[i]);
+        freq.second += behavior[i].size()-u.size()+1;
     }
     return freq.first/freq.second;
 
@@ -486,30 +486,39 @@ QList< QPair<double,double> > Statistics::pvalue(QList<double> values, QList<dou
 
 QPair<double,double> Statistics::V(list_behavior u, QMap<int, list_behavior> behavior,
                                    enum types_of_variances type){
-    QList<double> sample;
     QList<double> Mcalc;
-    QMapIterator<int, list_behavior> i(behavior);
+    QList<int> keys = behavior.uniqueKeys();
+    QListIterator<int> i(keys);
 
     while (i.hasNext()){
-        i.next();
+        list_behavior subject_behavior;
+        int key = i.next();
+        QMap<int, list_behavior>::const_iterator j = behavior.find(key);
+
+        while (j != behavior.end() && j.key() == key) {
+            subject_behavior.append(j.value());
+            j++;
+        }
+
+        QList<double> sample;
 
         if (type==Residue){
-            sample = this->R(u,i.value());
+            sample = this->R(u,subject_behavior);
         }
         else if (type==Observed){
-            sample = this->O(u,i.value());
+            sample = this->O(u,subject_behavior);
         }
         else if (type==Expected){
-            sample = this->E(u,i.value());
+            sample = this->E(u,subject_behavior);
         }
         else if (type==Probability){
-            sample = this->P(u,i.value());
+            sample = this->P(u,subject_behavior);
         }
         Mcalc.push_back(this->V(sample).first);
     }
+
     return this->V(Mcalc);
 }
-
 
 // for convenince
 QPair<double,double> Statistics::V(list_behavior u, list_behavior behavior,
@@ -554,7 +563,7 @@ void Statistics::calcPermutation()
         this->dataR.clear();
         this->dataP.clear();
 
-        int totalSessions = sessions.at(0).list.size();
+        int totalSessions = sessions.at(0).size();
         // TODO : É necessário fazer o controle do indíviduo
         //        Aqui está fazendo ainda a mesma coisa que o
         //        original, então é preciso adicionar indexador
@@ -579,7 +588,7 @@ void Statistics::calcPermutation()
         for(int s=0; s < totalSessions; s++){
             QList< QVariantList > bootstrap_list = this->bootstrap(this->events.at(s),this->indexes.at(s),this->nPermutations);
             for(int p=0; p < this->nPermutations; p++){
-//                distributions[p].list.push_back(bootstrap_list.at(p));
+//                distributions[p].push_back(bootstrap_list.at(p));
             }
         }
 
@@ -595,7 +604,7 @@ void Statistics::calcPermutation()
                 emit this->threadStopped();
                 return;
             }
-            set_us.list.push_back(this->permutation_list.at(s));
+            set_us.push_back(this->permutation_list.at(s));
             for(int idu=0; idu<this->permutation_list.at(s).size(); idu++){
                 info.append(this->permutation_list.at(s).at(idu).toString()); info.append(", ");
             }
