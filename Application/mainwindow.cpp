@@ -147,7 +147,7 @@ void MainWindow::executeImportText(bool append /*true is default */){
         int subject = spc.getSubject().toInt();
         /* import from text */
         QString filename = QFileDialog::getOpenFileName(this, tr("Importar análise do arquivo"), QDir::homePath());
-        QFile file(filename);
+        QFile id_file(filename);
         bool candidateToTitle=false;
         QString text;
         QList<QString> title;
@@ -158,8 +158,12 @@ void MainWindow::executeImportText(bool append /*true is default */){
             this->sessions.clear();
         }
 
-        if(!(file.open(QIODevice::ReadOnly | QIODevice::Text)))
+        if(!(id_file.open(QIODevice::ReadOnly | QIODevice::Text)))
             return;
+
+        QTextStream file(&id_file);
+        file.setAutoDetectUnicode(true);
+
         QPixmap pixmap(":/icons/splash.png");
         pixmap.scaled(QApplication::desktop()->screenGeometry().width()*0.1,QApplication::desktop()->screenGeometry().height()*0.1);
         QSplashScreen splash(pixmap);
@@ -275,6 +279,7 @@ void MainWindow::executeImportText(bool append /*true is default */){
             }
         }
         //        qDebug() << "Number of sessions = " << this->sessions.size();
+        id_file.close();
         splash.finish(this);
         return;
     }
@@ -393,7 +398,7 @@ void MainWindow::aboutPacca()
                           "ou de interações entre indivíduos. Ele permite a detecção de significância estatística em rotinas comportamentais "
                           "específicas (ou conjuntos de rotinas com alguns aspectos em comum), típicas de um indivíduo, de uma população, "
                           "ou de uma espécie, a depender do esquema amostral do estudo.\n\n"
-                          "O aplicativo é fruto do trabalho de uma equipe que envolve desenvolvedores (Alex Santana e Luiz Gavazza) e "
+                          "O aplicativo é fruto do trabalho de uma equipe que envolve desenvolvedores (Alex Santana e Luiz Gavaza) e "
                           "estatísticos (Lucas Santana Souza), sob a coordenação de Hilton Ferreira Japyassú, como parte do projeto "
                           "INOMEP (Integrando Níveis de Organização em Modelos Ecológicos Preditivos), coordenado por Charbel Niño El-Hani, e "
                           "financiado pelo CNPq e pela FAPESB, no âmbito do Programa de Apoio a Núcleos de Excelência (PRONEX)."));
