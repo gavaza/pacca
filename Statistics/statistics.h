@@ -14,6 +14,8 @@
 #include <QtCore/qmath.h>
 #include <QLinkedListIterator>
 #include <QQueue>
+#include <QMap>
+#include <QMultiMap>
 
 #ifndef STATISTICS_VARIABLES
 const char SEPARATE_REGEX=';';
@@ -21,6 +23,8 @@ const char SEPARATE_REGEX=';';
 #endif // STATISTICS_VARIABLES
 
 typedef  QList<QVariantList> list_behavior;
+
+typedef QMap<int,list_behavior> StatisticMap;
 
 enum types_of_variances{
     Residue,
@@ -39,7 +43,7 @@ public:
     ~Statistics();
     void run();
     void setTypeRun(char typeRun);
-    void setSessions(QList<list_behavior> sessions);
+    void setSessions(list_behavior sessions, QList<int> sessionsSubjects);
     void setSequences(QList<list_behavior> sequences);
     void setPermutationList(QList<QVariantList> permutation_list);
     void setPermutationSize(int nPermutations);
@@ -87,7 +91,7 @@ public:
      * \return
      */
 
-    double R_unnamed(list_behavior u, QMap<int, list_behavior> behavior);
+    double R_unnamed(list_behavior u, StatisticMap behavior);
     double R_unnamed(list_behavior u, list_behavior behavior);
 
     double R_all(list_behavior u,
@@ -101,7 +105,7 @@ public:
      * \return
      */
     QPair<double, double> V(list_behavior u,
-             QMap<int, list_behavior> behavior,
+             StatisticMap behavior,
              enum types_of_variances type);
 
     /*!
@@ -169,7 +173,7 @@ private:
     void calcPermutation();
     unsigned int elements(int size_u, int size_behavior);
     char typeRun;
-    QList<list_behavior> sessions;
+    list_behavior sessions;
     QList<list_behavior> sequences;
     QList<QVariantList> permutation_list;
     int nPermutations;
@@ -178,6 +182,7 @@ private:
     QVector<QString> sessionsLabels;
     QVector<QString> infos;
     QVector<double> sessionsTicks;
+    QList<int> sessionsSubjects;
     QList<double> dataE;
     QList<double> dataO;
     QList<double> dataR;

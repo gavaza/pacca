@@ -7,7 +7,10 @@ AnalysisWindow::AnalysisWindow(QMdiArea* mdi, unsigned int nwin, QWidget *parent
     ui(new Ui::Analysis)
 {
     ui->setupUi(this);
-    this->statsModule = new Statistics();
+    this->statsModule = new Statistics(this->ui->dynamic->isChecked(),
+                                       this->ui->absolut->isChecked(),
+                                       this->ui->stepsSize->value(),
+                                       this->ui->startStep->value());
     this->phyloModule = new Phylogenetic();
     this->createConnection();
     this->ui->sessions->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -382,7 +385,10 @@ void AnalysisWindow::showSequenceStats()
     splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
     splash.show();
 
-    Statistics stats; // TODO: inicializar dynamic, absolute, step, start.
+    Statistics stats(this->ui->dynamic->isChecked(),
+                     this->ui->absolut->isChecked(),
+                     this->ui->stepsSize->value(),
+                     this->ui->startStep->value());
     Database db;
     list_behavior behaivors;
     QVector<QString> sessionsLabels;
@@ -482,10 +488,12 @@ void AnalysisWindow::showPermutationStats()
         list_behavior behaivors;
         QList< QVariantList > events;
         QList< QList<int> > indexes;
+        QList< int > subjects;
 
         if(this->ui->sessions->selectedItems().size() == 0){
             for(int s=0; s < this->ui->sessions->rowCount(); s++){
                 unsigned int idSession = this->ui->sessions->item(s,0)->text().toUInt();
+                int subject = db.getSession(idSession).getSubject().toInt();
                 QList<Actions> actions = db.getSequence(idSession);
                 QList<QVariant> behavior_session;
                 QVariantList tmp_ev;
@@ -500,11 +508,13 @@ void AnalysisWindow::showPermutationStats()
                 events.push_back(tmp_ev);
                 indexes.push_back(tmp_idx);
                 behaivors.push_back(behavior_session);
+                subjects.push_back(subject);
             }
         } else {
             int sizeCollumns = this->ui->sessions->columnCount();
             for(int s=0; s < this->ui->sessions->selectedItems().size(); s=s+sizeCollumns){
                 unsigned int idSession = this->ui->sessions->selectedItems().at(s)->text().toUInt();
+                int subject = db.getSession(idSession).getSubject().toInt();
                 QList<Actions> actions = db.getSequence(idSession);
                 QList<QVariant> behavior_session;\
                 QVariantList tmp_ev;
@@ -519,12 +529,12 @@ void AnalysisWindow::showPermutationStats()
                 events.push_back(tmp_ev);
                 indexes.push_back(tmp_idx);
                 behaivors.push_back(behavior_session);
+                subjects.push_back(subject);
             }
         }
         this->statsModule->setEvents(events);
         this->statsModule->setIndexes(indexes);
-        QList<list_behavior> tmp; tmp.push_back(behaivors);
-        this->statsModule->setSessions(tmp);
+        this->statsModule->setSessions(behaivors,subjects);
         this->statsModule->setPermutationList(this->permutation_list);
 //        this->statsModule->setStepSize(this->ui->stepsSize->value());
         this->statsModule->setPermutationSize(this->nPermutations);
@@ -608,7 +618,10 @@ void AnalysisWindow::showData(QList<double> tmp_E, QList<double> tmp_O,
 
 PlotWindow* AnalysisWindow::showFrequenceStats(QVariantList data, QString xlabel, QString title, QString legend, bool sorted)
 {
-    Statistics stats;
+    Statistics stats(this->ui->dynamic->isChecked(),
+                     this->ui->absolut->isChecked(),
+                     this->ui->stepsSize->value(),
+                     this->ui->startStep->value());
     QMap<QVariant,int> freq;
     if(sorted){
         freq = stats.frequence(data);
@@ -627,7 +640,10 @@ void AnalysisWindow::showGraphicStats(QList<double> E, QList<double> O, QList<do
                                       QVector<QString> sessionsLabels, QVector<QString> infos,
                                       QVector<double> sessionsTicks, QList<double> pvalues)
 {
-    Statistics stats;
+    Statistics stats(this->ui->dynamic->isChecked(),
+                     this->ui->absolut->isChecked(),
+                     this->ui->stepsSize->value(),
+                     this->ui->startStep->value());
     QTabWidget* statsWidget = new QTabWidget(this->mdi);
     statsWidget->setMinimumSize(600,400);
 
@@ -682,7 +698,10 @@ void AnalysisWindow::showGraphicStats(QList<double> E, QList<double> O, QList<do
 void AnalysisWindow::saveCsvStats(QList<double> E, QList<double> O, QList<double> R,
                                   QVector<QString> sessionsLabels, QVector<QString> infos, QList<double> pvalues)
 {
-    Statistics stats;
+    Statistics stats(this->ui->dynamic->isChecked(),
+                     this->ui->absolut->isChecked(),
+                     this->ui->stepsSize->value(),
+                     this->ui->startStep->value());
     QString filename = QFileDialog::getSaveFileName(this, tr("Salvar Arquivo CSV"), QDir::homePath(),".csv");
     if(filename != ""){
         QFile file(filename);
@@ -730,7 +749,10 @@ void AnalysisWindow::saveCsvStats(QList<double> E, QList<double> O, QList<double
 void AnalysisWindow::showTableStats(QList<double> E, QList<double> O, QList<double> R,
                                     QVector<QString> sessionsLabels, QVector<QString> infos, int n, QList<double> pvalues)
 {
-    Statistics stats;
+    Statistics stats(this->ui->dynamic->isChecked(),
+                     this->ui->absolut->isChecked(),
+                     this->ui->stepsSize->value(),
+                     this->ui->startStep->value());
     ViewTableStats* view = new ViewTableStats(this->mdi);
     QString title;
     if(n<0){
@@ -891,13 +913,15 @@ void AnalysisWindow::statisticsTests(){
     splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
     splash.show();
 
-    Statistics stats;
+    Statistics stats(this->ui->dynamic->isChecked(),
+                     this->ui->absolut->isChecked(),
+                     this->ui->stepsSize->value(),
+                     this->ui->startStep->value());
     Database db;
     list_behavior behaivors;
     list_behavior random_behavior;
     QVector<QString> tmp_sessionsLabels;
     QVector<QString> tmp_infos;
-    int stepSize = this->ui->stepsSize->value();
     if(this->ui->sessions->selectedItems().size() == 0){
         for(int s=0; s < this->ui->sessions->rowCount(); s++){
             QList<int> indexes;

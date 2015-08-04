@@ -28,9 +28,10 @@ void Statistics::setTypeRun(char typeRun)
     this->typeRun = typeRun;
 }
 
-void Statistics::setSessions(QList<list_behavior> sessions)
+void Statistics::setSessions(list_behavior sessions, QList<int> sessionsSubjects)
 {
     this->sessions = sessions;
+    this->sessionsSubjects = sessionsSubjects;
 }
 
 void Statistics::setSequences(QList<list_behavior> sequences)
@@ -291,7 +292,7 @@ QList<double> Statistics::R(list_behavior u, list_behavior behavior){
 
 // investigated = one
 // behavior = species
-double Statistics::R_unnamed(list_behavior u, QMap<int, list_behavior> behavior){
+double Statistics::R_unnamed(list_behavior u, StatisticMap behavior){
     QPair<double,double> Ra;
     Ra = this->V(u,behavior,Residue);
     return Ra.first/sqrt(Ra.second/behavior.size());
@@ -301,7 +302,7 @@ double Statistics::R_unnamed(list_behavior u, QMap<int, list_behavior> behavior)
 // behavior = multiple
 // for convenince
 double Statistics::R_unnamed(list_behavior u, list_behavior behavior){
-    QMap<int, list_behavior> tmp;
+    StatisticMap tmp;
     tmp.insert(0,behavior);
     return this->R_unnamed(u,tmp);
 }
@@ -484,7 +485,7 @@ QList< QPair<double,double> > Statistics::pvalue(QList<double> values, QList<dou
 }
 
 
-QPair<double,double> Statistics::V(list_behavior u, QMap<int, list_behavior> behavior,
+QPair<double,double> Statistics::V(list_behavior u, StatisticMap behavior,
                                    enum types_of_variances type){
     QList<double> Mcalc;
     QList<int> keys = behavior.uniqueKeys();
@@ -493,7 +494,7 @@ QPair<double,double> Statistics::V(list_behavior u, QMap<int, list_behavior> beh
     while (i.hasNext()){
         list_behavior subject_behavior;
         int key = i.next();
-        QMap<int, list_behavior>::const_iterator j = behavior.find(key);
+        StatisticMap::const_iterator j = behavior.find(key);
 
         while (j != behavior.end() && j.key() == key) {
             subject_behavior.append(j.value());
@@ -523,7 +524,7 @@ QPair<double,double> Statistics::V(list_behavior u, QMap<int, list_behavior> beh
 // for convenince
 QPair<double,double> Statistics::V(list_behavior u, list_behavior behavior,
                                    enum types_of_variances type){
-    QMap<int,list_behavior> tmp;
+    StatisticMap tmp;
     tmp.insert(0,behavior);
     return this->V(u,tmp,type);
 }
@@ -563,38 +564,26 @@ void Statistics::calcPermutation()
         this->dataR.clear();
         this->dataP.clear();
 
-        int totalSessions = sessions.at(0).size();
-        // TODO : É necessário fazer o controle do indíviduo
-        //        Aqui está fazendo ainda a mesma coisa que o
-        //        original, então é preciso adicionar indexador
-        //        para controlar de qual indíviduo pertence a lista
+        int totalSessions = sessions.size();
+        QList<StatisticMap> distributions;
+        StatisticMap behaivors;
 
-        //        list_behavior behaivors = sessions.at(0);
-
-        QMap<int,list_behavior> behaivors;
-        behaivors.insert(1,sessions.at(0));
-
-        // O comentário referente a este TODO termina na linha acima
-
-
-        // TODO : É necessário fazer o controle do indíviduo
-        //        então é preciso verificar como adicionar o indexador
-        //        para controlar de qual indíviduo pertence a lista
-        QList<QMap<int,list_behavior> > distributions;
         for(int d=0; d < this->nPermutations; d++){
-            QMap<int,list_behavior> tmp;
+            StatisticMap tmp;
             distributions.push_back(tmp);
         }
         for(int s=0; s < totalSessions; s++){
-            QList< QVariantList > bootstrap_list = this->bootstrap(this->events.at(s),this->indexes.at(s),this->nPermutations);
+            list_behavior bootstrap_list = this->bootstrap(this->events.at(s),this->indexes.at(s),this->nPermutations);
+            int subject = this->sessionsSubjects.at(s);
+            list_behavior session;
+            session.push_back(this->sessions.at(s));
+            behaivors.insert(subject,session);
             for(int p=0; p < this->nPermutations; p++){
-//                distributions[p].push_back(bootstrap_list.at(p));
+                list_behavior dist;
+                dist.push_back(bootstrap_list.at(p));
+                distributions[p].insertMulti(subject,dist);
             }
         }
-
-        // O comentário referente a este TODO termina na linha acima
-
-
         int totalPermutations = this->permutation_list.size();
         for(int s=0; s < totalPermutations; s++){
             list_behavior set_us;

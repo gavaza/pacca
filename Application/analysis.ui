@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>830</width>
+    <width>934</width>
     <height>524</height>
    </rect>
   </property>
@@ -46,8 +46,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>378</width>
-               <height>202</height>
+               <width>482</width>
+               <height>165</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -91,97 +91,6 @@
                   </item>
                  </layout>
                 </widget>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="2">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="labelSizeSeq">
-              <property name="text">
-               <string>Tamanho da sequência</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="sizeSeq">
-              <property name="minimum">
-               <number>1</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Tamanho do passo</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="stepsSize">
-              <property name="prefix">
-               <string/>
-              </property>
-              <property name="minimum">
-               <number>1</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="config">
-              <property name="text">
-               <string/>
-              </property>
-              <property name="icon">
-               <iconset resource="resource.qrc">
-                <normaloff>:/icons/gear24x24.png</normaloff>:/icons/gear24x24.png</iconset>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="4" column="0">
-           <widget class="QScrollArea" name="scrollArea_2">
-            <property name="widgetResizable">
-             <bool>true</bool>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents_2">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>368</width>
-               <height>77</height>
-              </rect>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_8">
-              <item row="0" column="0">
-               <widget class="QTabWidget" name="tabSeq">
-                <property name="currentIndex">
-                 <number>-1</number>
-                </property>
-                <property name="usesScrollButtons">
-                 <bool>true</bool>
-                </property>
-                <property name="tabsClosable">
-                 <bool>true</bool>
-                </property>
                </widget>
               </item>
              </layout>
@@ -274,6 +183,38 @@
             </item>
            </layout>
           </item>
+          <item row="4" column="0">
+           <widget class="QScrollArea" name="scrollArea_2">
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents_2">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>472</width>
+               <height>77</height>
+              </rect>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_8">
+              <item row="0" column="0">
+               <widget class="QTabWidget" name="tabSeq">
+                <property name="currentIndex">
+                 <number>-1</number>
+                </property>
+                <property name="usesScrollButtons">
+                 <bool>true</bool>
+                </property>
+                <property name="tabsClosable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
           <item row="6" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
@@ -297,6 +238,96 @@
               <property name="icon">
                <iconset resource="resource.qrc">
                 <normaloff>:/icons/remove16x16.png</normaloff>:/icons/remove16x16.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <layout class="QGridLayout" name="gridLayout_12">
+            <item row="0" column="3">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Tamanho do passo</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QSpinBox" name="stepsSize">
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="sizeSeq">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QToolButton" name="config">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="resource.qrc">
+                <normaloff>:/icons/gear24x24.png</normaloff>:/icons/gear24x24.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelSizeSeq">
+              <property name="text">
+               <string>Tamanho da sequência</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="absolut">
+              <property name="text">
+               <string>Absoluto</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="dynamic">
+              <property name="text">
+               <string>Dinâmico</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QSpinBox" name="startStep">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>99999</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Início</string>
               </property>
              </widget>
             </item>
@@ -697,6 +728,12 @@
   <tabstop>scrollArea_2</tabstop>
  </tabstops>
  <resources>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
+  <include location="resource.qrc"/>
   <include location="resource.qrc"/>
   <include location="resource.qrc"/>
  </resources>
