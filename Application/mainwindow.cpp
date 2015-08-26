@@ -12,6 +12,11 @@ MainWindow::MainWindow(QApplication *app, QWidget *parent) :
     this->adjustShortcuts();
     this->linkSignals();
     this->createConnections();
+    this->users_ui = NULL;
+    this->ctl_sessions = NULL;
+    this->ctl_species = NULL;
+    this->ctl_subjects = NULL;
+    this->dict_ui = NULL;
     this->countAnalysis=1;
 }
 
@@ -303,7 +308,7 @@ void MainWindow::login()
 
 void MainWindow::newuser()
 {
-    if(this->users_ui == NULL){
+    if(this->users_ui  == NULL){
         this->users_ui = new ControlUsers(this->ui->mdiArea);
         connect(this->users_ui,SIGNAL(destroyed(QObject*)),this,SLOT(usersClosed()));
         this->users_ui->setWindowModality(Qt::ApplicationModal);
