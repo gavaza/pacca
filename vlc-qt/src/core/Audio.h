@@ -1,6 +1,6 @@
 /****************************************************************************
 * VLC-Qt - Qt and libvlc connector library
-* Copyright (C) 2012 Tadej Novak <tadej@tano.si>
+* Copyright (C) 2015 Tadej Novak <tadej@tano.si>
 *
 * This library is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published
@@ -22,6 +22,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
 
+#include "Enums.h"
+
 #include "SharedExportCore.h"
 
 class VlcMediaPlayer;
@@ -29,7 +31,8 @@ class VlcMediaPlayer;
 struct libvlc_media_player_t;
 
 /*!
-    \class VlcAudio Audio.h vlc-qt/Audio.h
+    \class VlcAudio Audio.h VLCQtCore/Audio.h
+    \ingroup VLCQtCore
     \brief Audio controls
 
     A group of audio controls functions.
@@ -37,6 +40,7 @@ struct libvlc_media_player_t;
 class VLCQT_CORE_EXPORT VlcAudio : public QObject
 {
 Q_OBJECT
+    friend class VlcAudioCallbackHelper;
 public:
     /*!
         \brief VlcAudio constructor.
@@ -53,11 +57,13 @@ public:
     ~VlcAudio();
 
     /*!
-        \brief Get current mute status.
-        \return current mute status (const bool)
+        \brief Get current mute state.
+        \return current mute state (const bool)
     */
     bool getMute() const;
 
+
+public slots:
     /*!
         \brief Set current audio level.
         \param volume new audio level (int)
@@ -71,10 +77,24 @@ public:
     void setTrack(int track);
 
     /*!
-        \brief Toggle mute status.
-        \return new mute status (const bool)
+        \brief Toggle mute state.
+        \return new mute state (const bool)
     */
     bool toggleMute() const;
+
+    /*!
+        \brief Set audio channel.
+        \param channel new audio channel
+    */
+    void setChannel(Vlc::AudioChannel channel);
+
+
+public:
+    /*!
+        \brief Set mute state.
+        \param mute mute state (bool)
+    */
+    void setMute(bool mute) const;
 
     /*!
         \brief Get current audio track.
@@ -105,6 +125,33 @@ public:
         \return current audio level, -1 if media is not playing (const int)
     */
     int volume() const;
+
+    /*!
+        \brief Get audio channel.
+        \return current audio channel, -1 if error
+    */
+    Vlc::AudioChannel channel() const;
+
+
+signals:
+    /*!
+        \brief Signal sent when volume has changed.
+        \param volume new volume (float)
+    */
+    void volumeChangedF(float volume);
+
+    /*!
+        \brief Signal sent when volume has changed.
+        \param volume new volume (int)
+    */
+    void volumeChanged(int volume);
+
+    /*!
+        \brief Signal sent when mute has changed.
+        \param mute new mute state (bool)
+    */
+    void muteChanged(bool mute);
+
 
 private:
     libvlc_media_player_t *_vlcMediaPlayer;

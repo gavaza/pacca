@@ -27,7 +27,8 @@
 #include "SharedExportCore.h"
 
 /*!
-    \struct VlcVideoFrame VideoFrame.h vlc-qt/VideoFrame.h
+    \struct VlcVideoFrame VideoFrame.h VLCQtCore/VideoFrame.h
+    \ingroup VLCQtCore
     \brief Video frame data container
 */
 struct VLCQT_CORE_EXPORT VlcVideoFrame
@@ -38,6 +39,8 @@ struct VLCQT_CORE_EXPORT VlcVideoFrame
         This construction ensures default data is set.
     */
     VlcVideoFrame();
+
+    bool inited; /*!< initialisation status */
 
     unsigned int width; /*!< frame width */
     unsigned int height; /*!< frame height */

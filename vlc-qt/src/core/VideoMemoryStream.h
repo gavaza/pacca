@@ -25,7 +25,16 @@
 #include "SharedExportCore.h"
 
 #if defined(VLCQT_CORE_LIBRARY) || defined(VLCQT_QML_LIBRARY)
-#   include <vlc/plugins/vlc_fourcc.h>
+/* MSVC support fix */
+#if defined(_MSC_VER)
+#   include <BaseTsd.h>
+    typedef SSIZE_T ssize_t;
+#endif
+/* MSVC + MinGW support fix */
+#if defined (_WIN32)
+#   define LIBVLC_USE_PTHREAD_CANCEL 1
+#endif
+#include <vlc/plugins/vlc_fourcc.h>
 #else
 struct vlc_chroma_description_t;
 #endif
@@ -33,7 +42,8 @@ struct vlc_chroma_description_t;
 class VlcMediaPlayer;
 
 /*!
-    \class VlcVideoMemoryStream VideoMemoryStream.h vlc-qt/VideoMemoryStream.h
+    \class VlcVideoMemoryStream VideoMemoryStream.h VLCQtCore/VideoMemoryStream.h
+    \ingroup VLCQtCore
     \brief Video memory stream
 
     VlcVideoMemoryStream is a template class for creating own video rendering engines.

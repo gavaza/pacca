@@ -22,7 +22,8 @@
 #include "SharedExportCore.h"
 
 /*!
-	\class VlcError Error.h vlc-qt/Error.h
+    \class VlcError Error.h VLCQtCore/Error.h
+    \ingroup VLCQtCore
 	\brief Error handler
 
 	A basic error handler for VLC-Qt library.

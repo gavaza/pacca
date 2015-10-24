@@ -25,6 +25,7 @@
 #include "core/Enums.h"
 #include "core/Error.h"
 #include "core/Instance.h"
+#include "core/ModuleDescription.h"
 
 VlcInstance::VlcInstance(const QStringList &args,
                          QObject *parent)
@@ -52,10 +53,10 @@ VlcInstance::VlcInstance(const QStringList &args,
 
     // Check if instance is running
     if(_vlcInstance) {
-        qDebug() << "libvlc-qt" << libVersion() << "initialised";
+        qDebug() << "VLC-Qt" << libVersion() << "initialised";
         qDebug() << "Using libvlc version:" << version();
     } else {
-        qDebug() << "libvlc-qt Error: libvlc failed to load!";
+        qDebug() << "VLC-Qt Error: libvlc failed to load!";
         abort();
     }
 }
@@ -79,9 +80,9 @@ QString VlcInstance::libVersion()
     version.append(QString("Unknown"));
 #endif //LIBVLCQT_VERSION
 
-#if defined(LIBVLCQT_VERSION_PATCH)
-    if(QString(LIBVLCQT_VERSION_PATCH) != "0" && QString(LIBVLCQT_VERSION_PATCH) != "") {
-        version.append("-" + QString(LIBVLCQT_VERSION_PATCH));
+#if defined(LIBVLCQT_VERSION_VCS)
+    if(QString(LIBVLCQT_VERSION_VCS) != "0" && QString(LIBVLCQT_VERSION_VCS) != "") {
+        version.append("-" + QString(LIBVLCQT_VERSION_VCS));
     }
 #endif //LIBVLCQT_VERSION
 
@@ -92,7 +93,7 @@ int VlcInstance::libVersionMajor()
 {
     int version = -1;
 #if defined(LIBVLCQT_VERSION_MAJOR)
-    version = QString(LIBVLCQT_VERSION_MAJOR).toInt();
+    version = LIBVLCQT_VERSION_MAJOR;
 #endif //LIBVLCQT_VERSION
 
     return version;
@@ -102,7 +103,7 @@ int VlcInstance::libVersionMinor()
 {
     int version = -1;
 #if defined(LIBVLCQT_VERSION_MINOR)
-    version = QString(LIBVLCQT_VERSION_MINOR).toInt();
+    version = LIBVLCQT_VERSION_MINOR;
 #endif //LIBVLCQT_VERSION
 
     return version;
@@ -130,6 +131,54 @@ void VlcInstance::setUserAgent(const QString &application,
                                const QString &version)
 {
     QString applicationOutput = application + " " + version;
-    QString httpOutput = application + "/" + version + " " + "libvlc-qt" + "/" + libVersion(); // "AppName/1.2.3 libvlc-qt/1.2.3"
+    QString httpOutput = application + "/" + version + " " + "VLC-Qt" + "/" + libVersion(); // "AppName/1.2.3 VLC-Qt/1.2.3"
     libvlc_set_user_agent(_vlcInstance, applicationOutput.toUtf8().data(), httpOutput.toUtf8().data());
+}
+
+QList<VlcModuleDescription *> VlcInstance::audioFilterList() const
+{
+    libvlc_module_description_t *original = libvlc_video_filter_list_get(_vlcInstance);
+    if (original == NULL) {
+        return QList<VlcModuleDescription *>();
+    }
+
+    libvlc_module_description_t *list = original;
+    QList<VlcModuleDescription *> audioFilters;
+    do {
+        VlcModuleDescription *module = new VlcModuleDescription(VlcModuleDescription::AudioFilter, list->psz_name);
+        module->setLongName(list->psz_longname);
+        module->setShortName(list->psz_shortname);
+        module->setHelp(list->psz_help);
+        audioFilters << module;
+
+        list = list->p_next;
+    } while (list->p_next);
+
+    libvlc_module_description_list_release(original);
+
+    return audioFilters;
+}
+
+QList<VlcModuleDescription *> VlcInstance::videoFilterList() const
+{
+    libvlc_module_description_t *original = libvlc_video_filter_list_get(_vlcInstance);
+    if (original == NULL) {
+        return QList<VlcModuleDescription *>();
+    }
+
+    libvlc_module_description_t *list = original;
+    QList<VlcModuleDescription *> videoFilters;
+    do {
+        VlcModuleDescription *module = new VlcModuleDescription(VlcModuleDescription::VideoFilter, list->psz_name);
+        module->setLongName(list->psz_longname);
+        module->setShortName(list->psz_shortname);
+        module->setHelp(list->psz_help);
+        videoFilters << module;
+
+        list = list->p_next;
+    } while (list->p_next);
+
+    libvlc_module_description_list_release(original);
+
+    return videoFilters;
 }

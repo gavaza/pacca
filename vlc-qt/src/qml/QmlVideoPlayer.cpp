@@ -19,6 +19,8 @@
 #include <QtCore/QDebug>
 #include <QtQml/QQmlEngine>
 
+#include "Config.h"
+
 #include "core/Video.h"
 #include "core/Audio.h"
 #include "core/Common.h"
@@ -31,7 +33,6 @@
 VlcQmlVideoPlayer::VlcQmlVideoPlayer(QQuickItem *parent)
     : VlcQmlVideoObject(parent),
       _instance(0),
-      _player(0),
       _media(0),
       _audioManager(0),
       _deinterlacing(Vlc::Disabled),
@@ -64,7 +65,7 @@ VlcQmlVideoPlayer::~VlcQmlVideoPlayer()
 
 void VlcQmlVideoPlayer::registerPlugin()
 {
-    qmlRegisterType<VlcQmlVideoPlayer>("VLCQt", VlcInstance::libVersionMajor(), VlcInstance::libVersionMinor(), "VlcVideoPlayer");
+    qmlRegisterType<VlcQmlVideoPlayer>("VLCQt", LIBVLCQT_VERSION_QML_MAJOR, LIBVLCQT_VERSION_QML_MINOR, "VlcVideoPlayer");
 }
 
 void VlcQmlVideoPlayer::openInternal()
@@ -79,14 +80,14 @@ void VlcQmlVideoPlayer::openInternal()
     _hasMedia = true;
 }
 
-int VlcQmlVideoPlayer::deinterlacing() const
+QString VlcQmlVideoPlayer::deinterlacing() const
 {
-    return (int)_deinterlacing;
+    return Vlc::deinterlacing()[_deinterlacing];
 }
 
-void VlcQmlVideoPlayer::setDeinterlacing(int deinterlacing)
+void VlcQmlVideoPlayer::setDeinterlacing(const QString &deinterlacing)
 {
-    _deinterlacing = (Vlc::Deinterlacing) deinterlacing;
+    _deinterlacing = (Vlc::Deinterlacing) Vlc::deinterlacing().indexOf(deinterlacing);
     _player->video()->setDeinterlace(_deinterlacing);
 }
 
@@ -151,13 +152,15 @@ QUrl VlcQmlVideoPlayer::url() const
 
 void VlcQmlVideoPlayer::setUrl(const QUrl &url)
 {
+    _player->stop();
+
     if (_media)
         delete _media;
 
     if(url.isLocalFile()) {
         _media = new VlcMedia(url.toLocalFile(), true, _instance);
     } else {
-        _media = new VlcMedia(url.toString(), false, _instance);
+        _media = new VlcMedia(url.toString(QUrl::FullyEncoded), false, _instance);
     }
 
     openInternal();
@@ -190,22 +193,22 @@ void VlcQmlVideoPlayer::setVolume(int volume)
     emit volumeChanged();
 }
 
-int VlcQmlVideoPlayer::aspectRatio()
+QString VlcQmlVideoPlayer::aspectRatio() const
 {
-    return (int) VlcQmlVideoObject::aspectRatio();
+    return Vlc::ratio()[VlcQmlVideoObject::aspectRatio()];
 }
 
-void VlcQmlVideoPlayer::setAspectRatio(int aspectRatio)
+void VlcQmlVideoPlayer::setAspectRatio(const QString &aspectRatio)
 {
-    VlcQmlVideoObject::setAspectRatio( (Vlc::Ratio)aspectRatio );
+    VlcQmlVideoObject::setAspectRatio( (Vlc::Ratio) Vlc::ratio().indexOf(aspectRatio) );
 }
 
-int VlcQmlVideoPlayer::cropRatio()
+QString VlcQmlVideoPlayer::cropRatio() const
 {
-    return (int) VlcQmlVideoObject::cropRatio();
+    return Vlc::ratio()[VlcQmlVideoObject::cropRatio()];
 }
 
-void VlcQmlVideoPlayer::setCropRatio(int cropRatio)
+void VlcQmlVideoPlayer::setCropRatio(const QString &cropRatio)
 {
-    VlcQmlVideoObject::setCropRatio( (Vlc::Ratio)cropRatio );
+    VlcQmlVideoObject::setCropRatio( (Vlc::Ratio) Vlc::ratio().indexOf(cropRatio) );
 }

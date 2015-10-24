@@ -22,7 +22,8 @@
 #include <QtCore/QList>
 #include <QtCore/QMap>
 
-#include "Enums.h"
+#include <VLCQtCore/Enums.h>
+
 #include "SharedExportWidgets.h"
 
 class QAction;
@@ -32,7 +33,8 @@ class VlcMediaPlayer;
 class VlcVideo;
 
 /*!
-    \class VlcControlVideo ControlVideo.h vlc-qt/ControlVideo.h
+    \class VlcControlVideo ControlVideo.h VLCQtWidgets/ControlVideo.h
+    \ingroup VLCQtWidgets
     \brief Video control class
 
     This is one of VLC-Qt control classes.
@@ -44,9 +46,9 @@ Q_OBJECT
 public:
     /*!
         \brief VideoControl constructor
-        \param player media player (VlcMediaPlayer *)
-        \param language default subtitle language (QString)
-        \param parent video controller's parent object (QObject)
+        \param player media player
+        \param language default subtitle language
+        \param parent video controller's parent object
     */
     explicit VlcControlVideo(VlcMediaPlayer *player,
                              const QString &language = 0,
@@ -67,7 +69,7 @@ public:
 
     /*!
         \brief Set default subtitle language
-        \param language comma separated languages (QString)
+        \param language comma separated languages
     */
     void setDefaultSubtitleLanguage(const QString &language);
 
@@ -83,25 +85,23 @@ public slots:
 signals:
     /*!
         \brief Signal sending actions for changing video and subititle tracks
-        \param QList<QAction*> list of actions
-        \param Vlc::ActionsType type of actions
+        \param actions list of actions
+        \param type type of actions
     */
-    void actions(QList<QAction *>,
-                 const Vlc::ActionsType);
+    void actions(QList<QAction *> actions,
+                 const Vlc::ActionsType type);
 
     /*!
         \brief Signal sending actions for changing subititle tracks
-        \param Vlc::ActionsType type of actions
-        \param QList<QAction*> list of actions
+        \param actions list of actions
     */
-    void subtitleTracks(QList<QAction *>);
+    void subtitleTracks(QList<QAction *> actions);
 
     /*!
         \brief Signal sending actions for changing video tracks
-        \param Vlc::ActionsType type of actions
-        \param QList<QAction*> list of actions
+        \param actions list of actions
     */
-    void videoTracks(QList<QAction *>);
+    void videoTracks(QList<QAction *> actions);
 
 
 private slots:

@@ -25,10 +25,12 @@
 
 #include <QtGui/qwindowdefs.h>
 
+#include "Config.h"
 #include "Enums.h"
 #include "SharedExportCore.h"
 
 class VlcAudio;
+class VlcEqualizer;
 class VlcInstance;
 class VlcMedia;
 class VlcVideo;
@@ -40,7 +42,8 @@ struct libvlc_media_t;
 struct libvlc_media_player_t;
 
 /*!
-    \class VlcMediaPlayer MediaPlayer.h vlc-qt/MediaPlayer.h
+    \class VlcMediaPlayer MediaPlayer.h VLCQtCore/MediaPlayer.h
+    \ingroup VLCQtCore
     \brief Media Player
 
     A basic MediaPlayer manager for VLC-Qt library.
@@ -68,19 +71,27 @@ public:
         \brief Returns libvlc media player object.
         \return libvlc media player (libvlc_media_player_t *)
     */
-    libvlc_media_player_t *core();
+    libvlc_media_player_t *core() const;
 
     /*!
         \brief Returns audio manager object.
         \return audio manager (VlcAudio *)
     */
-    VlcAudio *audio();
+    VlcAudio *audio() const;
 
     /*!
         \brief Returns video manager object.
         \return video manager (VlcVideo *)
     */
-    VlcVideo *video();
+    VlcVideo *video() const;
+
+#if LIBVLC_VERSION >= 0x020200
+    /*!
+        \brief Returns equalizer object.
+        \return equalizer (VlcEqualizer *)
+    */
+    VlcEqualizer *equalizer() const;
+#endif
 
     /*!
         \brief Get the current movie length (in ms).
@@ -92,7 +103,7 @@ public:
         \brief Get current media object
         \return media object (VlcMedia *)
     */
-    VlcMedia *currentMedia();
+    VlcMedia *currentMedia() const;
 
     /*!
         \brief Get current media core object
@@ -112,6 +123,7 @@ public:
     */
     void openOnly(VlcMedia *media);
 
+public slots:
     /*! \brief Set the movie time (in ms).
 
         This has no effect if no media is being played. Not all formats and protocols support this.
@@ -120,6 +132,7 @@ public:
     */
     void setTime(int time);
 
+public:
     /*!
         \brief Get the current movie time (in ms).
         \return the movie time (in ms), or -1 if there is no media (const int)
@@ -150,7 +163,7 @@ public:
         \brief Get current video widget.
         \return current video widget (VlcVideoWidget *)
     */
-    VlcVideoDelegate *videoWidget();
+    VlcVideoDelegate *videoWidget() const;
 
     /*!
         \brief Get current video position.
@@ -158,6 +171,13 @@ public:
     */
     float position();
 
+    /*!
+        \brief Get sample aspect ratio for current video track( vlc >= 2.1.0 ).
+        \return sample aspect ratio (float)
+    */
+    float sampleAspectRatio();
+
+public slots:
     /*! \brief Set the movie position.
 
         This has no effect if no media is being played. Not all formats and protocols support this.
@@ -166,7 +186,6 @@ public:
     */
     void setPosition(float pos);
 
-public slots:
     /*!
         \brief Starts playing current media if possible
     */
@@ -201,9 +220,15 @@ signals:
 
     /*!
         \brief Signal sent on buffering
-        \param float buffer
+        \param buffer buffer status in percent
     */
-    void buffering(float);
+    void buffering(float buffer);
+
+    /*!
+        \brief Signal sent on buffering
+        \param buffer buffer status in percent
+    */
+    void buffering(int buffer);
 
     /*!
         \brief Signal sent when end reached
@@ -222,15 +247,15 @@ signals:
 
     /*!
         \brief Signal sent on length change
-        \param int length
+        \param length new length
     */
-    void lengthChanged(int);
+    void lengthChanged(int length);
 
     /*!
         \brief Signal sent on media change
-        \param libvlc_media_t * media
+        \param media new media object
     */
-    void mediaChanged(libvlc_media_t *);
+    void mediaChanged(libvlc_media_t *media);
 
     /*!
         \brief Signal sent nothing speciall happened
@@ -244,9 +269,9 @@ signals:
 
     /*!
         \brief Signal sent on pausable change
-        \param bool pausable
+        \param pausable pausable status
     */
-    void pausableChanged(bool);
+    void pausableChanged(bool pausable);
 
     /*!
         \brief Signal sent when paused
@@ -260,21 +285,21 @@ signals:
 
     /*!
         \brief Signal sent on position change
-        \param float position
+        \param position new position
     */
-    void positionChanged(float);
+    void positionChanged(float position);
 
     /*!
         \brief Signal sent on seekable change
-        \param bool seekable
+        \param seekable seekable status
     */
-    void seekableChanged(bool);
+    void seekableChanged(bool seekable);
 
     /*!
         \brief Signal sent on snapshot taken
-        \param QString filename
+        \param filename filename of the snapshot
     */
-    void snapshotTaken(const QString &);
+    void snapshotTaken(const QString &filename);
 
     /*!
         \brief Signal sent when stopped
@@ -283,21 +308,21 @@ signals:
 
     /*!
         \brief Signal sent on time change
-        \param int time
+        \param time new time
     */
-    void timeChanged(int);
+    void timeChanged(int time);
 
     /*!
         \brief Signal sent on title change
-        \param int title
+        \param title new title
     */
-    void titleChanged(int);
+    void titleChanged(int title);
 
     /*!
         \brief Signal sent when video output is available
-        \param int vout count
+        \param count number of video outputs available
     */
-    void vout(int);
+    void vout(int count);
 
     /*!
         \brief Signal sent when state of the player changed
@@ -318,6 +343,9 @@ private:
 
     VlcAudio *_vlcAudio;
     VlcVideo *_vlcVideo;
+#if LIBVLC_VERSION >= 0x020200
+    VlcEqualizer *_vlcEqualizer;
+#endif
 
     VlcVideoDelegate *_videoWidget;
     WId _currentWId;

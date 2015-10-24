@@ -16,8 +16,6 @@
 * along with this library. If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include <QtCore/QDebug>
-
 #include <vlc/vlc.h>
 
 #include "core/Audio.h"
@@ -27,6 +25,10 @@
 #include "core/MediaPlayer.h"
 #include "core/Video.h"
 #include "core/VideoDelegate.h"
+
+#if LIBVLC_VERSION >= 0x020200
+#include "core/Equalizer.h"
+#endif
 
 VlcMediaPlayer::VlcMediaPlayer(VlcInstance *instance)
     : QObject(instance)
@@ -42,6 +44,9 @@ VlcMediaPlayer::VlcMediaPlayer(VlcInstance *instance)
 
     _vlcAudio = new VlcAudio(this);
     _vlcVideo = new VlcVideo(this);
+#if LIBVLC_VERSION >= 0x020200
+    _vlcEqualizer = new VlcEqualizer(this);
+#endif
 
     _videoWidget = 0;
     _media = 0;
@@ -57,26 +62,36 @@ VlcMediaPlayer::~VlcMediaPlayer()
 
     delete _vlcAudio;
     delete _vlcVideo;
+#if LIBVLC_VERSION >= 0x020200
+    delete _vlcEqualizer;
+#endif
 
     libvlc_media_player_release(_vlcMediaPlayer);
 
     VlcError::showErrmsg();
 }
 
-libvlc_media_player_t *VlcMediaPlayer::core()
+libvlc_media_player_t *VlcMediaPlayer::core() const
 {
     return _vlcMediaPlayer;
 }
 
-VlcAudio *VlcMediaPlayer::audio()
+VlcAudio *VlcMediaPlayer::audio() const
 {
     return _vlcAudio;
 }
 
-VlcVideo *VlcMediaPlayer::video()
+VlcVideo *VlcMediaPlayer::video() const
 {
     return _vlcVideo;
 }
+
+#if LIBVLC_VERSION >= 0x020200
+VlcEqualizer *VlcMediaPlayer::equalizer() const
+{
+     return _vlcEqualizer;
+}
+#endif
 
 void VlcMediaPlayer::createCoreConnections()
 {
@@ -153,7 +168,7 @@ int VlcMediaPlayer::length() const
     return length;
 }
 
-VlcMedia *VlcMediaPlayer::currentMedia()
+VlcMedia *VlcMediaPlayer::currentMedia() const
 {
     return _media;
 }
@@ -295,7 +310,7 @@ int VlcMediaPlayer::time() const
     return time;
 }
 
-VlcVideoDelegate *VlcMediaPlayer::videoWidget()
+VlcVideoDelegate *VlcMediaPlayer::videoWidget() const
 {
     return _videoWidget;
 }
@@ -318,6 +333,8 @@ void VlcMediaPlayer::libvlc_callback(const libvlc_event_t *event,
         break;
     case libvlc_MediaPlayerBuffering:
         emit core->buffering(event->u.media_player_buffering.new_cache);
+        emit core->buffering(qRound(event->u.media_player_buffering.new_cache));
+        break;
     case libvlc_MediaPlayerPlaying:
         emit core->playing();
         break;
@@ -379,6 +396,37 @@ float VlcMediaPlayer::position()
         return -1;
 
     return libvlc_media_player_get_position(_vlcMediaPlayer);
+}
+
+float VlcMediaPlayer::sampleAspectRatio()
+{
+    if(!_vlcMediaPlayer)
+        return 0.0;
+#if LIBVLC_VERSION >= 0x020100
+    float sar = 0.0;
+
+    libvlc_media_track_t **tracks;
+    unsigned tracksCount;
+    tracksCount = libvlc_media_tracks_get( _media->core(), &tracks );
+    if( tracksCount > 0 )
+    {
+        for(unsigned i = 0; i < tracksCount; i++)
+        {
+            libvlc_media_track_t *track = tracks[i];
+            if( track->i_type == libvlc_track_video && track->i_id == 0 )
+            {
+                libvlc_video_track_t *videoTrack = track->video;
+                if( videoTrack->i_sar_num > 0 )
+                    sar = (float)videoTrack->i_sar_den / (float)videoTrack->i_sar_num;
+            }
+        }
+        libvlc_media_tracks_release( tracks, tracksCount );
+    }
+
+    return sar;
+#else
+    return 1.0;
+#endif // LIBVLC_VERSION >= 0x020100
 }
 
 void VlcMediaPlayer::setPosition(float pos)

@@ -26,6 +26,7 @@
 
 VlcQmlVideoObject::VlcQmlVideoObject(QQuickItem *parent)
     : QQuickPaintedItem(parent),
+      _player(0),
       _geometry(0, 0, 640, 480),
       _boundingRect(0, 0, 0, 0),
       _frameSize(0, 0),
@@ -57,7 +58,11 @@ void VlcQmlVideoObject::updateBoundingRect()
     updateAspectRatio();
 
     QSizeF scaledFrameSize = _boundingRect.size();
-    scaledFrameSize.scale(_geometry.size(), Qt::KeepAspectRatio);
+    if (_aspectRatio == Vlc::Ignore) {
+        scaledFrameSize.scale(_geometry.size(), Qt::IgnoreAspectRatio);
+    } else {
+        scaledFrameSize.scale(_geometry.size(), Qt::KeepAspectRatio);
+    }
     _boundingRect.setSize( scaledFrameSize );
 
     updateCropRatio();
@@ -122,28 +127,30 @@ void VlcQmlVideoObject::setAspectRatio(const Vlc::Ratio &aspectRatio)
 void VlcQmlVideoObject::paint(QPainter *painter)
 {
     lock();
+    if( _frame.inited )
+    {
+        if (!_graphicsPainter)
+            _graphicsPainter = new GlslPainter;
 
-    if (!_graphicsPainter)
-        _graphicsPainter = new GlslPainter;
-
-    Q_ASSERT(_graphicsPainter);
-
-    if (!_gotSize || _frameSize.isNull()) {
-        // TODO: do scaling ourselfs?
-        _gotSize = true;
-        _frameSize = QSize(_frame.width, _frame.height);
-        updateBoundingRect();
-    }
-
-    if (!_paintedOnce) {
-        painter->fillRect(_boundingRect, Qt::black);
-        _paintedOnce = true;
-    } else {
         Q_ASSERT(_graphicsPainter);
-        _graphicsPainter->setFrame(&_frame);
-        if (!_graphicsPainter->inited())
-            _graphicsPainter->init();
-        _graphicsPainter->paint(painter, _boundingRect, this);
+
+        if (!_gotSize || _frameSize.isNull()) {
+            // TODO: do scaling ourselfs?
+            _gotSize = true;
+            _frameSize = QSize(_frame.width, _frame.height);
+            updateBoundingRect();
+        }
+
+        if (!_paintedOnce) {
+            painter->fillRect(_boundingRect, Qt::black);
+            _paintedOnce = true;
+        } else {
+            Q_ASSERT(_graphicsPainter);
+            _graphicsPainter->setFrame(&_frame);
+            if (!_graphicsPainter->inited())
+                _graphicsPainter->init();
+            _graphicsPainter->paint(painter, _boundingRect, this);
+        }
     }
 
     unlock();
@@ -177,19 +184,19 @@ void VlcQmlVideoObject::reset()
     }
 }
 
-void VlcQmlVideoObject::connectToMediaPlayer(VlcMediaPlayer *mediaObject)
+void VlcQmlVideoObject::connectToMediaPlayer(VlcMediaPlayer *player)
 {
-    setCallbacks(mediaObject);
+    setCallbacks(player);
 }
 
-void VlcQmlVideoObject::disconnectFromMediaPlayer(VlcMediaPlayer *mediaObject)
+void VlcQmlVideoObject::disconnectFromMediaPlayer(VlcMediaPlayer *player)
 {
     // Try to prevent callbacks called after this object is being deleted
-    if (mediaObject) {
-        mediaObject->stop();
+    if (player) {
+        player->stop();
     }
 
-    unsetCallbacks(mediaObject);
+    unsetCallbacks(player);
 }
 
 void VlcQmlVideoObject::lock()
@@ -230,6 +237,15 @@ void VlcQmlVideoObject::unlockCallback(void *picture, void *const*planes)
 
 void VlcQmlVideoObject::displayCallback(void *picture)
 {
+    if( !_frame.inited )
+    {
+        float sar = _player->sampleAspectRatio();
+        if( sar > 0.0 )
+        {
+            _frame.height *= sar;
+            _frame.inited = true;
+        }
+    }
     Q_UNUSED(picture); // There is only one buffer.
 }
 
@@ -273,6 +289,7 @@ unsigned int VlcQmlVideoObject::formatCallback(char *chroma,
 
 void VlcQmlVideoObject::formatCleanUpCallback()
 {
+    _frame.inited = false;
     // To avoid thread polution do not call reset directly but via the event loop.
     QMetaObject::invokeMethod(this, "reset", Qt::QueuedConnection);
 }

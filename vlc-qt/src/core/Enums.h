@@ -26,7 +26,8 @@
 #include "SharedExportCore.h"
 
 /*!
-    \class Vlc Enums.h vlc-qt/Enums.h
+    \class Vlc Enums.h VLCQtCore/Enums.h
+    \ingroup VLCQtCore
     \brief Common enumerations
 */
 class VLCQT_CORE_EXPORT Vlc : public QObject
@@ -34,6 +35,7 @@ class VLCQT_CORE_EXPORT Vlc : public QObject
 Q_OBJECT
 
 Q_ENUMS(ActionsType)
+Q_ENUMS(AudioChannel)
 Q_ENUMS(AudioCodec)
 Q_ENUMS(AudioOutput)
 Q_ENUMS(Deinterlacing)
@@ -66,6 +68,19 @@ public:
         Subtitles,
         VideoTrack,
         Other
+    };
+
+    /*!
+        \enum AudioChannel
+        \brief Audio channel options
+    */
+    enum AudioChannel {
+        AudioChannelError = -1,
+        Stereo = 1,
+        RStereo = 2,
+        Left = 3,
+        Right = 4,
+        Dolbys = 5
     };
 
     /*!
@@ -159,6 +174,7 @@ public:
     */
     enum Ratio {
         Original,
+        Ignore, /*!< QML aspect ratio only */
         R_16_9,
         R_16_10,
         R_185_100,

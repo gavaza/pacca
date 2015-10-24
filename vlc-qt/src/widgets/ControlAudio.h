@@ -22,7 +22,8 @@
 #include <QtCore/QList>
 #include <QtCore/QMap>
 
-#include "Enums.h"
+#include <VLCQtCore/Enums.h>
+
 #include "SharedExportWidgets.h"
 
 class QAction;
@@ -32,7 +33,8 @@ class VlcAudio;
 class VlcMediaPlayer;
 
 /*!
-    \class VlcControlAudio ControAudiol.h vlc-qt/ControlAudio.h
+    \class VlcControlAudio ControlAudio.h VLCQtWidgets/ControlAudio.h
+    \ingroup VLCQtWidgets
     \brief Audio control class
 
     This is one of VLC-Qt control classes.
@@ -44,9 +46,9 @@ Q_OBJECT
 public:
     /*!
         \brief VlcControlAudio constructor
-        \param player media player (VlcMediaPlayer *)
-        \param language default audio language (QString)
-        \param parent audio controller's parent object (QObject *)
+        \param player media player
+        \param language default audio language
+        \param parent audio controller's parent object
     */
     explicit VlcControlAudio(VlcMediaPlayer *player,
                              const QString &language = 0,
@@ -67,7 +69,7 @@ public:
 
     /*!
         \brief Set default audio language
-        \param language comma separated languages (QString)
+        \param language comma separated languages
     */
     void setDefaultAudioLanguage(const QString &language);
 
@@ -75,17 +77,17 @@ public:
 signals:
     /*!
         \brief Signal sending actions for changing audio tracks
-        \param QList<QAction*> list of actions
-        \param Vlc::ActionsType type of actions
+        \param actions list of actions
+        \param type type of actions
     */
-    void actions(QList<QAction *>,
-                 const Vlc::ActionsType);
+    void actions(QList<QAction *> actions,
+                 const Vlc::ActionsType type);
 
     /*!
         \brief Signal sending actions for changing audio tracks
-        \param QList<QAction*> list of actions
+        \param actions list of actions
     */
-    void audioTracks(QList<QAction *>);
+    void audioTracks(QList<QAction *> actions);
 
 
 private slots:
