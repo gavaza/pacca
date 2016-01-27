@@ -7,6 +7,13 @@ const int TITLE_SESSION_SIZE_COMPLEX=7;
 #define INPUTTEXT_VARIABLES
 #endif
 
+enum types_of_files{
+    odf, // simple
+    mdf, // complex
+    unknown
+};
+
+#include <QDebug>
 #include <QApplication>
 #include <QTranslator>
 #include <QStandardPaths>
@@ -81,6 +88,7 @@ public slots:
 
 private slots:
     void executeImportText(bool append=true);
+    void executeExportText();
     void executeImportAdvanced();
     void executeImportVideo();
     void executeImportAudio();

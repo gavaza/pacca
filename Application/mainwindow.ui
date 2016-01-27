@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuNova">
@@ -72,6 +72,7 @@
     <addaction name="actionSpecies"/>
     <addaction name="actionIndiv_duos"/>
     <addaction name="actionSess_es"/>
+    <addaction name="actionTextExport"/>
     <addaction name="actionUsuario"/>
     <addaction name="separator"/>
     <addaction name="actionReiniciar_Banco"/>
@@ -218,6 +219,11 @@
   <action name="actionIndiv_duos">
    <property name="text">
     <string>Indivíduos</string>
+   </property>
+  </action>
+  <action name="actionTextExport">
+   <property name="text">
+    <string>Exportar</string>
    </property>
   </action>
  </widget>

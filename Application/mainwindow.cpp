@@ -46,6 +46,7 @@ void MainWindow::linkSignals(){
     connect(this->ui->actionIdioma,SIGNAL(triggered()),this,SLOT(changeLanguage()));
     connect(this->ui->actionCascata,SIGNAL(triggered()),this->ui->mdiArea,SLOT(cascadeSubWindows()));
     connect(this->ui->actionLado_a_Lado,SIGNAL(triggered()),this->ui->mdiArea,SLOT(tileSubWindows()));
+    connect(this->ui->actionTextExport,SIGNAL(triggered()),this,SLOT(executeExportText()));
 }
 
 void MainWindow::adjustShortcuts()
@@ -151,145 +152,269 @@ void MainWindow::executeImportText(bool append /*true is default */){
         int specie = spc.getSpecie().toInt();
         int subject = spc.getSubject().toInt();
         /* import from text */
-        QString filename = QFileDialog::getOpenFileName(this, tr("Importar análise do arquivo"), QDir::homePath());
-        QFile id_file(filename);
-        bool candidateToTitle=false;
-        QString text;
-        QList<QString> title;
-        Database db;
+        QStringList filename = QFileDialog::getOpenFileNames(this, tr("Importar análise do arquivo"), QDir::homePath(), tr("Arquivo ODF (*.odf);;Arquivo MDF (*.mdf)"));
 
-        if (!append){
-            /* remove all sessions information from memory */
-            this->sessions.clear();
-        }
+        for (int q=0; q<filename.size(); q++){
 
-        if(!(id_file.open(QIODevice::ReadOnly | QIODevice::Text)))
-            return;
+            QFile id_file(filename.at(q));
+            bool candidateToTitle=false;
+            QString text;
+            QList<QString> title;
+            Database db;
+            types_of_files type;
 
-        QTextStream file(&id_file);
-        file.setAutoDetectUnicode(true);
+            if (!append){
+                /* remove all sessions information from memory */
+                this->sessions.clear();
+            }
 
-        QPixmap pixmap(":/icons/splash.png");
-        pixmap.scaled(QApplication::desktop()->screenGeometry().width()*0.1,QApplication::desktop()->screenGeometry().height()*0.1);
-        QSplashScreen splash(pixmap);
-        splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
-        splash.show();
-        while (!file.atEnd()){
+            if(!(id_file.open(QIODevice::ReadOnly | QIODevice::Text)))
+                return;
 
-            /* seek beginning of session */
-            do{
-                text = file.readLine();
+            QTextStream file(&id_file);
+            file.setAutoDetectUnicode(true);
 
-                /* candidate to title information from simple file */
-                if (candidateToTitle){
-                    title = text.split(QRegExp("\\s"));
-                    candidateToTitle=false;
-                }
+            QPixmap pixmap(":/icons/splash.png");
+            pixmap.scaled(QApplication::desktop()->screenGeometry().width()*0.1,QApplication::desktop()->screenGeometry().height()*0.1);
+            QSplashScreen splash(pixmap);
+            splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
+            splash.show();
+            while (!file.atEnd()){
 
-                if (text.contains(QRegExp("\\.CNF")))
-                    candidateToTitle = true;
+                type = unknown;
 
-            }while(!file.atEnd() && !text.startsWith("{start}") && !text.startsWith("Observational data file"));
+                /* seek beginning of session */
+                do{
+                    text = file.readLine();
 
-            if (!file.atEnd()){
+                    /* candidate to title information from simple file */
+                    if (candidateToTitle){
+                        title = text.split(QRegExp("\\s"));
+                        candidateToTitle=false;
+                    }
 
-                bool tagEnd = false;
-                QStringList list;
-                double time = 0;
-                QString description;
-                QString state_description;
-                QString session_author;
-                int i;
+                    if (text.contains(QRegExp("\\.CNF")))
+                        candidateToTitle = true;
 
-                QList<Actions> actions;
+                }while(!file.atEnd() && !text.startsWith("{indvar}") && !text.startsWith("{start}") && !text.startsWith("Observational data file"));
 
-                while(!file.atEnd() && !tagEnd){
 
-                    i=0;
-                    /* search for information analysis: title or time, event [,state]*/
-                    do{
-                        if (text.startsWith("{start}")){
-                            /* sessions title information from simple file. */
-                            text = "Title";
-                            if (title.size() >= TITLE_SESSION_SIZE_SIMPLE){
-                                session_author = title[title.size()-2];
+                if (!file.atEnd()){
+
+                    bool tagEnd = false;
+                    bool readhead = false;
+                    QStringList list;
+                    double time = 0;
+                    QString description;
+                    QString state_description;
+                    QString session_author;
+                    int i;
+
+                    QList<Actions> actions;
+
+                    while(!file.atEnd() && !tagEnd){
+
+                        if (text.startsWith("Observational data file")){
+                            type=mdf;
+                        }
+                        else if (text.startsWith("{indvar}") || text.startsWith("{start}")){
+                            type=odf;
+                        }
+
+                        i=0;
+
+                        /* read head */
+                        if (!file.atEnd() && !readhead){
+                            readhead = true;
+                            if (type==odf){
+                                if (text.startsWith("{indvar}")){
+                                    /* not processed yet */
+                                    do{
+                                        text = file.readLine();
+                                    } while(!file.atEnd() && !text.startsWith("{start}"));
+                                }
+                                if (text.startsWith("{start}")){
+                                    /* sessions title information from simple file. */
+                                    text = "Title";
+                                    if (title.size() >= TITLE_SESSION_SIZE_SIMPLE){
+                                        session_author = title[title.size()-2];
+                                    }
+                                    else{
+                                        /* incomplete title information */
+                                    }
+                                }
                             }
-                            else{
-                                /* incomplete title information */
+                            else if(type==mdf){
+                                text = file.readLine();
+                                if (text.startsWith("Title")){
+                                    /* analysis title information from complex file. */
+                                    title = text.simplified().split(QRegExp("\\s"),QString::SkipEmptyParts);
+                                    if (title.size() >= TITLE_SESSION_SIZE_COMPLEX){
+                                        session_author = title[title.size()-2];
+                                    }
+                                    else{
+                                        /* incomplete title information */
+                                    }
+                                }
+                                do{
+                                    text = file.readLine();
+                                }while(!file.atEnd() && !text.contains("-----"));
                             }
                         }
-                        else{
-                            text = file.readLine();
-                            if (text.startsWith("Title")){
-                                /* analysis title information from complex file. */
-                                title = text.simplified().split(QRegExp("\\s"),QString::SkipEmptyParts);
-                                if (title.size() >= TITLE_SESSION_SIZE_COMPLEX){
-                                    session_author = title[title.size()-2];
-                                }
-                                else{
-                                    /* incomplete title information */
-                                }
-                            }
-                            else{
+
+                        /* search for information analysis: title or time, event [,state] */
+                        if (!file.atEnd()){
+                            do{
+                                text = file.readLine();
                                 list = text.simplified().split(QRegExp("\\s"),QString::SkipEmptyParts);
                                 i = 0;
-                                while (i<list.size() && !list[i].contains(QRegExp("\\d*\\.\\d+"))){
+                                //                            while (i<list.size() && !list[i].contains(QRegExp("\\d*\\.\\d+"))){
+                                while (i<list.size() && !list[i].contains(QRegExp("\\d+"))){
                                     i++;
                                 }
-                            }
+                            } while (!file.atEnd() && i==list.size());
                         }
-                    } while (!file.atEnd() && i==list.size());
 
-                    if (i<list.size()){
-                        /* time, event [, state] found or end tag */
-                        time = list.at(i).toDouble();
-                        description = list.at(i+1);
-                        if (description.endsWith("{end}")){
-                            /* end tag found, go to new session if exist */
-                            tagEnd = true;
-                        }
-                        else{
-                            list = description.simplified().split(QRegExp(","),QString::SkipEmptyParts);
-                            state_description = "";
-                            description = list.at(0);
-                            if (list.size()==2) {
-                                /* state is explicitly defined */
-                                state_description = list.at(1);
-                                if(state_description.at(list.at(i).size()-1) == ','){
-                                    state_description = state_description.remove(list.at(i).size()-1,1);
-                                }
+                        /* apply information to fields */
+                        if (i+1<list.size()){
+                            /* time, event [, state] found or end tag */
+                            time = list.at(i).toDouble();
+                            description = list.at(i+1);
+                            if (description.endsWith("{end}")){
+                                /* end tag found, go to new session if exist */
+                                tagEnd = true;
                             }
-                            if(description.at(list.at(i).size()-1) == ','){
-                                description = description.remove(list.at(i).size()-1,1);
+                            else{
+                                list = description.simplified().split(QRegExp(","),QString::SkipEmptyParts);
+                                state_description = "";
+                                if (list.size()>0){
+                                    description = list.at(0);
+                                    if (list.size()==2) {
+                                        /* state is explicitly defined */
+                                        state_description = list.at(1);
+                                        if(state_description.at(list.at(i).size()-1) == ','){
+                                            state_description = state_description.remove(list.at(i).size()-1,1);
+                                        }
+                                    }
+                                    if(description.at(list.at(i).size()-1) == ','){
+                                        description = description.remove(list.at(i).size()-1,1);
+                                    }
+                                }
                             }
                             actions.push_back(Actions(time, Events(description), States(state_description)));
                             //                            qDebug() << "(time, event, state) = " << time << description << state_description;
                         }
                     }
+                    this->sessions.push_back(Sessions());
+                    this->sessions.last().setDateDecoding(QDateTime::currentDateTime());
+                    this->sessions.last().setDateSession(QDateTime::currentDateTime());
+                    QSettings settings("NuEvo","Pacca");
+                    settings.beginGroup("global");
+                    this->sessions.last().setDecoder(settings.value("user"));
+                    this->sessions.last().setObserver(settings.value("user"));
+                    settings.endGroup();
+                    this->sessions.last().setDescription(filename.at(q));
+                    this->sessions.last().setActions(actions);
+                    this->sessions.last().setSpecies(specie);
+                    this->sessions.last().setSubject(subject);
+                    db.saveSession(this->sessions.last());
+                    //                qDebug() << "Session size = " << actions.size();
                 }
-                this->sessions.push_back(Sessions());
-                this->sessions.last().setDateDecoding(QDateTime::currentDateTime());
-                this->sessions.last().setDateSession(QDateTime::currentDateTime());
-                QSettings settings("NuEvo","Pacca");
-                settings.beginGroup("global");
-                this->sessions.last().setDecoder(settings.value("user"));
-                this->sessions.last().setObserver(settings.value("user"));
-                settings.endGroup();
-                this->sessions.last().setDescription(filename);
-                this->sessions.last().setActions(actions);
-                this->sessions.last().setSpecies(specie);
-                this->sessions.last().setSubject(subject);
-                db.saveSession(this->sessions.last());
-                //                qDebug() << "Session size = " << actions.size();
             }
+            //        qDebug() << "Number of sessions = " << this->sessions.size();
+            id_file.close();
+            splash.finish(this);
         }
-        //        qDebug() << "Number of sessions = " << this->sessions.size();
-        id_file.close();
-        splash.finish(this);
         return;
     }
 }
 
+
+void MainWindow::executeExportText(){
+    /* Dialog to choose */
+    DialogSelectSession d;
+    if(d.exec()){
+        QList<QTableWidgetItem*> itens = d.getSelectedItens();
+
+        /* file */
+        QString path_base = QFileDialog::getSaveFileName(this, tr("Exportar dados em arquivo"), QDir::homePath(), tr("Arquivo ODF (*.odf)"));
+
+
+
+        /* Database */
+        Database db;
+
+        QStringList list_path = path_base.split(QDir::separator());
+        QString filename_base = list_path.last();
+        filename_base = filename_base.remove(filename_base.size()-4,4);
+        list_path.pop_back();
+        QString path;
+        for (int i=0;i<list_path.size(); i++){
+            path = path.append(list_path.at(i));
+            path = path.append(QDir::separator());
+        }
+
+        for(int i=0; i<itens.size(); i=i+6){
+            unsigned int idSession = itens.at(i)->text().toInt();
+            QString filename = filename_base + QString(itens.at(i)->text());
+            filename = filename.append(".odf");
+            filename = path + filename;
+            QFile id_file(filename);
+            if (!id_file.open(QIODevice::WriteOnly | QIODevice::Text))
+                    return;
+            QTextStream out(&id_file);
+
+
+            /* write head to file */
+            out << itens.at(i+5)->text() << "\n";
+
+            out << itens.at(i+2)->text(); // specie
+            out << " ";
+            out << itens.at(i+1)->text(); // individuo
+            out << " ";
+            out << itens.at(i)->text(); // id session
+            out << " ";
+            out << itens.at(i+3)->text(); // author
+            out << "\n";
+
+            QStringList list = itens.at(i+4)->text().split(QRegExp("\\s"),QString::SkipEmptyParts);
+
+            out << list.at(0) << "\n";
+            out << list.at(1) << "\n";
+
+            out << "{media}\n";
+            out << itens.at(i+5)->text() << "\n";
+
+            out << "{indvar}\n";
+            out << itens.at(i+2)->text(); // genre
+            out << "\n";
+            out << itens.at(i+3)->text(); // author
+            out << "\n";
+            out << itens.at(i+1)->text(); // condition
+            out << "\n";
+
+            out << "{start}\n";
+
+            QList<Actions> actions = db.getSequence(idSession);
+            for (int j=0; j<actions.size(); j++){
+                out << actions[j].getTimeAction() << " " << actions[j].getEvent().getDescription();
+
+                if (actions[j].getState().getDescription().size()>0){
+                    out << "," << actions[j].getState().getDescription();
+                }
+
+                out << "\n";
+            }
+            if (actions.size()-1>0){
+                if (!actions[actions.size()-1].getEvent().getDescription().endsWith("{end}")){
+                    out << actions[actions.size()-1].getTimeAction() << " " << "{end}\n";
+                }
+            }
+            out << "{notes}\n";
+            id_file.close();
+        }
+    }
+}
 
 void MainWindow::login()
 {
