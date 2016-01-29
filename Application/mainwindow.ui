@@ -66,13 +66,20 @@
      <addaction name="actionCascata"/>
      <addaction name="actionLado_a_Lado"/>
     </widget>
+    <widget class="QMenu" name="menuExportar">
+     <property name="title">
+      <string>Exportar</string>
+     </property>
+     <addaction name="actionExportODF"/>
+     <addaction name="actionExportMDF"/>
+    </widget>
     <addaction name="actionLogin"/>
     <addaction name="separator"/>
     <addaction name="actionDicion_rio"/>
     <addaction name="actionSpecies"/>
     <addaction name="actionIndiv_duos"/>
     <addaction name="actionSess_es"/>
-    <addaction name="actionTextExport"/>
+    <addaction name="menuExportar"/>
     <addaction name="actionUsuario"/>
     <addaction name="separator"/>
     <addaction name="actionReiniciar_Banco"/>
@@ -221,9 +228,14 @@
     <string>Indivíduos</string>
    </property>
   </action>
-  <action name="actionTextExport">
+  <action name="actionExportODF">
    <property name="text">
-    <string>Exportar</string>
+    <string>Arquivo simples (*.odf)</string>
+   </property>
+  </action>
+  <action name="actionExportMDF">
+   <property name="text">
+    <string>Arquivo complexo (*.mdf)</string>
    </property>
   </action>
  </widget>

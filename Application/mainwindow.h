@@ -68,6 +68,7 @@ private:
     QApplication *app;
     void linkSignals();
     void adjustShortcuts();
+    QString identifySession(QString specie, QString individuo, QString id, QString author);
     Connections *connectdb;
     VideoWindow *video_ui;
     ControlUsers *users_ui;
@@ -81,6 +82,7 @@ private:
     unsigned int countAnalysis;
     QString dirConfig;
 
+
     QMdiSubWindow *swDict, *swSpc, *swUser, *swSsn;
 
 public slots:
@@ -88,11 +90,12 @@ public slots:
 
 private slots:
     void executeImportText(bool append=true);
-    void executeExportText();
     void executeImportAdvanced();
     void executeImportVideo();
     void executeImportAudio();
     void executeImportMedia(QString type);
+    void executeExportText();
+    void executeExportTextMDF();
     void executeAnalysis();
     void createConnections();
     void connectDatabse(bool makeTables = false);

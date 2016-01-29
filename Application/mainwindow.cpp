@@ -46,7 +46,8 @@ void MainWindow::linkSignals(){
     connect(this->ui->actionIdioma,SIGNAL(triggered()),this,SLOT(changeLanguage()));
     connect(this->ui->actionCascata,SIGNAL(triggered()),this->ui->mdiArea,SLOT(cascadeSubWindows()));
     connect(this->ui->actionLado_a_Lado,SIGNAL(triggered()),this->ui->mdiArea,SLOT(tileSubWindows()));
-    connect(this->ui->actionTextExport,SIGNAL(triggered()),this,SLOT(executeExportText()));
+    connect(this->ui->actionExportODF,SIGNAL(triggered()),this,SLOT(executeExportText()));
+    connect(this->ui->actionExportMDF,SIGNAL(triggered()),this,SLOT(executeExportTextMDF()));
 }
 
 void MainWindow::adjustShortcuts()
@@ -338,27 +339,16 @@ void MainWindow::executeExportText(){
 
         /* file */
         QString path_base = QFileDialog::getSaveFileName(this, tr("Exportar dados em arquivo"), QDir::homePath(), tr("Arquivo ODF (*.odf)"));
-
-
+        path_base = path_base.remove(path_base.size()-4,4);
 
         /* Database */
         Database db;
 
-        QStringList list_path = path_base.split(QDir::separator());
-        QString filename_base = list_path.last();
-        filename_base = filename_base.remove(filename_base.size()-4,4);
-        list_path.pop_back();
-        QString path;
-        for (int i=0;i<list_path.size(); i++){
-            path = path.append(list_path.at(i));
-            path = path.append(QDir::separator());
-        }
-
         for(int i=0; i<itens.size(); i=i+6){
             unsigned int idSession = itens.at(i)->text().toInt();
-            QString filename = filename_base + QString(itens.at(i)->text());
+            QString filename = path_base + QString(itens.at(i)->text());
             filename = filename.append(".odf");
-            filename = path + filename;
+
             QFile id_file(filename);
             if (!id_file.open(QIODevice::WriteOnly | QIODevice::Text))
                     return;
@@ -368,13 +358,8 @@ void MainWindow::executeExportText(){
             /* write head to file */
             out << itens.at(i+5)->text() << "\n";
 
-            out << itens.at(i+2)->text(); // specie
-            out << " ";
-            out << itens.at(i+1)->text(); // individuo
-            out << " ";
-            out << itens.at(i)->text(); // id session
-            out << " ";
-            out << itens.at(i+3)->text(); // author
+            out << this->identifySession(itens.at(i+2)->text(), itens.at(i+1)->text(),
+                                         itens.at(i)->text(), itens.at(i+3)->text());
             out << "\n";
 
             QStringList list = itens.at(i+4)->text().split(QRegExp("\\s"),QString::SkipEmptyParts);
@@ -414,6 +399,126 @@ void MainWindow::executeExportText(){
             id_file.close();
         }
     }
+}
+
+void MainWindow::executeExportTextMDF(){
+    /* Dialog to choose */
+    DialogSelectSession d;
+    if(d.exec()){
+        QList<QTableWidgetItem*> itens = d.getSelectedItens();
+
+        /* file */
+        QString filename = QFileDialog::getSaveFileName(this, tr("Exportar dados em arquivo"), QDir::homePath(), tr("Arquivo MDF (*.mdf)"));
+
+        QFile id_file(filename);
+        if (!id_file.open(QIODevice::WriteOnly | QIODevice::Text))
+                return;
+        QTextStream out(&id_file);
+
+        /* write head to file */
+
+        out << "+----------------------------------------------------------------+\n";
+        out << "|       Pacca 1.0  TIME-EVENT TABLE         "
+            << QDateTime::currentDateTime().toString("MM-dd-yyyy  hh:mm:ss") <<" |\n";
+        out << "+----------------------------------------------------------------+\n";
+
+        out << "\n";
+        out << "Project .....: " << "\n";
+        out << "Configuration: " << "\n";
+        out << "\n";
+
+        out << "Selected Observational Data Files:\n";
+        out << "File name      Date       Start time  Total duration Title\n";
+        out << "----------------------------------------------------------\n";
+
+        /* Database */
+        Database db;
+
+        for(int i=0; i<itens.size(); i=i+6){
+            QFileInfo info(itens.at(i+5)->text());
+            QString file = info.fileName();
+
+            out.setFieldWidth(15);
+            out.setFieldAlignment(QTextStream::AlignLeft);
+            out << file;
+            out.setFieldWidth(22);
+            out << itens.at(i+4)->text();
+            out.setFieldWidth(11);
+            out.setFieldAlignment(QTextStream::AlignRight);
+            out << "999.9";
+            out.reset();
+            out << " sec ";
+            out << this->identifySession(itens.at(i+2)->text(), itens.at(i+1)->text(),
+                                         itens.at(i)->text(), itens.at(i+3)->text());
+            out << "\n";
+        }
+
+        for(int i=0; i<itens.size(); i=i+6){
+            QFileInfo info(itens.at(i+5)->text());
+            QString file = info.fileName();
+
+            /* head to analysis */
+            out.reset();
+            out << "\nObservational data file .....: "
+                << file
+                << "\n";
+
+            out << "Title .......................: "
+                << this->identifySession(itens.at(i+2)->text(),
+                                         itens.at(i+1)->text(),
+                                         itens.at(i)->text(),
+                                         itens.at(i+3)->text())
+                << "\n";
+
+            out << "From ........................: "
+                << "Start of observation"
+                << "\n";
+
+            out << "To ..........................: "
+                << "End of observation"
+                << "\n";
+
+            out << "\n"
+                << "      Time Captura\n"
+                << "  -----------------\n";
+
+            unsigned int idSession = itens.at(i)->text().toInt();
+            QList<Actions> actions = db.getSequence(idSession);
+            for (int j=0; j<actions.size(); j++){
+                out.reset();
+                out.setFieldWidth(10);
+                out.setFieldAlignment(QTextStream::AlignRight);
+                out << actions[j].getTimeAction();
+                out.reset();
+                out << " " << actions[j].getEvent().getDescription();
+
+                if (actions[j].getState().getDescription().size()>0){
+                    out << "," << actions[j].getState().getDescription();
+                }
+
+                out << "\n";
+            }
+
+            if (actions.size()-1>0){
+                if (!actions[actions.size()-1].getEvent().getDescription().endsWith("{end}")){
+                    out.setFieldWidth(10);
+                    out.setFieldAlignment(QTextStream::AlignRight);
+                    out << actions[actions.size()-1].getTimeAction();
+                    out.reset();
+                    out << " " << "{end}\n";
+                }
+            }
+            out << "\n";
+        }
+
+
+        id_file.close();
+
+    }
+}
+
+QString MainWindow::identifySession(QString specie, QString individuo, QString id, QString author){
+    return specie + " " + individuo + " " + id + " " + author;
 }
 
 void MainWindow::login()
