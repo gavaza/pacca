@@ -13,6 +13,7 @@
 #include <Media.h>
 #include <MediaPlayer.h>
 #include <Error.h>
+
 #include <vlc/vlc.h>
 
 #include <QTableWidget>

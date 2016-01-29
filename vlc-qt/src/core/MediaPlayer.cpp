@@ -262,6 +262,11 @@ void VlcMediaPlayer::resume()
 
 void VlcMediaPlayer::setTime(int time)
 {
+    if (!(state() == Vlc::Buffering ||
+        state() == Vlc::Playing ||
+        state() == Vlc::Paused))
+        return;
+
     libvlc_media_player_set_time(_vlcMediaPlayer, time);
 
     VlcError::showErrmsg();
@@ -434,4 +439,19 @@ void VlcMediaPlayer::setPosition(float pos)
     libvlc_media_player_set_position(_vlcMediaPlayer, pos);
 
     VlcError::showErrmsg();
+}
+
+void VlcMediaPlayer::setPlaybackRate(float rate)
+{
+    libvlc_media_player_set_rate(_vlcMediaPlayer, rate);
+
+    VlcError::showErrmsg();
+}
+
+float VlcMediaPlayer::playbackRate()
+{
+    if (!_vlcMediaPlayer)
+        return -1;
+
+    return libvlc_media_player_get_rate(_vlcMediaPlayer);
 }

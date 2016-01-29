@@ -6,6 +6,8 @@ INCLUDEPATH += $$PWD/../Database
 
 macx {
     LIBS += -L$$PWD/../vlc-qt/build/osx/lib -lvlc-qt -lvlc-qt-widgets
+#    LIBS += -F$$PWD/../vlc-qt/build/osx/lib/ -framework VLCQtCore
+#    LIBS += -F$$PWD/../vlc-qt/build/osx/lib/ -framework VLCQtWidgets
     LIBS += -L/opt/local/lib -lvlc
 }
 unix {
@@ -22,7 +24,8 @@ win32 {
 }
 
 macx {
-    INCLUDEPATH += $$PWD/../vlc-qt/build/osx/include/vlc-qt
+    INCLUDEPATH += $$PWD/../vlc-qt/build/include
+    INCLUDEPATH += $$PWD/../vlc-qt/build/osx/include
     INCLUDEPATH += /opt/local/include
 }
 unix {
