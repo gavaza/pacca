@@ -9,6 +9,7 @@ Connections::Connections(QString driver, QString database){
 }
 
 bool Connections::openConnection(){
+    this->closeConnection();
     if (!(this->db.open())) {
         QMessageBox::critical(0, QMessageBox::tr("Erro no banco de dados"), this->db.lastError().text());
         return false;

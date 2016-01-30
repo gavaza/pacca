@@ -18,7 +18,7 @@ class DialogLogin : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogLogin(QWidget *parent = 0);
+    explicit DialogLogin(QList<Users> users, QWidget *parent = 0);
     ~DialogLogin();
     QString getName();
 

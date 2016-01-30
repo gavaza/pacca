@@ -1,18 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#ifndef INPUTTEXT_VARIABLES
-const int TITLE_SESSION_SIZE_SIMPLE=3;
-const int TITLE_SESSION_SIZE_COMPLEX=7;
-#define INPUTTEXT_VARIABLES
-#endif
-
-enum types_of_files{
-    odf, // simple
-    mdf, // complex
-    unknown
-};
-
 #include <QDebug>
 #include <QApplication>
 #include <QTranslator>
@@ -45,6 +33,7 @@ enum types_of_files{
 #include "controlspecies.h"
 #include "controlsubject.h"
 #include "dialogchooselanguage.h"
+#include "text.h"
 
 #include "GraphWindow.h"
 
@@ -68,7 +57,6 @@ private:
     QApplication *app;
     void linkSignals();
     void adjustShortcuts();
-    QString identifySession(QString specie, QString individuo, QString id, QString author);
     Connections *connectdb;
     VideoWindow *video_ui;
     ControlUsers *users_ui;
@@ -81,26 +69,24 @@ private:
     AnalysisWindow *analysis_ui;
     unsigned int countAnalysis;
     QString dirConfig;
-
-
+    void setDatabaseStatus(bool status=false);
     QMdiSubWindow *swDict, *swSpc, *swUser, *swSsn;
 
-public slots:
-    void login();
-
 private slots:
+    void login();
+    void logoff(bool status=false);
     void executeImportText(bool append=true);
-    void executeImportAdvanced();
     void executeImportVideo();
     void executeImportAudio();
     void executeImportMedia(QString type);
     void executeExportText();
     void executeExportTextMDF();
     void executeAnalysis();
-    void createConnections();
-    void connectDatabse(bool makeTables = false);
-    void resetDatabase();
+    void executeImportDB();
+    void executeExportDB();
     void newuser();
+    void connectDatabase();
+    void resetDatabase();
     void managerDict();
     void managerSessions();
     void managerSpecies();

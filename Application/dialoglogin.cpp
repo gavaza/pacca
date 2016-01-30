@@ -1,13 +1,11 @@
 #include "dialoglogin.h"
 #include "ui_dialoglogin.h"
 
-DialogLogin::DialogLogin(QWidget *parent) :
+DialogLogin::DialogLogin(QList<Users> users, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogLogin)
 {
     ui->setupUi(this);
-    Database db;
-    QList<Users> users = db.getAllUsers();
     if(users.size() == 0){
         QMessageBox::information(this,tr("Login Impossível"),tr("Nenhum usuário encontrado. Você deve criar um usuário antes de efeutar o login."));
         this->setResult(0);

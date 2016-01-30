@@ -11,7 +11,8 @@ MainWindow::MainWindow(QApplication *app, QWidget *parent) :
     if(!QDir(this->dirConfig).exists()) QDir().mkdir(this->dirConfig);
     this->adjustShortcuts();
     this->linkSignals();
-    this->createConnections();
+    this->logoff();
+    this->connectdb = NULL;
     this->users_ui = NULL;
     this->ctl_sessions = NULL;
     this->ctl_species = NULL;
@@ -34,7 +35,6 @@ void MainWindow::linkSignals(){
     connect(this->ui->actionVideo,SIGNAL(triggered()),this,SLOT(executeImportVideo()));
     connect(this->ui->actionAudio,SIGNAL(triggered()),this,SLOT(executeImportAudio()));
     connect(this->ui->actionUsuario,SIGNAL(triggered()),this,SLOT(newuser()));
-    connect(this->ui->actionReiniciar_Banco,SIGNAL(triggered()),this,SLOT(resetDatabase()));
     connect(this->ui->actionAnalise,SIGNAL(triggered()),this,SLOT(executeAnalysis()));
     connect(this->ui->actionLogin,SIGNAL(triggered()),this,SLOT(login()));
     connect(this->ui->actionDicion_rio,SIGNAL(triggered()),this,SLOT(managerDict()));
@@ -48,6 +48,9 @@ void MainWindow::linkSignals(){
     connect(this->ui->actionLado_a_Lado,SIGNAL(triggered()),this->ui->mdiArea,SLOT(tileSubWindows()));
     connect(this->ui->actionExportODF,SIGNAL(triggered()),this,SLOT(executeExportText()));
     connect(this->ui->actionExportMDF,SIGNAL(triggered()),this,SLOT(executeExportTextMDF()));
+    connect(this->ui->actionResetDB,SIGNAL(triggered()),this,SLOT(resetDatabase()));
+    connect(this->ui->actionExportDB,SIGNAL(triggered()),this,SLOT(executeExportDB()));
+    connect(this->ui->actionImportDB,SIGNAL(triggered()),this,SLOT(executeImportDB()));
 }
 
 void MainWindow::adjustShortcuts()
@@ -67,9 +70,6 @@ void MainWindow::saveSession(Sessions session)
 {
     Database db;
     db.saveSession(session);
-}
-
-void MainWindow::executeImportAdvanced(){
 }
 
 void MainWindow::executeImportVideo()
@@ -109,29 +109,20 @@ void MainWindow::executeAnalysis()
     this->analysis_ui->showMaximized();
 }
 
-void MainWindow::createConnections()
+void MainWindow::setDatabaseStatus(bool status)
 {
     QSettings settings("NuEvo","Pacca");
     settings.beginGroup("database");
-    bool databaseUnconfigured = settings.value("databaseUnconfigured",true).toBool();
+    settings.setValue("databaseUnconfigured",status);
     settings.endGroup();
-    this->connectDatabse(databaseUnconfigured || !QDir(this->dirConfig).exists("pacca_database.sqlite"));
 }
 
-void MainWindow::connectDatabse(bool makeTables)
+void MainWindow::connectDatabase()
 {
     QString databaseName = this->dirConfig+"/pacca_database.sqlite";
     this->connectdb = new Connections("QSQLITE",databaseName);
     if(!this->connectdb->openConnection()){
         qDebug("Connection error");
-    }
-    if(makeTables){
-        if(this->connectdb->makeDatabaseTables()){
-            QSettings settings("NuEvo","Pacca");
-            settings.beginGroup("database");
-            settings.setValue("databaseUnconfigured",false);
-            settings.endGroup();
-        }
     }
 }
 
@@ -143,193 +134,36 @@ void MainWindow::resetDatabase()
             == QMessageBox::Yes){
         this->ui->mdiArea->closeAllSubWindows();
         this->connectdb->makeDatabaseTables();
+        this->logoff();
     }
 }
 
 
-void MainWindow::executeImportText(bool append /*true is default */){
+void MainWindow::executeImportText(bool append){
+    if (!append) this->sessions.clear();
     DialogChooseSpecie spc;
     if(spc.exec()){
         int specie = spc.getSpecie().toInt();
         int subject = spc.getSubject().toInt();
         /* import from text */
         QStringList filename = QFileDialog::getOpenFileNames(this, tr("Importar análise do arquivo"), QDir::homePath(), tr("Arquivo ODF (*.odf);;Arquivo MDF (*.mdf)"));
-
-        for (int q=0; q<filename.size(); q++){
-
-            QFile id_file(filename.at(q));
-            bool candidateToTitle=false;
-            QString text;
-            QList<QString> title;
-            Database db;
-            types_of_files type;
-
-            if (!append){
-                /* remove all sessions information from memory */
-                this->sessions.clear();
-            }
-
-            if(!(id_file.open(QIODevice::ReadOnly | QIODevice::Text)))
-                return;
-
-            QTextStream file(&id_file);
-            file.setAutoDetectUnicode(true);
-
-            QPixmap pixmap(":/icons/splash.png");
-            pixmap.scaled(QApplication::desktop()->screenGeometry().width()*0.1,QApplication::desktop()->screenGeometry().height()*0.1);
-            QSplashScreen splash(pixmap);
-            splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
-            splash.show();
-            while (!file.atEnd()){
-
-                type = unknown;
-
-                /* seek beginning of session */
-                do{
-                    text = file.readLine();
-
-                    /* candidate to title information from simple file */
-                    if (candidateToTitle){
-                        title = text.split(QRegExp("\\s"));
-                        candidateToTitle=false;
-                    }
-
-                    if (text.contains(QRegExp("\\.CNF")))
-                        candidateToTitle = true;
-
-                }while(!file.atEnd() && !text.startsWith("{indvar}") && !text.startsWith("{start}") && !text.startsWith("Observational data file"));
-
-
-                if (!file.atEnd()){
-
-                    bool tagEnd = false;
-                    bool readhead = false;
-                    QStringList list;
-                    double time = 0;
-                    QString description;
-                    QString state_description;
-                    QString session_author;
-                    int i;
-
-                    QList<Actions> actions;
-
-                    while(!file.atEnd() && !tagEnd){
-
-                        if (text.startsWith("Observational data file")){
-                            type=mdf;
-                        }
-                        else if (text.startsWith("{indvar}") || text.startsWith("{start}")){
-                            type=odf;
-                        }
-
-                        i=0;
-
-                        /* read head */
-                        if (!file.atEnd() && !readhead){
-                            readhead = true;
-                            if (type==odf){
-                                if (text.startsWith("{indvar}")){
-                                    /* not processed yet */
-                                    do{
-                                        text = file.readLine();
-                                    } while(!file.atEnd() && !text.startsWith("{start}"));
-                                }
-                                if (text.startsWith("{start}")){
-                                    /* sessions title information from simple file. */
-                                    text = "Title";
-                                    if (title.size() >= TITLE_SESSION_SIZE_SIMPLE){
-                                        session_author = title[title.size()-2];
-                                    }
-                                    else{
-                                        /* incomplete title information */
-                                    }
-                                }
-                            }
-                            else if(type==mdf){
-                                text = file.readLine();
-                                if (text.startsWith("Title")){
-                                    /* analysis title information from complex file. */
-                                    title = text.simplified().split(QRegExp("\\s"),QString::SkipEmptyParts);
-                                    if (title.size() >= TITLE_SESSION_SIZE_COMPLEX){
-                                        session_author = title[title.size()-2];
-                                    }
-                                    else{
-                                        /* incomplete title information */
-                                    }
-                                }
-                                do{
-                                    text = file.readLine();
-                                }while(!file.atEnd() && !text.contains("-----"));
-                            }
-                        }
-
-                        /* search for information analysis: title or time, event [,state] */
-                        if (!file.atEnd()){
-                            do{
-                                text = file.readLine();
-                                list = text.simplified().split(QRegExp("\\s"),QString::SkipEmptyParts);
-                                i = 0;
-                                //                            while (i<list.size() && !list[i].contains(QRegExp("\\d*\\.\\d+"))){
-                                while (i<list.size() && !list[i].contains(QRegExp("\\d+"))){
-                                    i++;
-                                }
-                            } while (!file.atEnd() && i==list.size());
-                        }
-
-                        /* apply information to fields */
-                        if (i+1<list.size()){
-                            /* time, event [, state] found or end tag */
-                            time = list.at(i).toDouble();
-                            description = list.at(i+1);
-                            if (description.endsWith("{end}")){
-                                /* end tag found, go to new session if exist */
-                                tagEnd = true;
-                            }
-                            else{
-                                list = description.simplified().split(QRegExp(","),QString::SkipEmptyParts);
-                                state_description = "";
-                                if (list.size()>0){
-                                    description = list.at(0);
-                                    if (list.size()==2) {
-                                        /* state is explicitly defined */
-                                        state_description = list.at(1);
-                                        if(state_description.at(list.at(i).size()-1) == ','){
-                                            state_description = state_description.remove(list.at(i).size()-1,1);
-                                        }
-                                    }
-                                    if(description.at(list.at(i).size()-1) == ','){
-                                        description = description.remove(list.at(i).size()-1,1);
-                                    }
-                                }
-                            }
-                            actions.push_back(Actions(time, Events(description), States(state_description)));
-                            //                            qDebug() << "(time, event, state) = " << time << description << state_description;
-                        }
-                    }
-                    this->sessions.push_back(Sessions());
-                    this->sessions.last().setDateDecoding(QDateTime::currentDateTime());
-                    this->sessions.last().setDateSession(QDateTime::currentDateTime());
-                    QSettings settings("NuEvo","Pacca");
-                    settings.beginGroup("global");
-                    this->sessions.last().setDecoder(settings.value("user"));
-                    this->sessions.last().setObserver(settings.value("user"));
-                    settings.endGroup();
-                    this->sessions.last().setDescription(filename.at(q));
-                    this->sessions.last().setActions(actions);
-                    this->sessions.last().setSpecies(specie);
-                    this->sessions.last().setSubject(subject);
-                    db.saveSession(this->sessions.last());
-                    //                qDebug() << "Session size = " << actions.size();
-                }
-            }
-            //        qDebug() << "Number of sessions = " << this->sessions.size();
-            id_file.close();
-            splash.finish(this);
+        if (filename.size()==0) return;
+        Database db;
+        Text t;
+        QList<Sessions> s = t.executeImportText(filename);
+        for (int i=0; i<s.size(); i++){
+            QSettings settings("NuEvo","Pacca");
+            settings.beginGroup("global");
+            s[i].setDecoder(settings.value("user"));
+            s[i].setObserver(settings.value("user"));
+            settings.endGroup();
+            s[i].setSpecies(specie);
+            s[i].setSubject(subject);
+            db.saveSession(s.at(i));
         }
-        return;
+        this->sessions.append(s);
     }
 }
-
 
 void MainWindow::executeExportText(){
     /* Dialog to choose */
@@ -341,62 +175,24 @@ void MainWindow::executeExportText(){
         QString path_base = QFileDialog::getSaveFileName(this, tr("Exportar dados em arquivo"), QDir::homePath(), tr("Arquivo ODF (*.odf)"));
         path_base = path_base.remove(path_base.size()-4,4);
 
+        if (path_base.size()==0) return;
+
         /* Database */
         Database db;
-
         for(int i=0; i<itens.size(); i=i+6){
+
             unsigned int idSession = itens.at(i)->text().toInt();
             QString filename = path_base + QString(itens.at(i)->text());
             filename = filename.append(".odf");
 
-            QFile id_file(filename);
-            if (!id_file.open(QIODevice::WriteOnly | QIODevice::Text))
-                    return;
-            QTextStream out(&id_file);
-
-
-            /* write head to file */
-            out << itens.at(i+5)->text() << "\n";
-
-            out << this->identifySession(itens.at(i+2)->text(), itens.at(i+1)->text(),
-                                         itens.at(i)->text(), itens.at(i+3)->text());
-            out << "\n";
-
-            QStringList list = itens.at(i+4)->text().split(QRegExp("\\s"),QString::SkipEmptyParts);
-
-            out << list.at(0) << "\n";
-            out << list.at(1) << "\n";
-
-            out << "{media}\n";
-            out << itens.at(i+5)->text() << "\n";
-
-            out << "{indvar}\n";
-            out << itens.at(i+2)->text(); // genre
-            out << "\n";
-            out << itens.at(i+3)->text(); // author
-            out << "\n";
-            out << itens.at(i+1)->text(); // condition
-            out << "\n";
-
-            out << "{start}\n";
-
             QList<Actions> actions = db.getSequence(idSession);
-            for (int j=0; j<actions.size(); j++){
-                out << actions[j].getTimeAction() << " " << actions[j].getEvent().getDescription();
-
-                if (actions[j].getState().getDescription().size()>0){
-                    out << "," << actions[j].getState().getDescription();
-                }
-
-                out << "\n";
+            QList<QString> infos;
+            for (int j=i; j<i+6; j++){
+                infos.push_back(itens.at(j)->text());
             }
-            if (actions.size()-1>0){
-                if (!actions[actions.size()-1].getEvent().getDescription().endsWith("{end}")){
-                    out << actions[actions.size()-1].getTimeAction() << " " << "{end}\n";
-                }
-            }
-            out << "{notes}\n";
-            id_file.close();
+
+            Text t;
+            t.executeExportText(filename, actions, infos);
         }
     }
 }
@@ -409,131 +205,90 @@ void MainWindow::executeExportTextMDF(){
 
         /* file */
         QString filename = QFileDialog::getSaveFileName(this, tr("Exportar dados em arquivo"), QDir::homePath(), tr("Arquivo MDF (*.mdf)"));
-
-        QFile id_file(filename);
-        if (!id_file.open(QIODevice::WriteOnly | QIODevice::Text))
-                return;
-        QTextStream out(&id_file);
-
-        /* write head to file */
-
-        out << "+----------------------------------------------------------------+\n";
-        out << "|       Pacca 1.0  TIME-EVENT TABLE         "
-            << QDateTime::currentDateTime().toString("MM-dd-yyyy  hh:mm:ss") <<" |\n";
-        out << "+----------------------------------------------------------------+\n";
-
-        out << "\n";
-        out << "Project .....: " << "\n";
-        out << "Configuration: " << "\n";
-        out << "\n";
-
-        out << "Selected Observational Data Files:\n";
-        out << "File name      Date       Start time  Total duration Title\n";
-        out << "----------------------------------------------------------\n";
+        if (filename.size()==0) return;
 
         /* Database */
         Database db;
+        QList< QList<Actions> > list_actions;
+        QList< QList<QString> > list_infos;
 
-        for(int i=0; i<itens.size(); i=i+6){
-            QFileInfo info(itens.at(i+5)->text());
-            QString file = info.fileName();
-
-            out.setFieldWidth(15);
-            out.setFieldAlignment(QTextStream::AlignLeft);
-            out << file;
-            out.setFieldWidth(22);
-            out << itens.at(i+4)->text();
-            out.setFieldWidth(11);
-            out.setFieldAlignment(QTextStream::AlignRight);
-            out << "999.9";
-            out.reset();
-            out << " sec ";
-            out << this->identifySession(itens.at(i+2)->text(), itens.at(i+1)->text(),
-                                         itens.at(i)->text(), itens.at(i+3)->text());
-            out << "\n";
-        }
-
-        for(int i=0; i<itens.size(); i=i+6){
-            QFileInfo info(itens.at(i+5)->text());
-            QString file = info.fileName();
-
-            /* head to analysis */
-            out.reset();
-            out << "\nObservational data file .....: "
-                << file
-                << "\n";
-
-            out << "Title .......................: "
-                << this->identifySession(itens.at(i+2)->text(),
-                                         itens.at(i+1)->text(),
-                                         itens.at(i)->text(),
-                                         itens.at(i+3)->text())
-                << "\n";
-
-            out << "From ........................: "
-                << "Start of observation"
-                << "\n";
-
-            out << "To ..........................: "
-                << "End of observation"
-                << "\n";
-
-            out << "\n"
-                << "      Time Captura\n"
-                << "  -----------------\n";
+        for (int i=0; i<itens.size(); i+=6){
 
             unsigned int idSession = itens.at(i)->text().toInt();
             QList<Actions> actions = db.getSequence(idSession);
-            for (int j=0; j<actions.size(); j++){
-                out.reset();
-                out.setFieldWidth(10);
-                out.setFieldAlignment(QTextStream::AlignRight);
-                out << actions[j].getTimeAction();
-                out.reset();
-                out << " " << actions[j].getEvent().getDescription();
-
-                if (actions[j].getState().getDescription().size()>0){
-                    out << "," << actions[j].getState().getDescription();
-                }
-
-                out << "\n";
+            list_actions.push_back(actions);
+            QList<QString> infos;
+            for (int j=i; j<i+6; j++){
+                infos.push_back(itens.at(j)->text());
             }
-
-            if (actions.size()-1>0){
-                if (!actions[actions.size()-1].getEvent().getDescription().endsWith("{end}")){
-                    out.setFieldWidth(10);
-                    out.setFieldAlignment(QTextStream::AlignRight);
-                    out << actions[actions.size()-1].getTimeAction();
-                    out.reset();
-                    out << " " << "{end}\n";
-                }
-            }
-            out << "\n";
+            list_infos.push_back(infos);
         }
 
-
-        id_file.close();
-
+        Text t;
+        t.executeExportTextMDF(filename, list_actions, list_infos);
     }
 }
 
-QString MainWindow::identifySession(QString specie, QString individuo, QString id, QString author){
-    return specie + " " + individuo + " " + id + " " + author;
-}
+
 
 void MainWindow::login()
 {
-    DialogLogin login;
-    if(login.exec()){
-        QString username = login.getName();
-        QSettings settings("NuEvo","Pacca");
-        settings.beginGroup("global");
-        settings.setValue("user",username);
-        settings.endGroup();
-        this->ui->menuNova->setEnabled(true);
-        this->ui->menuSess_o->setEnabled(true);
-        this->ui->actionSess_es->setEnabled(true);
+    QSettings settings("NuEvo","Pacca");
+    settings.beginGroup("database");
+    bool databaseUnconfigured = settings.value("databaseUnconfigured",true).toBool();
+    settings.endGroup();
+
+    if (databaseUnconfigured || !QDir(this->dirConfig).exists("pacca_database.sqlite")){
+        if (!this->connectdb) this->connectDatabase();
+        this->connectdb->makeDatabaseTables();
+        this->newuser();
+        this->setDatabaseStatus();
+        return;
     }
+
+    if (!this->connectdb) this->connectDatabase();
+
+    Database db;
+    QList<Users> users = db.getAllUsers();
+    if (users.size()>0){
+        DialogLogin login(users);
+        if(login.exec()){
+            QString username = login.getName();
+            QSettings settings("NuEvo","Pacca");
+            settings.beginGroup("global");
+            settings.setValue("user",username);
+            settings.endGroup();
+            this->logoff(true);
+        }
+    }
+    else{
+        this->newuser();
+    }
+}
+
+void MainWindow::logoff(bool status)
+{
+    this->ui->menuBar->setEnabled(true);
+    this->ui->menuNova->setEnabled(status);
+    this->ui->menuControle->setEnabled(true);
+    this->ui->actionLogin->setEnabled(true);
+    this->ui->menuAjuda->setEnabled(true);
+    this->ui->actionDicion_rio->setEnabled(status);
+    this->ui->actionSpecies->setEnabled(status);
+    this->ui->actionIndiv_duos->setEnabled(status);
+    this->ui->actionSess_es->setEnabled(status);
+    this->ui->menuSess_o->setEnabled(status);
+    this->ui->actionAnalise->setEnabled(status);
+    this->ui->actionAudio->setEnabled(status);
+    this->ui->actionVideo->setEnabled(status);
+    this->ui->actionText->setEnabled(status);
+    this->ui->actionUsuario->setEnabled(status);
+    this->ui->menuExportar->setEnabled(status);
+    this->ui->menuBanco->setEnabled(true);
+    this->ui->actionResetDB->setEnabled(true);
+    this->ui->actionExportDB->setEnabled(status);
+    this->ui->actionImportDB->setEnabled(true);
+    this->ui->menuJanelas->setEnabled(true);
 }
 
 void MainWindow::newuser()
@@ -657,4 +412,31 @@ void MainWindow::videowClosed()
     this->ui->menuBar->setEnabled(true);
     this->ui->mdiArea->setFocus();
     disconnect(this->video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed()));
+}
+
+void MainWindow::executeExportDB(){
+    QString filename = QFileDialog::getSaveFileName(this, tr("Exportar banco de dados"),
+                                                    QDir::homePath(), tr("Arquivo SQLite (*.sqlite)"));
+    if (filename.size()==0) return;
+
+    QFile destination(filename);
+    if (destination.exists()) destination.remove();
+    QFile::copy(this->dirConfig+"/pacca_database.sqlite", filename);
+}
+
+void MainWindow::executeImportDB(){
+    QString filename = QFileDialog::getOpenFileName(this, tr("Importar banco de dados"),
+                                                    QDir::homePath(), tr("Arquivo SQLite (*.sqlite)"));
+    if (filename.size()==0) return;
+
+    this->logoff();
+    QFile database(this->dirConfig+"/pacca_database.sqlite");
+    if(!QDir(this->dirConfig).exists()) QDir().mkdir(this->dirConfig);
+    if (database.exists()){
+        this->connectdb->closeConnection();
+        database.remove();
+    }
+    QFile::copy(filename, this->dirConfig+"/pacca_database.sqlite");
+    this->connectdb->openConnection();
+    this->setDatabaseStatus();
 }

@@ -35,6 +35,5 @@ int main(int argc, char *argv[])
     MainWindow w(&a);
 
     w.showMaximized();
-    w.login();
     return a.exec();
 }

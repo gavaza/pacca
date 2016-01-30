@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuNova">
@@ -67,11 +67,22 @@
      <addaction name="actionLado_a_Lado"/>
     </widget>
     <widget class="QMenu" name="menuExportar">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="title">
       <string>Exportar</string>
      </property>
      <addaction name="actionExportODF"/>
      <addaction name="actionExportMDF"/>
+    </widget>
+    <widget class="QMenu" name="menuBanco">
+     <property name="title">
+      <string>Banco de Dados</string>
+     </property>
+     <addaction name="actionExportDB"/>
+     <addaction name="actionImportDB"/>
+     <addaction name="actionResetDB"/>
     </widget>
     <addaction name="actionLogin"/>
     <addaction name="separator"/>
@@ -82,7 +93,7 @@
     <addaction name="menuExportar"/>
     <addaction name="actionUsuario"/>
     <addaction name="separator"/>
-    <addaction name="actionReiniciar_Banco"/>
+    <addaction name="menuBanco"/>
     <addaction name="separator"/>
     <addaction name="menuJanelas"/>
    </widget>
@@ -114,11 +125,6 @@
    </property>
    <property name="shortcut">
     <string>Meta+U</string>
-   </property>
-  </action>
-  <action name="actionReiniciar_Banco">
-   <property name="text">
-    <string>Reiniciar Banco</string>
    </property>
   </action>
   <action name="actionVideo">
@@ -154,6 +160,9 @@
    </property>
   </action>
   <action name="actionDicion_rio">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Dicionários</string>
    </property>
@@ -181,6 +190,9 @@
    </property>
   </action>
   <action name="actionSpecies">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Espécies</string>
    </property>
@@ -224,6 +236,9 @@
    </property>
   </action>
   <action name="actionIndiv_duos">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Indivíduos</string>
    </property>
@@ -236,6 +251,21 @@
   <action name="actionExportMDF">
    <property name="text">
     <string>Arquivo complexo (*.mdf)</string>
+   </property>
+  </action>
+  <action name="actionExportDB">
+   <property name="text">
+    <string>Exportar</string>
+   </property>
+  </action>
+  <action name="actionImportDB">
+   <property name="text">
+    <string>Importar</string>
+   </property>
+  </action>
+  <action name="actionResetDB">
+   <property name="text">
+    <string>Reiniciar</string>
    </property>
   </action>
  </widget>

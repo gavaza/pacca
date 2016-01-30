@@ -53,7 +53,7 @@ FORMS    += mainwindow.ui \
 RESOURCES += \
     resource.qrc
 
-LIBS += -L$$OUT_PWD/../lib/ -lQGVCore -lGraphWindow -lStatistics -lPhylogenetic -lDatabaseControl -lVideo -lPlotWindow
+LIBS += -L$$OUT_PWD/../lib/ -lQGVCore -lGraphWindow -lStatistics -lPhylogenetic -lDatabaseControl -lVideo -lPlotWindow -lText
 
 INCLUDEPATH += $$PWD/../Statistics
 INCLUDEPATH += $$PWD/../Phylogenetic
@@ -63,5 +63,6 @@ INCLUDEPATH += $$PWD/../QGVCore
 INCLUDEPATH += $$PWD/../GraphWindow
 INCLUDEPATH += $$PWD/../Database
 INCLUDEPATH += $$PWD/../PlotWindow
+INCLUDEPATH += $$PWD/../Text
 
 
