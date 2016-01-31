@@ -32,4 +32,4 @@ SOURCES += \
     subject.cpp
 
 
-RESOURCES += ../Application/resource.qrc
+RESOURCES += $$PWD/../Application/resource.qrc

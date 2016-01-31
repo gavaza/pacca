@@ -45,4 +45,4 @@ HEADERS  += QGVScene.h \
 		private/QGVNodePrivate.h \
     qgv.h
 
-RESOURCES += ../Application/resource.qrc
+RESOURCES += $$PWD/../../Application/resource.qrc

@@ -6,11 +6,6 @@ DEFINES += VIDEO_LIBRARY
 DESTDIR = $$OUT_PWD/../lib
 DLLDESTDIR = $$OUT_PWD/../bin
 
-#Video librairie
-!include(Video.pri) {
-     error("fail open Video.pri")
-}
-
 HEADERS += \
     videowindow.h
 
@@ -20,4 +15,15 @@ SOURCES += \
 FORMS += \
     videowindow.ui
 
-RESOURCES += ../Application/resource.qrc
+RESOURCES += $$PWD/../Application/resource.qrc
+
+QT += sql
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+
+LIBS += -L$$OUT_PWD/../lib -lDatabase
+INCLUDEPATH += $$PWD/../Database
+
+#Video librairie
+!include(Video.pri) {
+     error("fail open Video.pri")
+}

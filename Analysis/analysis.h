@@ -23,6 +23,8 @@
 #include "phylogenetic.h"
 #include "viewphylogenetics.h"
 
+#include "analysis_global.h"
+
 
 namespace Ui {
 class Analysis;
@@ -32,7 +34,7 @@ class Analysis;
  * This class is resposible for control th Analysis window.
  * In this window the user can select session and apply statistical methods.
  */
-class AnalysisWindow : public QWidget
+class ANALYSISSHARED_EXPORT AnalysisWindow : public QWidget
 {
     Q_OBJECT
     

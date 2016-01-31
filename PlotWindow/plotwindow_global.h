@@ -1,0 +1,12 @@
+#ifndef PLOTWINDOW_GLOBAL_H
+#define PLOTWINDOW_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(TEXT_LIBRARY)
+#  define PLOTWINDOWSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define PLOTWINDOWSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // PLOTWINDOW_GLOBAL_H

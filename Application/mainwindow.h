@@ -22,7 +22,6 @@
 #include "action.h"
 #include "database.h"
 #include "videowindow.h"
-#include "statistics.h"
 #include "controlusers.h"
 #include "analysis.h"
 #include "dialoglogin.h"
@@ -34,10 +33,6 @@
 #include "controlsubject.h"
 #include "dialogchooselanguage.h"
 #include "text.h"
-
-#include "GraphWindow.h"
-
-#include "plotwindow.h"
 
 
 namespace Ui {

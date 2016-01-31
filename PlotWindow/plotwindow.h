@@ -7,11 +7,13 @@
 #include <QVariant>
 #include "qcustomplot.h"
 
+#include "plotwindow_global.h"
+
 namespace Ui {
 class PlotWindow;
 }
 
-class PlotWindow : public QWidget
+class PLOTWINDOWSHARED_EXPORT PlotWindow : public QWidget
 {
     Q_OBJECT
 

@@ -39,4 +39,4 @@ FORMS += \
 LIBS += -L$$OUT_PWD/../lib -lDatabase
 INCLUDEPATH += $$PWD/../Database
 
-RESOURCES += ../Application/resource.qrc
+RESOURCES += $$PWD/../Application/resource.qrc

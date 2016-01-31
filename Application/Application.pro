@@ -13,56 +13,45 @@ TEMPLATE = app
 DESTDIR = $$OUT_PWD/../bin
 ICON = $$PWD/icons/logo.icns
 
+SOURCES += main.cpp\
+        mainwindow.cpp \
+    dialoglogin.cpp \
+    dialogchoosedict.cpp \
+    dialogchooselanguage.cpp
+
+HEADERS  += mainwindow.h \
+    dialoglogin.h \
+    dialogchoosedict.h \
+    dialogchooselanguage.h
+
+FORMS    += mainwindow.ui \
+    dialoglogin.ui \
+    dialogchoosedict.ui \
+    dialogchooselanguage.ui
+
+RESOURCES += \
+    resource.qrc
+
+LIBS += -L$$OUT_PWD/../lib/ -lVideo -lText -lAnalysis -lDatabaseControl -lDatabase
+
+
+INCLUDEPATH += $$PWD/../Text
+INCLUDEPATH += $$PWD/../Analysis
+INCLUDEPATH += $$PWD/../DatabaseControl
+INCLUDEPATH += $$PWD/../Video
+
+# verify soon below
+INCLUDEPATH += $$PWD/../PlotWindow
+INCLUDEPATH += $$PWD/../Statistics
+INCLUDEPATH += $$PWD/../GraphWindow/GraphWindowCore
+INCLUDEPATH += $$PWD/../GraphWindow/QGVCore
+INCLUDEPATH += $$PWD/../Phylogenetic
+INCLUDEPATH += $$PWD/../Database
+
 #Video librairie
 !include(../Video/Video.pri) {
      error("fail open Video.pri")
 }
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    analysis.cpp \
-    qcustomplot.cpp \
-    dialoglogin.cpp \
-    dialogchoosedict.cpp \
-    viewtablestats.cpp \
-    dialogconfigstats.cpp \
-    graph.cpp \
-    dialogchooselanguage.cpp \
-    viewphylogenetics.cpp
-
-HEADERS  += mainwindow.h \
-    analysis.h \
-    qcustomplot.h \
-    dialoglogin.h \
-    dialogchoosedict.h \
-    viewtablestats.h \
-    dialogconfigstats.h \
-    graph.h \
-    dialogchooselanguage.h \
-    viewphylogenetics.h
-
-FORMS    += mainwindow.ui \
-    analysis.ui \
-    dialoglogin.ui \
-    dialogchoosedict.ui \
-    viewtablestats.ui \
-    dialogconfigstats.ui \
-    dialogchooselanguage.ui \
-    viewphylogenetics.ui
-
-RESOURCES += \
-    resource.qrc
-
-LIBS += -L$$OUT_PWD/../lib/ -lQGVCore -lGraphWindow -lStatistics -lPhylogenetic -lDatabaseControl -lVideo -lPlotWindow -lText
-
-INCLUDEPATH += $$PWD/../Statistics
-INCLUDEPATH += $$PWD/../Phylogenetic
-INCLUDEPATH += $$PWD/../DatabaseControl
-INCLUDEPATH += $$PWD/../Video
-INCLUDEPATH += $$PWD/../QGVCore
-INCLUDEPATH += $$PWD/../GraphWindow
-INCLUDEPATH += $$PWD/../Database
-INCLUDEPATH += $$PWD/../PlotWindow
-INCLUDEPATH += $$PWD/../Text
 
 

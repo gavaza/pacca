@@ -8,14 +8,16 @@ DESTDIR = $$OUT_PWD/../lib
 DLLDESTDIR = $$OUT_PWD/../bin
 
 HEADERS += \
+    viewphylogenetics.h \
     phylogenetic.h
 
 SOURCES += \
+    viewphylogenetics.cpp \
     phylogenetic.cpp
+
+FORMS += viewphylogenetics.ui
 
 LIBS += -L$$OUT_PWD/../lib/ -lStatistics
 INCLUDEPATH += $$PWD/../Statistics
 
-FORMS +=
-
-RESOURCES += ../Application/resource.qrc
+RESOURCES += $$PWD/../Application/resource.qrc

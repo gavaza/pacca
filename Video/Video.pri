@@ -1,8 +1,4 @@
-QT += sql
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-LIBS += -L$$OUT_PWD/../lib -lDatabase
-INCLUDEPATH += $$PWD/../Database
 
 macx {
     LIBS += -L$$PWD/../vlc-qt/build/osx/lib -lvlc-qt -lvlc-qt-widgets

@@ -10,7 +10,8 @@ DLLDESTDIR = $$OUT_PWD/../bin
 
 HEADERS += \
     qcustomplot.h \
-    plotwindow.h
+    plotwindow.h \
+    plotwindow_global.h
 
 SOURCES += \
     qcustomplot.cpp \
@@ -18,4 +19,4 @@ SOURCES += \
 
 FORMS    += plotwindow.ui
 
-RESOURCES += ../Application/resource.qrc
+RESOURCES += $$PWD/../Application/resource.qrc
