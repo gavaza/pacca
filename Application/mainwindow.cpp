@@ -99,6 +99,7 @@ void MainWindow::executeImportMedia(QString type)
             this->video_ui->showMaximized();
         }
     }
+    emit this->database_updated();
 }
 
 void MainWindow::executeAnalysis()
@@ -160,6 +161,7 @@ void MainWindow::executeImportText(bool append){
             s[i].setSpecies(specie);
             s[i].setSubject(subject);
             db.saveSession(s.at(i));
+            emit this->database_updated();
         }
         this->sessions.append(s);
     }
@@ -438,5 +440,6 @@ void MainWindow::executeImportDB(){
     }
     QFile::copy(filename, this->dirConfig+"/pacca_database.sqlite");
     this->connectdb->openConnection();
+    this->ui->mdiArea->closeAllSubWindows();
     this->setDatabaseStatus();
 }

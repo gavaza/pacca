@@ -98,6 +98,9 @@ private slots:
 
     void changeLanguage();
     void videowClosed();
+
+signals:
+    void database_updated();
 };
 
 #endif // MAINWINDOW_H
