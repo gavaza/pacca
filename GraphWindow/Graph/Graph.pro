@@ -8,35 +8,30 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = GraphWindowCore
+TARGET = Graph
 TEMPLATE = lib
 
-DEFINES += GRAPHWINDOW_LIBRARY
+DEFINES += GRAPH_LIBRARY
 
 DESTDIR = $$OUT_PWD/../../lib
 DLLDESTDIR = $$OUT_PWD/../../bin
 
 #QGVCore librairie
-LIBS += -L$$OUT_PWD/../../lib -lQGVCore
+LIBS += -L$$OUT_PWD/../../lib -lGraphWindowCore
+INCLUDEPATH += $$PWD/../GraphWindowCore
+DEPENDPATH += $$PWD/../GraphWindowCore
+
 INCLUDEPATH += $$PWD/../QGVCore
 DEPENDPATH += $$PWD/../QGVCore
 
 
 #GraphViz librairie
-!include(../QGVCore/GraphViz.pri) {
-     error("fail open GraphViz.pri")
- }
+#!include(../QGVCore/GraphViz.pri) {
+#     error("fail open GraphViz.pri")
+#}
 
 SOURCES +=\
-    QGraphicsViewEc.cpp \
-    GraphWindow.cpp
+    graph.cpp \
 
 HEADERS  += \
-    QGraphicsViewEc.h \
-    GraphWindow.h \
-    graphwindow_global.h
-
-FORMS    += \
-    GraphWindow.ui
-
-RESOURCES += $$PWD/../../Application/resource.qrc
+    graph.h \

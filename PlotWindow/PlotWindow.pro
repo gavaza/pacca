@@ -13,6 +13,8 @@ HEADERS += \
     plotwindow.h \
     plotwindow_global.h
 
+DEFINES += PLOTWINDOW_LIBRARY
+
 SOURCES += \
     qcustomplot.cpp \
     plotwindow.cpp

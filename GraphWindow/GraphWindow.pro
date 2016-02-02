@@ -1,6 +1,8 @@
 TEMPLATE = subdirs
 
 SUBDIRS += QGVCore \
-           GraphWindowCore
+           GraphWindowCore \
+           Graph
 
+Graph.depends = GraphWindowCore
 GraphWindowCore.depends = QGVCore

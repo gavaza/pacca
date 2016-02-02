@@ -45,6 +45,7 @@ INCLUDEPATH += $$PWD/../PlotWindow
 INCLUDEPATH += $$PWD/../Statistics
 INCLUDEPATH += $$PWD/../GraphWindow/GraphWindowCore
 INCLUDEPATH += $$PWD/../GraphWindow/QGVCore
+INCLUDEPATH += $$PWD/../GraphWindow/Graph
 INCLUDEPATH += $$PWD/../Phylogenetic
 INCLUDEPATH += $$PWD/../Database
 

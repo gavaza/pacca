@@ -27,16 +27,18 @@ HEADERS += analysis.h\
         analysis_global.h
 
 FORMS += analysis.ui \
-       viewtablestats.ui
+       viewtablestats.ui \
      dialogconfigstats.ui
 
-LIBS += -L$$OUT_PWD/../lib/ -lGraphWindow -lStatistics -lPhylogenetic -lDatabaseControl -lPlotWindow  -lDatabase
-#-lQGVCore
+LIBS += -L$$OUT_PWD/../lib/ -lGraph -lGraphWindowCore -lStatistics -lPhylogenetic -lDatabaseControl -lPlotWindow  -lDatabase
 
 INCLUDEPATH += $$PWD/../Database
 INCLUDEPATH += $$PWD/../DatabaseControl
 INCLUDEPATH += $$PWD/../Phylogenetic
 INCLUDEPATH += $$PWD/../Statistics
 INCLUDEPATH += $$PWD/../PlotWindow
+INCLUDEPATH += $$PWD/../GraphWindow/Graph
 INCLUDEPATH += $$PWD/../GraphWindow/GraphWindowCore
 INCLUDEPATH += $$PWD/../GraphWindow/QGVCore
+
+

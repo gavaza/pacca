@@ -3,7 +3,7 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(TEXT_LIBRARY)
+#if defined(PLOTWINDOW_LIBRARY)
 #  define PLOTWINDOWSHARED_EXPORT Q_DECL_EXPORT
 #else
 #  define PLOTWINDOWSHARED_EXPORT Q_DECL_IMPORT

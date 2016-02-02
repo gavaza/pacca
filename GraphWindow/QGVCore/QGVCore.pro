@@ -16,8 +16,8 @@ lessThan(QT_MAJOR_VERSION, 5) {
 TARGET = QGVCore
 TEMPLATE = lib
 
-DESTDIR = $$OUT_PWD/../lib
-DLLDESTDIR = $$OUT_PWD/../bin
+DESTDIR = $$OUT_PWD/../../lib
+DLLDESTDIR = $$OUT_PWD/../../bin
 
 #GraphViz librairie
 !include(GraphViz.pri) {

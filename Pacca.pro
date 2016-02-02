@@ -15,19 +15,13 @@ Application.depends = Text
 Application.depends = Analysis
 Application.depends = DatabaseControl
 Application.depends = Video
-
-#Application.depends = GraphWindow
-#Application.depends = Statistics
-#Application.depends = Phylogenetic
-#Application.depends = PlotWindow
+Application.depends = Analysis
 
 Analysis.depends = GraphWindow
 Analysis.depends = Phylogenetic
 Analysis.depends = Statistics
 Analysis.depends = DatabaseControl
 Analysis.depends = Database
-
-#GraphWindow.depends = QGVCore
 
 DatabaseControl.depends = Database
 

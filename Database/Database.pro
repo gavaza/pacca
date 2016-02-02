@@ -30,6 +30,3 @@ SOURCES += \
     dictionary.cpp \
     connections.cpp \
     subject.cpp
-
-
-RESOURCES += $$PWD/../Application/resource.qrc

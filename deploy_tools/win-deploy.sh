@@ -32,13 +32,16 @@ cp -f ${GRAPHVIZ_PATH}/libglib-2.0-0.dll ${OUTPUT_DIR}
 
 
 # VLC-Qt library
-cp -f ${VLCQT_DIR}/build/windows/bin/libvlc-qt.dll ${OUTPUT_DIR}
-cp -f ${VLCQT_DIR}/build/windows/bin/libvlc-qt-widgets.dll ${OUTPUT_DIR}
+cp -f ${VLCQT_DIR}/build/windows/bin/libVLCQtCore.dll ${OUTPUT_DIR}
+cp -f ${VLCQT_DIR}/build/windows/bin/libVLCQtWidgets.dll ${OUTPUT_DIR}
 cp -f ${VLCQT_DIR}/build/windows/bin/libvlc.dll ${OUTPUT_DIR}
 cp -f ${VLCQT_DIR}/build/windows/bin/libvlccore.dll ${OUTPUT_DIR}
 
+
+
 # Internet Explorer library
-cp -f "${PROGRAM_FILES}/Internet Explorer/IEShims.dll" ${OUTPUT_DIR}
+#cp -f "${PROGRAM_FILES}/Internet Explorer/IEShims.dll" ${OUTPUT_DIR}
 
 # VLC plugins
-cp -r ${VLC_DIR}/plugins ${OUTPUT_DIR}
+# cp -r ${VLC_DIR}/plugins ${OUTPUT_DIR}
+cp -f ${VLCQT_DIR}/build/windows/bin/plugins ${OUTPUT_DIR}
