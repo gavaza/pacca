@@ -22,6 +22,7 @@ cp -f ../lib/libVideo.1.dylib ${APP_NAME}/Contents/Frameworks/
 cp -f ../lib/libPlotWindow.1.dylib ${APP_NAME}/Contents/Frameworks/
 cp -f ../lib/libText.1.dylib ${APP_NAME}/Contents/Frameworks/
 cp -f ../lib/libAnalysis.1.dylib ${APP_NAME}/Contents/Frameworks/
+cp -f ../lib/libAudio.1.dylib ${APP_NAME}/Contents/Frameworks/
 mkdir -p ${APP_NAME}/Contents/Frameworks/graphviz/
 cp -f /opt/local/lib/graphviz/libgvplugin_pango.6.dylib ${APP_NAME}/Contents/Frameworks/graphviz/
 cp -f /opt/local/lib/graphviz/libgvplugin_dot_layout.6.dylib ${APP_NAME}/Contents/Frameworks/graphviz/
