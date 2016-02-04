@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QList>
 #include <QFileDialog>
+#include <QKeyEvent>
 
 #include "database.h"
 #include "subject.h"
@@ -24,8 +25,10 @@ public:
     
 private:
     Ui::ControlSubjects *ui;
-    void refreshList();
     QString origText;
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
     /*!
@@ -52,6 +55,10 @@ private slots:
      * \brief Import from a text file
      */
     void importFromFile();
+    /*!
+     * \brief Refresh subjects list
+     */
+    void refreshList();
 };
 
 #endif // CONTROLSUBJECTS_H

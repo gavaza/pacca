@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QList>
+#include <QKeyEvent>
 
 #include "database.h"
 #include "users.h"
@@ -23,8 +24,10 @@ public:
     
 private:
     Ui::ControlUsers *ui;
-    void refreshList();
     QString origText;
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
     /*!
@@ -47,6 +50,11 @@ private slots:
      * \brief Remove a user.
      */
     void remove();
+    /*!
+     * \brief Refresh users list
+     */
+    void refreshList();
+
 };
 
 #endif // CONTROLUSERS_H

@@ -4,12 +4,13 @@ set -x
 
 APP_NAME=Pacca.exe
 VLC_DIR=/home/ef9g/Programas/vlc # EF9G
-VLCQT_DIR=/home/ef9g/Nuevo/pacca-code/trunk/vlc-qt #EF9G
+VLCQT_DIR=/home/ef9g/Nuevo/pacca-git/vlc-qt #EF9G
 GRAPHVIZ_PATH=/home/ef9g/Programas/Graphviz2.38/bin #EF9G
-OUTPUT_DIR=/home/ef9g/Nuevo/pacca-code/build-Pacca-Desktop_Qt_5_4_1_MinGW_32bit-Release/bin #EF9G
+OUTPUT_DIR=/home/ef9g/Nuevo/build-Pacca-Desktop_Qt_5_4_1_MinGW_32bit-Release/bin #EF9G
 PROGRAM_FILES="/cygdrive/c/Program Files (x86)"
 
 cd  ${OUTPUT_DIR}
+BASS_PATH=`pwd`/../../pacca-git/bass
 windeployqt ${APP_NAME}
 cd -
 
@@ -44,4 +45,7 @@ cp -f ${VLCQT_DIR}/build/windows/bin/libvlccore.dll ${OUTPUT_DIR}
 
 # VLC plugins
 # cp -r ${VLC_DIR}/plugins ${OUTPUT_DIR}
-cp -f ${VLCQT_DIR}/build/windows/bin/plugins ${OUTPUT_DIR}
+cp -rf ${VLCQT_DIR}/build/windows/bin/plugins ${OUTPUT_DIR}/plugins
+
+# Bass plugin
+cp -f ${BASS_PATH}/build/windows/lib/bass.dll ${OUTPUT_DIR}

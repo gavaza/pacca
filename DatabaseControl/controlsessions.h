@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QSettings>
 #include <QMessageBox>
+#include <QKeyEvent>
 
 #include "database.h"
 #include "sessions.h"
@@ -24,6 +25,9 @@ public:
 private:
     Ui::ControlSessions *ui;
     QString origText;
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
     void save(int r, int c);

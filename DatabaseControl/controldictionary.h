@@ -6,6 +6,7 @@
 #include <QMapIterator>
 #include <QDebug>
 #include <QMessageBox>
+#include <QKeyEvent>
 
 #include "database.h"
 #include "dictionary.h"
@@ -26,6 +27,9 @@ private:
     Ui::ControlDictionary *ui;
     void createConnexions();
     QString origText;
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
     void loadDict();

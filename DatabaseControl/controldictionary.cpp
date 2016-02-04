@@ -16,6 +16,12 @@ ControlDictionary::~ControlDictionary()
     delete ui;
 }
 
+void ControlDictionary::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Delete){
+    }
+}
+
 void ControlDictionary::createConnexions()
 {
     connect(this->ui->addDict,SIGNAL(clicked()),this,SLOT(saveDict()));
@@ -144,14 +150,24 @@ void ControlDictionary::saveEntry()
 void ControlDictionary::removeEntry()
 {
     if(this->ui->entries->selectedItems().size() > 0){
-        QString dictName = this->ui->listDict->selectedItems().first()->text();
-        QString code = this->ui->entries->selectedItems().first()->text();
-        if(QMessageBox::question(this,tr("Apagar entrada"),
-                                 tr("Você tem certeza que deseja apagar a entrada selecionada?"))
+        if(QMessageBox::question(this,tr("Apagar entradas de dicionário"),
+                                 tr("Você tem certeza que deseja apagar as entradas de dicionário selecionadas?"))
                 == QMessageBox::Yes){
+
+            QString dictName = this->ui->listDict->selectedItems().first()->text();
+
             Database db;
-            db.removeDictEntry(dictName,code);
-            this->loadEntries();
+            QList<int> rows;
+
+            for (int i=0; i<this->ui->entries->selectedItems().size(); i+=2){
+                QString code = this->ui->entries->selectedItems().at(i)->text();
+                db.removeDictEntry(dictName,code);
+                rows.push_back(this->ui->entries->selectedItems().at(i)->row());
+            }
+            while(rows.size()>0){
+                this->ui->entries->removeRow(rows.last());
+                rows.pop_back();
+            }
         }
     }
 }
@@ -192,6 +208,8 @@ bool ControlDictionary::existDict(QString name)
     return exist;
 }
 
+// TODO : Necessário reescrever para considerar que os itens deletados.
+//        Da forma como está implementado, ocorrem travamentos.
 void ControlDictionary::loadEntries()
 {
     if(this->ui->listDict->selectedItems().size() > 0){

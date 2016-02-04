@@ -19,6 +19,13 @@ ControlSessions::~ControlSessions()
     delete ui;
 }
 
+void ControlSessions::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Delete){
+        this->remove();
+    }
+}
+
 void ControlSessions::save(int r, int c)
 {
     disconnect(this->ui->sessions,SIGNAL(cellChanged(int,int)),this,SLOT(save(int,int)));

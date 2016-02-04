@@ -14,6 +14,7 @@ ControlSubjects::ControlSubjects(QWidget *parent) :
     connect(this->ui->listSubjects,SIGNAL(cellEntered(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->b_excluir,SIGNAL(clicked()),this,SLOT(remove()));
     connect(this->ui->importFile,SIGNAL(clicked()),this,SLOT(importFromFile()));
+    connect(this->parentWidget()->parentWidget()->parentWidget(),SIGNAL(database_updated()),this,SLOT(refreshList()));
 }
 
 ControlSubjects::~ControlSubjects()
@@ -21,24 +22,61 @@ ControlSubjects::~ControlSubjects()
     delete ui;
 }
 
+void ControlSubjects::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Delete){
+        this->remove();
+    }
+}
+
 void ControlSubjects::refreshList()
 {
-    this->ui->listSubjects->setRowCount(0);
     Database db;
     QList<Subjects> subjects = db.getAllSubjects();
+
+    this->ui->listSubjects->clearSelection();
+
     for(int i = 0; i < subjects.size(); i++){
-        QTableWidgetItem *item_id = new QTableWidgetItem;
-        QTableWidgetItem *item_name = new QTableWidgetItem;
-        Subjects u = subjects.at(i);
-        QString id(u.getId().toString());
-        QString name(u.getName().toString());
+
+        Subjects s = subjects.at(i);
+
+        QTableWidgetItem *item_id;
+        QTableWidgetItem *item_name;
+
+        /* find item */
+        QString id = s.getId().toString();
+        int row = -1;
+
+        QList<QTableWidgetItem*> search_id = this->ui->listSubjects->findItems(id,Qt::MatchExactly);
+        for (int j=0; j<search_id.size(); j++){
+            if (search_id.at(j)->column()==0){
+                row = search_id.at(j)->row();
+            }
+        }
+
+        /* not find item*/
+        if (row<0){
+
+            item_id = new QTableWidgetItem;
+            item_name = new QTableWidgetItem;
+            item_id->setFlags(item_id->flags() & ~Qt::ItemIsEditable);
+
+            row = this->ui->listSubjects->rowCount();
+            this->ui->listSubjects->insertRow(row);
+
+            /* setting item */
+            this->ui->listSubjects->setItem(row,0,item_id);
+            this->ui->listSubjects->setItem(row,1,item_name);
+        }
+
+        else{
+            item_id  = this->ui->listSubjects->item(row,0);
+            item_name = this->ui->listSubjects->item(row,1);
+        }
+
         item_id->setText(id);
-        item_id->setFlags(item_id->flags() & ~Qt::ItemIsEditable);
+        QString name(s.getName().toString());
         item_name->setText(name.left(1).toUpper()+name.mid(1).toLower());
-        int row = this->ui->listSubjects->rowCount();
-        this->ui->listSubjects->insertRow(row);
-        this->ui->listSubjects->setItem(row,0,item_id);
-        this->ui->listSubjects->setItem(row,1,item_name);
     }
 }
 
@@ -91,13 +129,20 @@ void ControlSubjects::saveOrigText(int row, int col)
 void ControlSubjects::remove()
 {
     if(this->ui->listSubjects->selectedItems().size() > 0){
-        Database db;
-        int row = this->ui->listSubjects->selectedItems().first()->row();
-        QString name = this->ui->listSubjects->selectedItems().first()->text();
-        unsigned int id = this->ui->listSubjects->item(row,0)->text().toUInt();
-        if(QMessageBox::question(this,tr("Excluir"),tr("Deseja realmente remover o indivíduo: ")+name) == QMessageBox::Yes){
-            db.removeSubject(id);
-            this->ui->listSubjects->removeRow(row);
+        if(QMessageBox::question(this,tr("Apagar indivíduos"),
+                                 tr("Você tem certeza que deseja apagar os indivíduos selecionados?"))
+                == QMessageBox::Yes){
+            Database db;
+            QList<int> rows;
+            for (int i=0; i<this->ui->listSubjects->selectedItems().size(); i+=2){
+                QString id = this->ui->listSubjects->selectedItems().at(i)->text();
+                db.removeSession(id);
+                rows.push_back(this->ui->listSubjects->selectedItems().at(i)->row());
+            }
+            while(rows.size()>0){
+                this->ui->listSubjects->removeRow(rows.last());
+                rows.pop_back();
+            }
         }
     }
 }

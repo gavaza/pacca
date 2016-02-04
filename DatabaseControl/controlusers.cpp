@@ -13,6 +13,7 @@ ControlUsers::ControlUsers(QWidget *parent) :
     connect(this->ui->listUsers,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->listUsers,SIGNAL(cellEntered(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->b_excluir,SIGNAL(clicked()),this,SLOT(remove()));
+    connect(this->parentWidget()->parentWidget()->parentWidget(),SIGNAL(database_updated()),this,SLOT(refreshList()));
 }
 
 ControlUsers::~ControlUsers()
@@ -20,24 +21,61 @@ ControlUsers::~ControlUsers()
     delete ui;
 }
 
+void ControlUsers::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Delete){
+        this->remove();
+    }
+}
+
 void ControlUsers::refreshList()
 {
-    this->ui->listUsers->setRowCount(0);
     Database db;
     QList<Users> users = db.getAllUsers();
+
+    this->ui->listUsers->clearSelection();
+
     for(int i = 0; i < users.size(); i++){
-        QTableWidgetItem *item_id = new QTableWidgetItem;
-        QTableWidgetItem *item_name = new QTableWidgetItem;
+
         Users u = users.at(i);
-        QString id(u.getId().toString());
-        QString name(u.getName().toString());
+
+        QTableWidgetItem *item_id;
+        QTableWidgetItem *item_name;
+
+        /* find item */
+        QString id = u.getId().toString();
+        int row = -1;
+
+        QList<QTableWidgetItem*> search_id = this->ui->listUsers->findItems(id,Qt::MatchExactly);
+        for (int j=0; j<search_id.size(); j++){
+            if (search_id.at(j)->column()==0){
+                row = search_id.at(j)->row();
+            }
+        }
+
+        /* not find item*/
+        if (row<0){
+
+            item_id = new QTableWidgetItem;
+            item_name = new QTableWidgetItem;
+            item_id->setFlags(item_id->flags() & ~Qt::ItemIsEditable);
+
+            row = this->ui->listUsers->rowCount();
+            this->ui->listUsers->insertRow(row);
+
+            /* setting item */
+            this->ui->listUsers->setItem(row,0,item_id);
+            this->ui->listUsers->setItem(row,1,item_name);
+        }
+
+        else{
+            item_id  = this->ui->listUsers->item(row,0);
+            item_name = this->ui->listUsers->item(row,1);
+        }
+
         item_id->setText(id);
-        item_id->setFlags(item_id->flags() & ~Qt::ItemIsEditable);
+        QString name(u.getName().toString());
         item_name->setText(name.left(1).toUpper()+name.mid(1).toLower());
-        int row = this->ui->listUsers->rowCount();
-        this->ui->listUsers->insertRow(row);
-        this->ui->listUsers->setItem(row,0,item_id);
-        this->ui->listUsers->setItem(row,1,item_name);
     }
 }
 
@@ -89,13 +127,18 @@ void ControlUsers::saveOrigText(int row, int col)
 void ControlUsers::remove()
 {
     if(this->ui->listUsers->selectedItems().size() > 0){
-        Database db;
-        int row = this->ui->listUsers->selectedItems().first()->row();
-        QString name = this->ui->listUsers->selectedItems().first()->text();
-        unsigned int id = this->ui->listUsers->item(row,0)->text().toUInt();
-        if(QMessageBox::question(this,tr("Excluir"),tr("Deseja realmente remover o usuário: ")+name) == QMessageBox::Yes){
-            db.removeUser(id);
-            this->ui->listUsers->removeRow(row);
+        if(QMessageBox::question(this,tr("Excluir usuários"),tr("Deseja realmente remover os usuários selecionados?")) == QMessageBox::Yes){
+            Database db;
+            QList<int> rows;
+            for (int i=0; i<this->ui->listUsers->selectedItems().size(); i+=2){
+                unsigned int id = this->ui->listUsers->selectedItems().at(i)->text().toUInt();
+                db.removeUser(id);
+                rows.push_back(this->ui->listUsers->selectedItems().at(i)->row());
+            }
+            while(rows.size()>0){
+                this->ui->listUsers->removeRow(rows.last());
+                rows.pop_back();
+            }
         }
     }
 }
