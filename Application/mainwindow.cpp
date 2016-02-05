@@ -90,22 +90,30 @@ void MainWindow::executeImportMedia(QString type)
         QString dict = d.getDictionary();
         filename = QFileDialog::getOpenFileName(this, tr("Escolha o arquivo:"), QDir::homePath());
         if(filename != ""){
-            this->ui->menuBar->setEnabled(false);
-            this->video_ui = new VideoWindow(type,this->ui->mdiArea);
-            connect(this->video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed()));
-            this->video_ui->setDictionary(dict);
-            this->video_ui->setFilename(filename);
-            this->ui->mdiArea->addSubWindow(this->video_ui);
-            this->video_ui->showMaximized();
+ //           this->ui->menuBar->setEnabled(false);
+            if (type=="video"){
+                VideoWindow *video_ui;
+//                this->ui->actionVideo->setEnabled(false);
+                video_ui = new VideoWindow(type,this);
+                connect(video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed()));
+                video_ui->setDictionary(dict);
+                video_ui->setFilename(filename);
+                video_ui->setAttribute(Qt::WA_DeleteOnClose);
+                this->ui->mdiArea->addSubWindow(video_ui);
+                video_ui->showMaximized();
+            }
+            else if (type=="audio"){
+
+            }
         }
     }
-    emit this->database_updated();
 }
 
 void MainWindow::executeAnalysis()
 {
     this->analysis_ui = new AnalysisWindow(this->ui->mdiArea,countAnalysis,this->ui->mdiArea);
     this->countAnalysis++;
+    this->analysis_ui->setAttribute(Qt::WA_DeleteOnClose);
     this->ui->mdiArea->addSubWindow(this->analysis_ui);
     this->analysis_ui->showMaximized();
 }
@@ -130,8 +138,8 @@ void MainWindow::connectDatabase()
 void MainWindow::resetDatabase()
 {
     if(QMessageBox::question(this,tr("Reiniciar Banco de Dados"),
-                             tr("Você tem certeza que deseja reiniciar o banco de dado?"
-                                " Essa ação irá apagar todas as informações do banco!"))
+                             tr("Você tem certeza que deseja reiniciar o banco de dados?"
+                                "Essa ação irá apagar todas as informações do banco!"))
             == QMessageBox::Yes){
         this->ui->mdiArea->closeAllSubWindows();
         this->connectdb->makeDatabaseTables();
@@ -147,7 +155,10 @@ void MainWindow::executeImportText(bool append){
         int specie = spc.getSpecie().toInt();
         int subject = spc.getSubject().toInt();
         /* import from text */
-        QStringList filename = QFileDialog::getOpenFileNames(this, tr("Importar análise do arquivo"), QDir::homePath(), tr("Arquivo ODF (*.odf);;Arquivo MDF (*.mdf)"));
+        QStringList filename = QFileDialog::getOpenFileNames(this,
+                                                             tr("Importar análise do arquivo"),
+                                                             QDir::homePath(),
+                                                             tr("Arquivos (*.odf *.mdf);;Arquivo ODF (*.odf);;Arquivo MDF (*.mdf)"));
         if (filename.size()==0) return;
         Database db;
         Text t;
@@ -298,11 +309,11 @@ void MainWindow::newuser()
     if(this->users_ui  == NULL){
         this->users_ui = new ControlUsers(this->ui->mdiArea);
         connect(this->users_ui,SIGNAL(destroyed(QObject*)),this,SLOT(usersClosed()));
-        this->users_ui->setWindowModality(Qt::ApplicationModal);
-        this->swUser = this->ui->mdiArea->addSubWindow(this->users_ui);
+        this->users_ui->setAttribute(Qt::WA_DeleteOnClose);
+        this->ui->mdiArea->addSubWindow(this->users_ui);
+
     }
     this->users_ui->show();
-    this->ui->mdiArea->setActiveSubWindow(this->swUser);
 }
 
 void MainWindow::managerDict()
@@ -310,11 +321,10 @@ void MainWindow::managerDict()
     if(this->dict_ui == NULL){
         this->dict_ui = new ControlDictionary(this->ui->mdiArea);
         connect(this->dict_ui,SIGNAL(destroyed(QObject*)),this,SLOT(dictClosed()));
-        this->dict_ui->setWindowModality(Qt::ApplicationModal);
-        this->swDict = this->ui->mdiArea->addSubWindow(this->dict_ui);
+        this->dict_ui->setAttribute(Qt::WA_DeleteOnClose);
+        this->ui->mdiArea->addSubWindow(this->dict_ui);
     }
     this->dict_ui->show();
-    this->ui->mdiArea->setActiveSubWindow(this->swDict);
 }
 
 void MainWindow::managerSessions()
@@ -322,23 +332,25 @@ void MainWindow::managerSessions()
     if(this->ctl_sessions == NULL){
         this->ctl_sessions = new ControlSessions(this->ui->mdiArea);
         connect(this->ctl_sessions,SIGNAL(destroyed(QObject*)),this,SLOT(sessionsClosed()));
-        this->ctl_sessions->setWindowModality(Qt::ApplicationModal);
-        this->swSsn = this->ui->mdiArea->addSubWindow(this->ctl_sessions);
+        this->ctl_sessions->setAttribute(Qt::WA_DeleteOnClose);
+        this->ui->mdiArea->addSubWindow(this->ctl_sessions);
+
     }
     this->ctl_sessions->show();
-    this->ui->mdiArea->setActiveSubWindow(this->swSsn);
 }
+
+
 
 void MainWindow::managerSpecies()
 {
     if(this->ctl_species == NULL){
         this->ctl_species = new ControlSpecies(this->ui->mdiArea);
         connect(this->ctl_species,SIGNAL(destroyed(QObject*)),this,SLOT(speciesClosed()));
-        this->ctl_species->setWindowModality(Qt::ApplicationModal);
-        this->swSpc = this->ui->mdiArea->addSubWindow(this->ctl_species);
+        this->ctl_species->setAttribute(Qt::WA_DeleteOnClose);
+        this->ui->mdiArea->addSubWindow(this->ctl_species);
+
     }
     this->ctl_species->show();
-    this->ui->mdiArea->setActiveSubWindow(this->swSpc);
 }
 
 void MainWindow::managerSubjects()
@@ -346,11 +358,11 @@ void MainWindow::managerSubjects()
     if(this->ctl_subjects == NULL){
         this->ctl_subjects = new ControlSubjects(this->ui->mdiArea);
         connect(this->ctl_subjects,SIGNAL(destroyed(QObject*)),this,SLOT(subjectsClosed()));
-        this->ctl_subjects->setWindowModality(Qt::ApplicationModal);
-        this->swSpc = this->ui->mdiArea->addSubWindow(this->ctl_subjects);
+        this->ctl_subjects->setAttribute(Qt::WA_DeleteOnClose);
+        this->ui->mdiArea->addSubWindow(this->ctl_subjects);
+
     }
     this->ctl_subjects->show();
-    this->ui->mdiArea->setActiveSubWindow(this->swSpc);
 }
 
 void MainWindow::dictClosed()
@@ -411,9 +423,11 @@ void MainWindow::changeLanguage()
 
 void MainWindow::videowClosed()
 {
-    this->ui->menuBar->setEnabled(true);
-    this->ui->mdiArea->setFocus();
-    disconnect(this->video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed()));
+//    this->ui->actionVideo->setEnabled(true);
+//    this->ui->mdiArea->setFocus();
+    emit this->database_updated();
+//    this->video_ui = NULL;
+//    disconnect(this->video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed()));
 }
 
 void MainWindow::executeExportDB(){

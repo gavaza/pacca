@@ -16,6 +16,7 @@
 #include <QRegExp>
 #include <QDebug>
 #include <QSettings>
+#include <QThread>
 
 #include "connections.h"
 #include "sessions.h"
@@ -35,7 +36,7 @@
 #include "text.h"
 
 
-namespace Ui {
+namespace Ui{
 class MainWindow;
 }
 
@@ -53,7 +54,6 @@ private:
     void linkSignals();
     void adjustShortcuts();
     Connections *connectdb;
-    VideoWindow *video_ui;
     ControlUsers *users_ui;
     ControlDictionary *dict_ui;
     QList<Sessions> sessions;
@@ -66,6 +66,7 @@ private:
     QString dirConfig;
     void setDatabaseStatus(bool status=false);
     QMdiSubWindow *swDict, *swSpc, *swUser, *swSsn;
+    QThread workerThread;
 
 private slots:
     void login();

@@ -31,13 +31,17 @@ VideoWindow::VideoWindow(QString typeMedia,QWidget *parent) :
 
 VideoWindow::~VideoWindow()
 {
+    delete _player;
+    delete _media;
+    delete _instance;
     delete ui;
+    emit windowClosed();
 }
 
 void VideoWindow::closeEvent(QCloseEvent *ev)
 {
-    emit windowClosed();
     if(this->_player->state() == Vlc::Playing) this->_player->stop();
+    emit windowClosed();
 }
 
 void VideoWindow::createConnections()
@@ -153,13 +157,14 @@ void VideoWindow::saveSession()
     qDebug() << ret;
     if(ret > 0){
         QMessageBox::information(this,tr("Sucesso"),tr("Os dados foram salvos com sucesso!"));
-        this->_player->stop();
+//        this->_player->stop();
 //        if(this->_player) delete this->_player;
 //        if(this->_media) delete this->_media;
 //        if(this->_instance) delete this->_instance;
 //        delete this->_player;
 //        delete this->_instance;
-        this->my_parent->closeActiveSubWindow();
+        this->close();
+//        this->my_parent->closeActiveSubWindow();
     } else {
         QMessageBox::critical(this,tr("Erro"),tr("Ocorreu um erro ao salvar! Tente novamente!"));
     }

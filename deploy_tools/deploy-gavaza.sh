@@ -10,23 +10,14 @@ mkdir -p ${APP_NAME}/Contents/Frameworks
 
 cp -f ../../pacca-git/vlc-qt/build/osx/lib/libvlc-qt.dylib ${APP_NAME}/Contents/Frameworks/
 cp -f ../../pacca-git/vlc-qt/build/osx/lib/libvlc-qt-widgets.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../../pacca-git/vlc-qt/build/osx/lib/libvlc.5.dylib ${APP_NAME}/Contents/Frameworks/
-cp -r ../../Application/languages ${APP_NAME}/Contents/Languages
-cp -f ../lib/libQGVCore.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libGraphWindow.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libPhylogenetic.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libStatistics.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libDatabase.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libDatabaseControl.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libVideo.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libPlotWindow.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libText.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libAnalysis.1.dylib ${APP_NAME}/Contents/Frameworks/
-cp -f ../lib/libAudio.1.dylib ${APP_NAME}/Contents/Frameworks/
+cp -f /opt/local/lib/libvlc.5.dylib ${APP_NAME}/Contents/Frameworks/
+cp -f ../lib/*.1.dylib ${APP_NAME}/Contents/Frameworks/
 mkdir -p ${APP_NAME}/Contents/Frameworks/graphviz/
 cp -f /opt/local/lib/graphviz/libgvplugin_pango.6.dylib ${APP_NAME}/Contents/Frameworks/graphviz/
 cp -f /opt/local/lib/graphviz/libgvplugin_dot_layout.6.dylib ${APP_NAME}/Contents/Frameworks/graphviz/
 cp -f /opt/local/lib/graphviz/config6 ${APP_NAME}/Contents/Frameworks/graphviz/
+
+#cp -r ../Application/languages ${APP_NAME}/Contents/Languages
 
 wait
 
@@ -56,15 +47,6 @@ install_name_tool -change /opt/local/lib/graphviz/libgvplugin_dot_layout.6.dylib
 install_name_tool -change /opt/local/lib/graphviz/libgvplugin_pango.6.dylib @executable_path/../Frameworks/graphviz/libgvplugin_dot_layout.6.dylib ${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_pango.6.dylib
 
 mkdir -p ${APP_NAME}/Contents/PlugIns/vlc
-
-#cp -r /Applications/VLC.app/Contents/MacOS/plugins/lib* ${APP_NAME}/Contents/PlugIns/vlc
-
-#cd ${APP_NAME}/Contents/PlugIns/vlc
-#for i in *; do
-#	install_name_tool -change @loader_path/../lib/libvlccore.7.dylib @executable_path/../Frameworks/libvlccore.7.dylib ${i}
-#	install_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${i}
-#done
-
 cp -r /opt/local/lib/vlc/plugins/ ${APP_NAME}/Contents/PlugIns/vlc/
 
 cd ${LOCAL_PATH_}

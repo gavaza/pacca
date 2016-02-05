@@ -8,6 +8,8 @@
 #include <QPalette>
 #include <QCloseEvent>
 
+#include <QThread>
+
 #include <Common.h>
 #include <Instance.h>
 #include <Media.h>

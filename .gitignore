@@ -1,0 +1,8 @@
+# Possible build dirs:
+vlc-qt/build
+
+# System files
+*.DS_Store*
+
+# Project files
+Pacca.pro.user
