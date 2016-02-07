@@ -1,9 +1,18 @@
 macx {
-    LIBS += -L$$PWD/../vlc-qt/build/osx/lib -lvlc-qt -lvlc-qt-widgets
-    LIBS += -L/opt/local/lib -lvlc
-    INCLUDEPATH += $$PWD/../vlc-qt/build/include
-    INCLUDEPATH += $$PWD/../vlc-qt/build/osx/include
-    INCLUDEPATH += /opt/local/include
+     LIBS += -F$$PWD/../vlc-qt/build/osx/lib/ -framework VLCQtCore -framework VLCQtWidgets
+     LIBS += -L/opt/local/lib -lvlc
+
+     INCLUDEPATH += $$PWD/../vlc-qt/build/osx/lib/VLCQtCore.framework/Headers
+     DEPENDPATH += $$PWD/../vlc-qt/build/osx/lib/VLCQtCore.framework/Headers
+
+     INCLUDEPATH += $$PWD/../vlc-qt/build/osx/lib/VLCQtWidgets.framework/Headers
+     DEPENDPATH += $$PWD/../vlc-qt/build/osx/lib/VLCQtWidgets.framework/Headers
+
+     INCLUDEPATH += $$PWD/../vlc-qt/build/include
+     DEPENDPATH += $$PWD/../vlc-qt/build/include
+
+     INCLUDEPATH += /opt/local/include
+     DEPENDPATH += /opt/local/include
 }
 
 linux {
@@ -30,3 +39,4 @@ win32 {
     INCLUDEPATH += "C:/Users/ef9g/Programas/vlc/sdk/include" #EF9G
 
 }
+
