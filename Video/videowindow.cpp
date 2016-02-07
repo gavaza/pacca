@@ -157,14 +157,14 @@ void VideoWindow::saveSession()
     qDebug() << ret;
     if(ret > 0){
         QMessageBox::information(this,tr("Sucesso"),tr("Os dados foram salvos com sucesso!"));
-//        this->_player->stop();
-//        if(this->_player) delete this->_player;
-//        if(this->_media) delete this->_media;
-//        if(this->_instance) delete this->_instance;
-//        delete this->_player;
-//        delete this->_instance;
+        //        this->_player->stop();
+        //        if(this->_player) delete this->_player;
+        //        if(this->_media) delete this->_media;
+        //        if(this->_instance) delete this->_instance;
+        //        delete this->_player;
+        //        delete this->_instance;
         this->close();
-//        this->my_parent->closeActiveSubWindow();
+        //        this->my_parent->closeActiveSubWindow();
     } else {
         QMessageBox::critical(this,tr("Erro"),tr("Ocorreu um erro ao salvar! Tente novamente!"));
     }
@@ -193,14 +193,15 @@ void VideoWindow::highlight(int ms)
 {
     for(int r=0; r < this->eventsPositionInMiliseconds.size(); r++){
         QTableWidgetItem* item = this->ui->sequence->item(r,0);
-        if(this->eventsPositionInMiliseconds.at(r) >= ms-125 && this->eventsPositionInMiliseconds.at(r) <= ms+125){
-            item->setBackgroundColor(Qt::green);
+        if(this->eventsPositionInMiliseconds.at(r) <= ms+125){
+            if(this->eventsPositionInMiliseconds.at(r) >= ms-125)  item->setBackgroundColor(Qt::green);
+            else item->setBackgroundColor(QColor(153,255,255));
         } else {
             QPalette p;
             if(r%2==0)
-              item->setBackground(p.base());
+                item->setBackground(p.base());
             else
-              item->setBackground(p.alternateBase());
+                item->setBackground(p.alternateBase());
         }
     }
 }

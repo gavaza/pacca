@@ -122,9 +122,9 @@ void ControlDictionary::removeDict()
                 == QMessageBox::Yes){
             Database db;
             db.removeDict(name);
-            this->loadDict();
             this->ui->entries->clear();
             this->ui->entries->setRowCount(0);
+            this->loadDict();
         }
     }
 }
@@ -231,5 +231,11 @@ void ControlDictionary::loadEntries()
             this->ui->entries->setItem(row,0,item_code);
             this->ui->entries->setItem(row,1,item_word);
         }
+    } else {
+        this->ui->code->text().clear();
+        this->ui->word->text().clear();
+        this->ui->entries->clear();
+        this->ui->entries->setRowCount(0);
+        this->ui->words->setEnabled(false);
     }
 }
