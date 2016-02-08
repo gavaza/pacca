@@ -17,11 +17,6 @@ change_install_name() {
   if [ ! $? -eq 0 ] ; then
     # Old name not present
     echo "$OTOOL_OUT" | grep -q "$NEW"
-    if [ ! $? -eq 0 ] ; then
-      # New name not present => error
-      echo "[$SCRIPT] Error: no reference to '$OLD' found in '$FILE'"
-#     exit 1
-    fi
   else
     doo install_name_tool -change "$OLD" "$NEW" "$FILE"
   fi
@@ -32,7 +27,17 @@ doo(){
   "$@"
 }
 
+# change_id_name newname file.dylib
+change_id_name() {
+  NEW="$1"
+  FILE="$2"
 
+  OTOOL_OUT=$(otool -D "$FILE")
+  echo "$OTOOL_OUT" | grep loader_path
+  if [ $? -eq 0 ] ; then
+    doo install_name_tool -id "$NEW" "$FILE"
+  fi
+}
 
 mkdir -p ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks
 
@@ -50,17 +55,15 @@ cp -f /opt/local/lib/graphviz/config6 ${LOCAL_PATH_}/${APP_NAME}/Contents/Framew
 
 wait
 
-install_name_tool -id @executable_path/../Frameworks/libvlc.5.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc.5.dylib
-install_name_tool -id @executable_path/../Frameworks/libvlccore.7.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlccore.7.dylib
-install_name_tool -id @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt.dylib
-install_name_tool -id @executable_path/../Frameworks/libvlc-qt-widgets.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt-widgets.dylib
+for i in ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/*.dylib; do
+	LIB=$(echo $i | grep '\(lib[A-z]..*\.dylib\)' -o)	
+	change_id_name @executable_path/../Frameworks/$LIB $i
+done
+
 install_name_tool -id @executable_path/../Frameworks/graphviz/libgvplugin_dot_layout.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_dot_layout.6.dylib
 install_name_tool -id @executable_path/../Frameworks/graphviz/libgvplugin_pango.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_pango.6.dylib
 
-cd ../lib
-#for i in *.1.dylib; do
-#  install_name_tool -id $i "${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/$i"
-#done
+cd ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks
 
 for i in *.1.dylib; do
    for j in *.1.dylib; do
@@ -71,35 +74,35 @@ done
 
 cd -
 
+sh ${PACCA_GIT}/deploy_tools/osx_qt.sh ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
+sh ${PACCA_GIT}/deploy_tools/osx_qt.sh ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt-widgets.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
 
 # libvlc
-install_name_tool -change /opt/local/lib/libvlc.5.dylib @executable_path/../Frameworks/libvlc.5.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
-install_name_tool -change /opt/local/lib/libvlc.5.dylib @executable_path/../Frameworks/libvlc.5.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libVideo.1.dylib
-install_name_tool -change /opt/local/lib/libvlc.5.dylib @executable_path/../Frameworks/libvlc.5.dylib  ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt.dylib
+change_install_name /opt/local/lib/libvlc.5.dylib @executable_path/../Frameworks/libvlc.5.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
+change_install_name /opt/local/lib/libvlc.5.dylib @executable_path/../Frameworks/libvlc.5.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libVideo.1.dylib
+change_install_name /opt/local/lib/libvlc.5.dylib @executable_path/../Frameworks/libvlc.5.dylib  ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt.dylib
 
 # libvlccore
-install_name_tool -change /opt/local/lib/libvlccore.7.dylib @executable_path/../Frameworks/libvlccore.7.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt.dylib
-install_name_tool -change /opt/local/lib/libvlccore.7.dylib @executable_path/../Frameworks/libvlccore.7.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlccore.7.dylib
-install_name_tool -change /opt/local/lib/libvlccore.7.dylib @executable_path/../Frameworks/libvlccore.7.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc.5.dylib
+change_install_name /opt/local/lib/libvlccore.7.dylib @executable_path/../Frameworks/libvlccore.7.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt.dylib
+change_install_name /opt/local/lib/libvlccore.7.dylib @executable_path/../Frameworks/libvlccore.7.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlccore.7.dylib
+change_install_name /opt/local/lib/libvlccore.7.dylib @executable_path/../Frameworks/libvlccore.7.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc.5.dylib
 
 # libvlc-qt.dylib
 version_libvlc="1.0.0"
 
-install_name_tool -change @rpath/VLCQtCore.framework/Versions/${version_libvlc}/VLCQtCore @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
-install_name_tool -change @rpath/VLCQtCore.framework/Versions/${version_libvlc}/VLCQtCore @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt-widgets.dylib
-install_name_tool -change @rpath/VLCQtCore.framework/Versions/${version_libvlc}/VLCQtCore @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libVideo.1.dylib
+change_install_name @rpath/VLCQtCore.framework/Versions/${version_libvlc}/VLCQtCore @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
+change_install_name @rpath/VLCQtCore.framework/Versions/${version_libvlc}/VLCQtCore @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt-widgets.dylib
+change_install_name @rpath/VLCQtCore.framework/Versions/${version_libvlc}/VLCQtCore @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libVideo.1.dylib
 
 # libvlc-qt-widgets
-install_name_tool -change @rpath/VLCQtWidgets.framework/Versions/${version_libvlc}/VLCQtWidgets @executable_path/../Frameworks/libvlc-qt-widgets.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
-install_name_tool -change @rpath/VLCQtWidgets.framework/Versions/${version_libvlc}/VLCQtWidgets @executable_path/../Frameworks/libvlc-qt-widgets.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libVideo.1.dylib
+change_install_name @rpath/VLCQtWidgets.framework/Versions/${version_libvlc}/VLCQtWidgets @executable_path/../Frameworks/libvlc-qt-widgets.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
+change_install_name @rpath/VLCQtWidgets.framework/Versions/${version_libvlc}/VLCQtWidgets @executable_path/../Frameworks/libvlc-qt-widgets.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libVideo.1.dylib
 
 # graphviz
-install_name_tool -change /opt/local/lib/graphviz/libgvplugin_dot_layout.6.dylib @executable_path/../Frameworks/graphviz/libgvplugin_dot_layout.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_dot_layout.6.dylib
-install_name_tool -change /opt/local/lib/graphviz/libgvplugin_pango.6.dylib @executable_path/../Frameworks/graphviz/libgvplugin_dot_layout.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_pango.6.dylib
+change_install_name /opt/local/lib/graphviz/libgvplugin_dot_layout.6.dylib @executable_path/../Frameworks/graphviz/libgvplugin_dot_layout.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_dot_layout.6.dylib
+change_install_name /opt/local/lib/graphviz/libgvplugin_pango.6.dylib @executable_path/../Frameworks/graphviz/libgvplugin_dot_layout.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_pango.6.dylib
 
-# deploy before copy plugins
 rm -rf ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc
-macdeployqt ${LOCAL_PATH_}/${APP_NAME}
 
 cd ${LOCAL_PATH_}
 
@@ -111,9 +114,7 @@ do
 	sh ${PACCA_GIT}/deploy_tools/osx_vlc_plugins_postprocess.sh ${i}
 done
 
-# deploy after copy plugins (only in final version)
-if [ $2 -eq "final" ]; then
-	macdeployqt ${LOCAL_PATH_}/${APP_NAME}
-fi
+# deploy to final version
+# macdeployqt ${LOCAL_PATH_}/${APP_NAME}
 
 echo sucess
