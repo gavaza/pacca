@@ -9,6 +9,7 @@ ControlSessions::ControlSessions(QWidget *parent) :
     this->load();
     connect(this->ui->sessions,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->sessions,SIGNAL(cellEntered(int,int)),this,SLOT(saveOrigText(int,int)));
+    connect(this->ui->sessions,SIGNAL(cellChanged(int,int)),this,SLOT(save(int,int)));
     connect(this->ui->remove,SIGNAL(clicked()),this,SLOT(remove()));
     connect(this->parentWidget()->parentWidget()->parentWidget(),SIGNAL(database_updated()),this,SLOT(load()));
 
@@ -30,40 +31,40 @@ void ControlSessions::save(int r, int c)
 {
     disconnect(this->ui->sessions,SIGNAL(cellChanged(int,int)),this,SLOT(save(int,int)));
     QString newContent = this->ui->sessions->item(r,c)->text().simplified();
-    if(c!=3) this->ui->sessions->item(r,c)->setText(this->origText);
+    this->ui->sessions->item(r,c)->setText(this->origText);
     if(newContent.size() != 0){
-        if(c!=3) {
-            QList<int> rows;
-            for(int i=0; i<this->ui->sessions->selectedItems().size(); i+=6){
-                rows.push_back(this->ui->sessions->selectedItems().at(i)->row());
+        //        if(c!=3) {
+        QList<int> rows;
+        for(int i=0; i<this->ui->sessions->selectedItems().size(); i+=6){
+            rows.push_back(this->ui->sessions->selectedItems().at(i)->row());
+        }
+        rows.push_back(r);
+        for(int i=0; i<rows.size(); i++){
+            this->ui->sessions->item(rows.at(i),c)->setText(newContent);
+            Sessions s;
+            s.setId(this->ui->sessions->item(rows.at(i),0)->text());
+            s.setObserver(this->ui->sessions->item(rows.at(i),1)->text());
+            s.setSubject(this->ui->sessions->item(rows.at(i),2)->text());
+            s.setSpecies(this->ui->sessions->item(rows.at(i),3)->text());
+            s.setDescription(this->ui->sessions->item(rows.at(i),5)->text());
+            switch (c) {
+            case 1:
+                s.setObserver(newContent);
+                break;
+            case 2:
+                s.setSubject(newContent);
+                break;
+            case 3:
+                s.setSpecies(newContent);
+                break;
+            case 5:
+                s.setDescription(newContent);
+                break;
+            default:
+                break;
             }
-            rows.push_back(r);
-            for(int i=0; i<rows.size(); i++){
-                this->ui->sessions->item(rows.at(i),c)->setText(newContent);
-                Sessions s;
-                s.setId(this->ui->sessions->item(rows.at(i),0)->text());
-                s.setObserver(this->ui->sessions->item(rows.at(i),1)->text());
-                s.setSubject(this->ui->sessions->item(rows.at(i),2)->text());
-                s.setSpecies(this->ui->sessions->item(rows.at(i),3)->text());
-                s.setDescription(this->ui->sessions->item(rows.at(i),5)->text());
-                switch (c) {
-                case 1:
-                    s.setObserver(newContent);
-                    break;
-                case 2:
-                    s.setSubject(newContent);
-                    break;
-                case 5:
-                    s.setDescription(newContent);
-                    break;
-                default:
-                    break;
-                }
-                Database db;
-                db.editSession(s);
-            }
-        } else {
-            this->ui->sessions->item(r,c)->setText(this->origText);
+            Database db;
+            db.editSession(s);
         }
     }
 }
@@ -109,8 +110,6 @@ void ControlSessions::load()
             item_des = new QTableWidgetItem;
 
             item_id->setFlags(item_id->flags() & ~Qt::ItemIsEditable);
-            item_sub->setFlags(item_sub->flags() & ~Qt::ItemIsEditable);
-            item_spc->setFlags(item_spc->flags() & ~Qt::ItemIsEditable);
             item_dd->setFlags(item_dd->flags() & ~Qt::ItemIsEditable);
 
             row = this->ui->sessions->rowCount();
@@ -146,25 +145,8 @@ void ControlSessions::load()
 
 void ControlSessions::saveOrigText(int r, int c)
 {
-    if(c!=3 && c!=2){
-        this->origText = this->ui->sessions->item(r,c)->text();
-        connect(this->ui->sessions,SIGNAL(cellChanged(int,int)),this,SLOT(save(int,int)));
-    } else {
-        DialogChooseSpecie spc;
-        if(spc.exec()){
-            if(c==3){
-                this->ui->sessions->item(r,c-1)->setText(spc.getSubjectName());
-                this->ui->sessions->item(r,c)->setText(spc.getSpecieName());
-                this->save(r,c-1);
-                this->save(r,c);
-            } else {
-                this->ui->sessions->item(r,c)->setText(spc.getSubjectName());
-                this->ui->sessions->item(r,c+1)->setText(spc.getSpecieName());
-                this->save(r,c);
-                this->save(r,c+1);
-            }
-        }
-    }
+    this->origText = this->ui->sessions->item(r,c)->text();
+    connect(this->ui->sessions,SIGNAL(cellChanged(int,int)),this,SLOT(save(int,int)));
 }
 
 void ControlSessions::remove()

@@ -88,6 +88,7 @@ private:
 
     int insertSession(QVariant decoder, QVariant dateDecoding, QVariant observer, QVariant subject, QVariant specie, QVariant dateSession, QVariant description);
     int insertAction(QVariant timer, QVariant session, QVariant state, QVariant event);
+    int insertSubject(QVariant name);
 };
 
 #endif // DATABASE_H

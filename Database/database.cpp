@@ -224,7 +224,10 @@ int Database::insertSpecie(Species s)
 
 int Database::insertSubject(Subjects s)
 {
-    QVariant name = s.getName().toString().toLower();
+    return this->insertSubject(s.getName().toString().toLower());
+}
+
+int Database::insertSubject(QVariant name){
     if(!this->subjectExist(name)){
         this->query.prepare("INSERT INTO Subjects (name) VALUES (:name);");
         this->query.bindValue(":name",name);
@@ -738,8 +741,18 @@ int Database::saveSession(Sessions session)
         if(observerId <= 0) return -2;
         this->cacheUserId.insert(session.getObserver().toString(),observerId);
     }
-    int specieId = session.getSpecies().toInt();
-    int subjectId = session.getSubject().toInt();
+    int specieId = this->specieExist(session.getSpecies());
+    if (specieId == 0){
+        specieId = this->insertSpecie(Species(session.getSpecies()));
+        if (specieId <= 0) return -2;
+    }
+    int subjectId = this->subjectExist(session.getSubject());
+    if (subjectId == 0){
+        Subjects s;
+        s.setName(session.getSubject());
+        subjectId = this->insertSubject(s);
+        if (subjectId <= 0) return -2;
+    }
 
     int sessionId = this->insertSession(decoderId, session.getDateDecoding(),
                                         observerId, subjectId, specieId,
@@ -777,12 +790,22 @@ int Database::editSession(Sessions session)
         this->cacheUserId.insert(session.getObserver().toString(),observerId);
     }
     QVariant specieId = session.getSpecies();
-    if(session.getSpecies().type() == QVariant::String)
-        specieId = this->getSpecies(session.getSpecies()).getId();
+    if(session.getSpecies().type() == QVariant::String){
+        specieId = this->specieExist(session.getSpecies());
+        if (specieId==0){
+            specieId = this->insertSpecie(Species(session.getSpecies()));
+            if (specieId <=0) return -2;
+        }
+    }
     if(specieId <= 0) return -1;
     QVariant subjectId = session.getSubject();
-    if(session.getSubject().type() == QVariant::String)
-        subjectId = this->getSubjects(session.getSubject()).getId();
+    if(session.getSubject().type() == QVariant::String){
+        subjectId = this->subjectExist(session.getSubject());
+        if (subjectId==0){
+            subjectId = this->insertSubject(session.getSubject());
+            if (subjectId <=0) return -2;
+        }
+    }
     if(subjectId <= 0) return -1;
     this->query.prepare("UPDATE Sessions SET observer = :observer, subject = :subject, specie = :specie, description = :description "
                         "WHERE id = :id;");

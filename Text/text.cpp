@@ -56,6 +56,9 @@ QList<Sessions> Text::executeImportText(QStringList filename){
                 QString description;
                 QString state_description;
                 QString session_author;
+                QVariant specie;
+                QVariant individual;
+                QVariant session;
                 int i;
 
                 QList<Actions> actions;
@@ -76,9 +79,47 @@ QList<Sessions> Text::executeImportText(QStringList filename){
                         readhead = true;
                         if (type==odf){
                             if (text.startsWith("{indvar}")){
-                                /* not processed yet */
+                                int i=0;
                                 do{
                                     text = file.readLine();
+                                    /* pacca header in simple file */
+                                    if (text.startsWith("pacca")){
+                                        list = text.simplified().split(QRegExp("\\s"),QString::SkipEmptyParts);
+                                        if (list.size()==2){
+                                            if (i==0){
+                                                specie=list.at(1);
+                                                i++;
+                                            }
+                                            else if (i==1){
+                                                individual=list.at(1);
+                                                i++;
+                                            }
+                                            else if (i==2){
+                                                session=list.at(1);
+                                                i++;
+                                            }
+                                        }
+                                        else if (list.size()>2){
+                                            if (i==0){
+                                                specie=list.at(1);
+                                                individual=list.at(2);
+                                                i+=2;
+                                                if (list.size()>=3){
+                                                    session=list.at(3);
+                                                    i++;
+                                                }
+                                            }
+                                            else if (i==1){
+                                                individual=list.at(1);
+                                                session=list.at(2);
+                                                i+=2;
+                                            }
+                                            else if (i==2){
+                                                session=list.at(1);
+                                                i++;
+                                            }
+                                        }
+                                    }
                                 } while(!file.atEnd() && !text.startsWith("{start}"));
                             }
                             if (text.startsWith("{start}")){
@@ -106,6 +147,22 @@ QList<Sessions> Text::executeImportText(QStringList filename){
                             }
                             do{
                                 text = file.readLine();
+                                /* pacca header in complex file */
+                                list = text.simplified().split(QRegExp(":"),QString::SkipEmptyParts);
+                                QString content;
+                                if (list.size()>=2){
+                                    content = list.at(1);
+                                }
+                                if (text.startsWith("Specie")){
+                                    specie = content;
+                                }
+                                else if (text.startsWith("Individual")){
+                                    individual = content;
+                                }
+                                else if (text.startsWith("Session")){
+                                    session = content;
+                                }
+
                             }while(!file.atEnd() && !text.contains("-----"));
                         }
                     }
@@ -116,7 +173,6 @@ QList<Sessions> Text::executeImportText(QStringList filename){
                             text = file.readLine();
                             list = text.simplified().split(QRegExp("\\s"),QString::SkipEmptyParts);
                             i = 0;
-                            //                            while (i<list.size() && !list[i].contains(QRegExp("\\d*\\.\\d+"))){
                             while (i<list.size() && !list[i].contains(QRegExp("\\d+"))){
                                 i++;
                             }
@@ -157,6 +213,14 @@ QList<Sessions> Text::executeImportText(QStringList filename){
                 sessions.last().setDateDecoding(QDateTime::currentDateTime());
                 sessions.last().setDateSession(QDateTime::currentDateTime());
                 sessions.last().setDescription(filename.at(q));
+                if (specie.toString().size()==0){
+                    specie = "default";
+                }
+                if (individual.toString().size()==0){
+                    individual = "default";
+                }
+                sessions.last().setSpecies(specie);
+                sessions.last().setSubject(individual);
                 sessions.last().setActions(actions);
 
                 //                qDebug() << "Session size = " << actions.size();
@@ -180,8 +244,8 @@ void Text::executeExportText(QString filename, QList<Actions> actions, QList<QSt
     /* write head to file */
     out << infos.at(5) << "\n";
 
-    out << this->identifySession(infos.at(2), infos.at(1),
-                                 infos.at(0), infos.at(3));
+    out << this->identifySession(infos.at(0), infos.at(1),
+                                 infos.at(2), infos.at(3));
     out << "\n";
 
     QStringList list = infos.at(4).split(QRegExp("\\s"),QString::SkipEmptyParts);
@@ -193,12 +257,14 @@ void Text::executeExportText(QString filename, QList<Actions> actions, QList<QSt
     out << infos.at(5) << "\n";
 
     out << "{indvar}\n";
-    out << infos.at(2); // genre
-    out << "\n";
-    out << infos.at(3); // author
-    out << "\n";
-    out << infos.at(1); // condition
-    out << "\n";
+    out << infos.at(0) << "\n"; // genre
+    out << infos.at(3) << "\n"; // author
+    out << infos.at(6) << "\n"; // condition
+
+    /* pacca informations */
+    out << "pacca " << infos.at(0) << "\n";
+    out << "pacca " << infos.at(1) << "\n";
+    out << "pacca " << infos.at(2) << "\n";
 
     out << "{start}\n";
 
@@ -260,8 +326,8 @@ void Text::executeExportTextMDF(QString filename, QList< QList<Actions> > list_a
         out << "999.9";
         out.reset();
         out << " sec ";
-        out << this->identifySession(list_infos.at(i).at(2), list_infos.at(i).at(1),
-                                     list_infos.at(i).at(0), list_infos.at(i).at(3));
+        out << this->identifySession(list_infos.at(i).at(0), list_infos.at(i).at(1),
+                                     list_infos.at(i).at(2), list_infos.at(i).at(3));
         out << "\n";
     }
 
@@ -277,9 +343,9 @@ void Text::executeExportTextMDF(QString filename, QList< QList<Actions> > list_a
             << "\n";
 
         out << "Title .......................: "
-            << this->identifySession(list_infos.at(i).at(2),
+            << this->identifySession(list_infos.at(i).at(0),
                                      list_infos.at(i).at(1),
-                                     list_infos.at(i).at(0),
+                                     list_infos.at(i).at(2),
                                      list_infos.at(i).at(3))
             << "\n";
 
@@ -289,6 +355,18 @@ void Text::executeExportTextMDF(QString filename, QList< QList<Actions> > list_a
 
         out << "To ..........................: "
             << "End of observation"
+            << "\n";
+
+        out << "Specie ......................: "
+            << list_infos.at(i).at(0)
+            << "\n";
+
+        out << "Individual ..................: "
+            << list_infos.at(i).at(1)
+            << "\n";
+
+        out << "Session .....................: "
+            << list_infos.at(i).at(2)
             << "\n";
 
         out << "\n"

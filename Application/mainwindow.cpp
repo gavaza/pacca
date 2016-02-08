@@ -90,10 +90,8 @@ void MainWindow::executeImportMedia(QString type)
         QString dict = d.getDictionary();
         filename = QFileDialog::getOpenFileName(this, tr("Escolha o arquivo:"), QDir::homePath());
         if(filename != ""){
- //           this->ui->menuBar->setEnabled(false);
             if (type=="video"){
                 VideoWindow *video_ui;
-//                this->ui->actionVideo->setEnabled(false);
                 video_ui = new VideoWindow(type,this);
                 connect(video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed()));
                 video_ui->setDictionary(dict);
@@ -150,32 +148,27 @@ void MainWindow::resetDatabase()
 
 void MainWindow::executeImportText(bool append){
     if (!append) this->sessions.clear();
-    DialogChooseSpecie spc;
-    if(spc.exec()){
-        int specie = spc.getSpecie().toInt();
-        int subject = spc.getSubject().toInt();
-        /* import from text */
-        QStringList filename = QFileDialog::getOpenFileNames(this,
-                                                             tr("Importar análise do arquivo"),
-                                                             QDir::homePath(),
-                                                             tr("Arquivos (*.odf *.mdf);;Arquivo ODF (*.odf);;Arquivo MDF (*.mdf)"));
-        if (filename.size()==0) return;
-        Database db;
-        Text t;
-        QList<Sessions> s = t.executeImportText(filename);
-        for (int i=0; i<s.size(); i++){
-            QSettings settings("NuEvo","Pacca");
-            settings.beginGroup("global");
-            s[i].setDecoder(settings.value("user"));
-            s[i].setObserver(settings.value("user"));
-            settings.endGroup();
-            s[i].setSpecies(specie);
-            s[i].setSubject(subject);
-            db.saveSession(s.at(i));
-            emit this->database_updated();
-        }
-        this->sessions.append(s);
+
+    /* import from text */
+    QStringList filename = QFileDialog::getOpenFileNames(this,
+                                                         tr("Importar análise do arquivo"),
+                                                         QDir::homePath(),
+                                                         tr("Arquivos (*.odf *.mdf);;Arquivo ODF (*.odf);;Arquivo MDF (*.mdf)"));
+    if (filename.size()==0) return;
+
+    Database db;
+    Text t;
+    QList<Sessions> s = t.executeImportText(filename);
+    for (int i=0; i<s.size(); i++){
+        QSettings settings("NuEvo","Pacca");
+        settings.beginGroup("global");
+        s[i].setDecoder(settings.value("user"));
+        s[i].setObserver(settings.value("user"));
+        settings.endGroup();
+        db.saveSession(s.at(i));
+        emit this->database_updated();
     }
+    this->sessions.append(s);
 }
 
 void MainWindow::executeExportText(){
@@ -200,10 +193,14 @@ void MainWindow::executeExportText(){
 
             QList<Actions> actions = db.getSequence(idSession);
             QList<QString> infos;
-            for (int j=i; j<i+6; j++){
-                infos.push_back(itens.at(j)->text());
-            }
-
+            Sessions s = db.getSession(idSession);
+            infos.push_back(s.getSpecies().toString());
+            infos.push_back(s.getSubject().toString());
+            infos.push_back(itens.at(i)->text());
+            infos.push_back(s.getDecoder().toString());
+            infos.push_back(itens.at(i+4)->text());
+            infos.push_back(s.getDescription().toString());
+            infos.push_back("condition undefined");
             Text t;
             t.executeExportText(filename, actions, infos);
         }
@@ -231,9 +228,14 @@ void MainWindow::executeExportTextMDF(){
             QList<Actions> actions = db.getSequence(idSession);
             list_actions.push_back(actions);
             QList<QString> infos;
-            for (int j=i; j<i+6; j++){
-                infos.push_back(itens.at(j)->text());
-            }
+            Sessions s = db.getSession(idSession);
+            infos.push_back(s.getSpecies().toString());
+            infos.push_back(s.getSubject().toString());
+            infos.push_back(itens.at(i)->text());
+            infos.push_back(s.getDecoder().toString());
+            infos.push_back(itens.at(i+4)->text());
+            infos.push_back(s.getDescription().toString());
+            infos.push_back("condition undefined");
             list_infos.push_back(infos);
         }
 
