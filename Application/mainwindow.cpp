@@ -101,7 +101,8 @@ void MainWindow::executeImportMedia(QString type)
                 video_ui->showMaximized();
             }
             else if (type=="audio"){
-
+                Audio audio(filename);
+                audio.start();
             }
         }
     }

@@ -7,7 +7,8 @@
 TARGET = Audio
 TEMPLATE = lib
 
-QT -= core gui
+QT += core
+QT -= gui
 
 DESTDIR = $$OUT_PWD/../lib
 DLLDESTDIR = $$OUT_PWD/../bin

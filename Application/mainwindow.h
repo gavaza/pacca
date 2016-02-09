@@ -34,6 +34,7 @@
 #include "controlsubject.h"
 #include "dialogchooselanguage.h"
 #include "text.h"
+#include "Audio.h"
 
 
 namespace Ui{

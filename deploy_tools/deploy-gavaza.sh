@@ -27,6 +27,20 @@ doo(){
   "$@"
 }
 
+deploy_plugins(){
+	rm -rf ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc
+
+	cd ${LOCAL_PATH_}
+
+	mkdir -p ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc
+	cp -r /opt/local/lib/vlc/plugins/ ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc/
+
+	for i in ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc/*;
+	do
+		sh ${PACCA_GIT}/deploy_tools/osx_vlc_plugins_postprocess.sh ${i}
+	done
+}
+
 # change_id_name newname file.dylib
 change_id_name() {
   NEW="$1"
@@ -50,6 +64,7 @@ mkdir -p ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/
 cp -f /opt/local/lib/graphviz/libgvplugin_pango.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/
 cp -f /opt/local/lib/graphviz/libgvplugin_dot_layout.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/
 cp -f /opt/local/lib/graphviz/config6 ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/
+cp -f ${PACCA_GIT}/bass/build/osx/lib/*.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/
 
 #cp -r ../Application/languages ${LOCAL_PATH_}/${APP_NAME}/Contents/Languages
 
@@ -71,6 +86,9 @@ for i in *.1.dylib; do
    done
    change_install_name $i @executable_path/../Frameworks/$i "${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca"
 done
+
+change_install_name @loader_path/libbass.dylib  @executable_path/../Frameworks/libbass.dylib "${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca"
+change_install_name @loader_path/libbass.dylib  @executable_path/../Frameworks/libbass.dylib "${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libAudio.1.dylib"
 
 cd -
 
@@ -102,19 +120,10 @@ change_install_name @rpath/VLCQtWidgets.framework/Versions/${version_libvlc}/VLC
 change_install_name /opt/local/lib/graphviz/libgvplugin_dot_layout.6.dylib @executable_path/../Frameworks/graphviz/libgvplugin_dot_layout.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_dot_layout.6.dylib
 change_install_name /opt/local/lib/graphviz/libgvplugin_pango.6.dylib @executable_path/../Frameworks/graphviz/libgvplugin_dot_layout.6.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/graphviz/libgvplugin_pango.6.dylib
 
-rm -rf ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc
+# deploy plugins - executar na primeira vez em que for trabalhar
+#deploy_plugins
 
-cd ${LOCAL_PATH_}
-
-mkdir -p ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc
-cp -r /opt/local/lib/vlc/plugins/ ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc/
-
-for i in ${LOCAL_PATH_}/${APP_NAME}/Contents/PlugIns/vlc/*;
-do
-	sh ${PACCA_GIT}/deploy_tools/osx_vlc_plugins_postprocess.sh ${i}
-done
-
-# deploy to final version
-# macdeployqt ${LOCAL_PATH_}/${APP_NAME}
+# deploy to final version - apenas para versão completa do deploy
+#macdeployqt ${LOCAL_PATH_}/${APP_NAME}
 
 echo sucess

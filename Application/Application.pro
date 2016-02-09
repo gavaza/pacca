@@ -32,13 +32,14 @@ FORMS    += mainwindow.ui \
 RESOURCES += \
     resource.qrc
 
-LIBS += -L$$OUT_PWD/../lib/ -lVideo -lText -lAnalysis -lDatabaseControl -lDatabase
+LIBS += -L$$OUT_PWD/../lib/ -lVideo -lText -lAnalysis -lDatabaseControl -lDatabase -lAudio
 
 
 INCLUDEPATH += $$PWD/../Text
 INCLUDEPATH += $$PWD/../Analysis
 INCLUDEPATH += $$PWD/../DatabaseControl
 INCLUDEPATH += $$PWD/../Video
+INCLUDEPATH += $$PWD/../Audio
 
 # verify soon below
 INCLUDEPATH += $$PWD/../PlotWindow
@@ -52,6 +53,11 @@ INCLUDEPATH += $$PWD/../Database
 #Video librairie
 !include(../Video/Video.pri) {
      error("fail open Video.pri")
+}
+
+#Audio librairie
+!include(../Audio/Audio.pri) {
+     error("fail open Audio.pri")
 }
 
 
