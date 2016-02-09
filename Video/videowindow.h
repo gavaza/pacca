@@ -53,6 +53,7 @@ public:
     explicit VideoWindow(QString typeMedia, QWidget *parent = 0);
     void setFilename(QString filename);
     void setDictionary(QString dict_view);
+    void setSubWindow(QMdiSubWindow* subwindow);
     ~VideoWindow();
 
 protected:
@@ -67,10 +68,9 @@ private:
     QString origText;
     qreal ratioVideoProgress;
     QMap<QString,QString> dictionary;
-    QMdiArea *my_parent;
     bool dictIsHiden;
     QList<unsigned int> eventsPositionInMiliseconds;
-
+    QMdiSubWindow *subwindow;
 
     void createConnections();
     void loadSpeceis();
@@ -93,6 +93,8 @@ private slots:
     void highlight(int time);
 
     void showDict();
+
+    void hideVideo(QMdiSubWindow *video);
 
 signals:
     void windowClosed();

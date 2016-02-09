@@ -3,29 +3,30 @@
 
 Text::Text()
 {
+    this->processed_files = 0;
+    this->qtd_files = 0;
+}
+
+Text::~Text(){
 }
 
 QList<Sessions> Text::executeImportText(QStringList filename){
     QList<Sessions> sessions;
+    this->processed_files = 0;
+    this->qtd_files = filename.size();
     for (int q=0; q<filename.size(); q++){
-        QFile id_file(filename.at(q));
+        this->processed_files = q;
+        this->id_file.setFileName(filename.at(q));
         bool candidateToTitle=false;
         QString text;
         QList<QString> title;
         types_of_files type;
 
-        if(!(id_file.open(QIODevice::ReadOnly | QIODevice::Text)))
+        if(!(this->id_file.open(QIODevice::ReadOnly | QIODevice::Text)))
             return sessions;
 
-        QTextStream file(&id_file);
+        QTextStream file(&this->id_file);
         file.setAutoDetectUnicode(true);
-
-        /* verify */
-        //            QPixmap pixmap(":/icons/splash.png");
-        //            pixmap.scaled(QApplication::desktop()->screenGeometry().width()*0.1,QApplication::desktop()->screenGeometry().height()*0.1);
-        //            QSplashScreen splash(pixmap);
-        //            splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
-        //            splash.show();
 
         while (!file.atEnd()){
 
@@ -152,6 +153,7 @@ QList<Sessions> Text::executeImportText(QStringList filename){
                                 QString content;
                                 if (list.size()>=2){
                                     content = list.at(1);
+                                    content.remove(0,content.lastIndexOf(' ')+1);
                                 }
                                 if (text.startsWith("Specie")){
                                     specie = content;
@@ -228,8 +230,8 @@ QList<Sessions> Text::executeImportText(QStringList filename){
         }
         //        qDebug() << "Number of sessions = " << this->sessions.size();
         id_file.close();
-        //            splash.finish(this);
     }
+    this->processed_files = filename.size();
     return sessions;
 }
 
@@ -407,4 +409,17 @@ void Text::executeExportTextMDF(QString filename, QList< QList<Actions> > list_a
 
 QString Text::identifySession(QString specie, QString individuo, QString id, QString author){
     return specie + " " + individuo + " " + id + " " + author;
+}
+
+void Text::run()
+{
+    QTimer timer;
+    connect(&timer, SIGNAL(timeout()), this, SLOT(update_processed()));
+    timer.start(100);
+    this->exec();
+}
+
+void Text::update_processed(){
+    emit percent_files_processed((double)this->processed_files/this->qtd_files);
+    emit percent_actual_file((double)this->id_file.pos()/this->id_file.size());
 }

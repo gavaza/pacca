@@ -66,8 +66,8 @@ private:
     unsigned int countAnalysis;
     QString dirConfig;
     void setDatabaseStatus(bool status=false);
-    QMdiSubWindow *swDict, *swSpc, *swUser, *swSsn;
-    QThread workerThread;
+    QMdiSubWindow *swDict, *swSpc, *swUser, *swSsn;    
+    QMap<QObject*, QMdiSubWindow*> swVidMap;
 
 private slots:
     void login();
@@ -99,7 +99,7 @@ private slots:
     void aboutPacca();
 
     void changeLanguage();
-    void videowClosed();
+    void videowClosed(QObject* object);
 
 signals:
     void database_updated();

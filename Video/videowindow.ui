@@ -505,8 +505,6 @@
   <include location="../Application/resource.qrc"/>
   <include location="../Application/resource.qrc"/>
   <include location="../Application/resource.qrc"/>
-  <include location="../Application/resource.qrc"/>
-  <include location="../Application/resource.qrc"/>
  </resources>
  <connections/>
 </ui>

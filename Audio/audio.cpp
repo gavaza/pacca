@@ -60,7 +60,7 @@ void Audio::run()
     connect(&timer_update_pos, SIGNAL(timeout()), this, SLOT(updatePos()));
     timer_update_pos.start(50);
 
-    exec();
+    this->exec();
 }
 
 void Audio::pauseAudio(){

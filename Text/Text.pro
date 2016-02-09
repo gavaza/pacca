@@ -7,7 +7,8 @@
 TARGET = Text
 TEMPLATE = lib
 
-QT       += sql multimediawidgets
+QT       += sql multimediawidgets core
+QT       -= gui
 
 DESTDIR = $$OUT_PWD/../lib
 DLLDESTDIR = $$OUT_PWD/../bin

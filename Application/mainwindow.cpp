@@ -93,11 +93,14 @@ void MainWindow::executeImportMedia(QString type)
             if (type=="video"){
                 VideoWindow *video_ui;
                 video_ui = new VideoWindow(type,this);
-                connect(video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed()));
+                connect(video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed(QObject*)));
                 video_ui->setDictionary(dict);
                 video_ui->setFilename(filename);
                 video_ui->setAttribute(Qt::WA_DeleteOnClose);
-                this->ui->mdiArea->addSubWindow(video_ui);
+                connect(this->ui->mdiArea,SIGNAL(subWindowActivated(QMdiSubWindow*)),video_ui,SLOT(hideVideo(QMdiSubWindow*)));
+                QMdiSubWindow *subwindow = this->ui->mdiArea->addSubWindow(video_ui);
+                this->swVidMap.insert(video_ui,subwindow);
+                video_ui->setSubWindow(subwindow);
                 video_ui->showMaximized();
             }
             else if (type=="audio"){
@@ -424,13 +427,11 @@ void MainWindow::changeLanguage()
     }
 }
 
-void MainWindow::videowClosed()
+void MainWindow::videowClosed(QObject *object)
 {
-//    this->ui->actionVideo->setEnabled(true);
-//    this->ui->mdiArea->setFocus();
     emit this->database_updated();
-//    this->video_ui = NULL;
-//    disconnect(this->video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed()));
+    QMdiSubWindow* window = this->swVidMap.take(object);
+    window->close();
 }
 
 void MainWindow::executeExportDB(){

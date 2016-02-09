@@ -1,14 +1,14 @@
 #include "videowindow.h"
 #include "ui_videowindow.h"
 
-VideoWindow::VideoWindow(QString typeMedia,QWidget *parent) :
+VideoWindow::VideoWindow(QString typeMedia, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::VideoWindow),_media(0)
 {
     ui->setupUi(this);
+    this->subwindow = subwindow;
     this->ui->b_save->setEnabled(false);
     this->ui->b_save->setToolTip(tr("Preencha todos os campos antes de salvar."));
-    this->my_parent = (QMdiArea*) parent;
     this->dictIsHiden = true;
     this->ui->dictView->setMaximumSize(0,0);
     QStringList args = VlcCommon::args();
@@ -31,11 +31,11 @@ VideoWindow::VideoWindow(QString typeMedia,QWidget *parent) :
 
 VideoWindow::~VideoWindow()
 {
+    this->deleteLater();
     delete _player;
     delete _media;
     delete _instance;
     delete ui;
-    emit windowClosed();
 }
 
 void VideoWindow::closeEvent(QCloseEvent *ev)
@@ -50,8 +50,8 @@ void VideoWindow::createConnections()
     connect(this->ui->b_pause,SIGNAL(clicked()),this,SLOT(pause()));
     connect(this->ui->b_stop,SIGNAL(clicked()),this,SLOT(stop()));
     connect(this->ui->speed,SIGNAL(valueChanged(int)),this,SLOT(setSpeed(int)));
-    connect(this->ui->in_event,SIGNAL(textChanged(QString)),this->_player,SLOT(pause()));
     connect(this->ui->in_event,SIGNAL(returnPressed()),this,SLOT(newEntry()));
+    connect(this->ui->in_event,SIGNAL(textChanged(QString)),this->_player,SLOT(pause()));
     connect(this->ui->sequence,SIGNAL(itemSelectionChanged()),this,SLOT(review()));
     connect(this->ui->sequence,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->sequence,SIGNAL(cellEntered(int,int)),this,SLOT(saveOrigText(int,int)));
@@ -156,15 +156,8 @@ void VideoWindow::saveSession()
     int ret = db.saveSession(s);
     qDebug() << ret;
     if(ret > 0){
-        QMessageBox::information(this,tr("Sucesso"),tr("Os dados foram salvos com sucesso!"));
-        //        this->_player->stop();
-        //        if(this->_player) delete this->_player;
-        //        if(this->_media) delete this->_media;
-        //        if(this->_instance) delete this->_instance;
-        //        delete this->_player;
-        //        delete this->_instance;
+//        QMessageBox::information(this,tr("Sucesso"),tr("Os dados foram salvos com sucesso!"));
         this->close();
-        //        this->my_parent->closeActiveSubWindow();
     } else {
         QMessageBox::critical(this,tr("Erro"),tr("Ocorreu um erro ao salvar! Tente novamente!"));
     }
@@ -172,9 +165,11 @@ void VideoWindow::saveSession()
 
 void VideoWindow::play()
 {
+    this->ui->sequence->clearSelection();
     this->_player->play();
     this->setSpeed(this->ui->speed->value());
     this->ui->in_event->setFocus();
+    connect(this->ui->in_event,SIGNAL(returnPressed()),this,SLOT(newEntry()));
 }
 
 void VideoWindow::pause()
@@ -186,7 +181,11 @@ void VideoWindow::pause()
 void VideoWindow::stop()
 {
     this->_player->stop();
+    this->ui->sequence->scrollToTop();
+    this->ui->sequence->clearSelection();
+    this->highlight(0);
     this->ui->in_event->setFocus();
+    disconnect(this->ui->in_event,SIGNAL(returnPressed()),this,SLOT(newEntry()));
 }
 
 void VideoWindow::highlight(int ms)
@@ -209,6 +208,7 @@ void VideoWindow::highlight(int ms)
 void VideoWindow::showDict()
 {
     if(this->dictIsHiden){
+        this->ui->sequence->scrollToBottom();
         this->ui->dictView->setMaximumSize(999,999);
     } else {
         this->ui->dictView->setMaximumSize(0,0);
@@ -255,7 +255,12 @@ void VideoWindow::newEntry()
     QString time = QTime(0,0,0).addMSecs(ms).toString("hh:mm:ss");
     item_time->setText(time);
     item_time->setFlags(item_time->flags() & ~Qt::ItemIsEditable);
-    item_state->setText("("+codeState+") "+state);
+    if (codeState.size()>0){
+        item_state->setText("("+codeState+") "+state);
+    }
+    else{
+        item_state->setText(state);
+    }
     item_event->setText("("+code+") "+event);
     this->ui->sequence->insertRow(row);
     this->ui->sequence->setItem(row,0,item_time);
@@ -297,6 +302,7 @@ void VideoWindow::review()
         int row = this->ui->sequence->currentRow();
         double timeInMiliSeconds = this->eventsPositionInMiliseconds.at(row);
         this->seekVideo(timeInMiliSeconds);
+        this->highlight(timeInMiliSeconds);
         this->_player->pause();
     }
 }
@@ -307,8 +313,13 @@ void VideoWindow::edit(int row, int col)
     QString code = this->ui->sequence->item(row,col)->text();
     QString event = this->dictionary.value(code,"").simplified();
     this->ui->sequence->item(row,col)->setText("("+code+") "+event);
-    if(event == "" && col==2){
-        this->ui->sequence->item(row,col)->setText(this->origText);
+    if(event == "" ){
+        if (col==0 || col==1){
+            this->ui->sequence->item(row,col)->setText(code);
+        }
+        else if(col==2){
+            this->ui->sequence->item(row,col)->setText(this->origText);
+        }
         this->origText="";
     }
 }
@@ -340,4 +351,17 @@ void VideoWindow::setDictionary(QString dict)
         this->ui->dictView->setItem(row,col,item);
         c++;
     }
+}
+
+void VideoWindow::hideVideo(QMdiSubWindow* video){
+    if (this->subwindow == video){
+        this->ui->w_video->show();
+    }
+    else{
+        this->ui->w_video->hide();
+    }
+}
+
+void VideoWindow::setSubWindow(QMdiSubWindow *subwindow){
+    this->subwindow = subwindow;
 }
