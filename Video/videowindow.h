@@ -93,7 +93,6 @@ private slots:
     void highlight(int time);
 
     void showDict();
-
     void hideVideo(QMdiSubWindow *video);
 
 signals:

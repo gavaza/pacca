@@ -357,9 +357,11 @@ void VideoWindow::hideVideo(QMdiSubWindow* video){
     if (this->subwindow == video){
         this->ui->w_video->show();
     }
+#ifdef MAC_OS_X_VERSION_MAX_ALLOWED
     else{
         this->ui->w_video->hide();
     }
+#endif
 }
 
 void VideoWindow::setSubWindow(QMdiSubWindow *subwindow){

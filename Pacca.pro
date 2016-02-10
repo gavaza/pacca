@@ -8,9 +8,9 @@ SUBDIRS += Text \
            DatabaseControl \
            Video \
            PlotWindow \
-           Application \           
            Audio \
            Analysis \
+           Application \
 
 
 Application.depends = Text

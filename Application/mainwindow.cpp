@@ -105,7 +105,6 @@ void MainWindow::executeImportMedia(QString type)
             }
             else if (type=="audio"){
                 Audio audio(filename);
-                audio.start();
             }
         }
     }

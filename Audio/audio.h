@@ -4,7 +4,6 @@
 #include <iostream>
 #include "bass.h"
 #include <QDebug>
-#include <QThread>
 #include <QtCore>
 
 #ifndef AUDIO_VARIABLES
@@ -13,9 +12,10 @@
 #define HEIGHT 201	// height (odd number for centre line)
 #endif
 
-class Audio : public QThread
+#define time_update 50
+
+class Audio
 {
-    Q_OBJECT
 public:
     Audio(QString filename);
 private:
@@ -24,12 +24,14 @@ private:
     DWORD chan;
     DWORD chan2;
     QWORD pos;
-    QWORD *wavebuf;
     double getPos();
     QWORD getPosW();
     BOOL playing;
-    BOOL killscan;
-    void run();
+    QPair<int, float*> calcpeaks();
+    void ScanPeaks(QWORD decoder, DWORD width, DWORD height);
+    void updateBpp(int width);
+    BYTE* wavebuf;
+    BOOL killscan; // thread scan
 
 private slots:
     void pauseAudio();
