@@ -23,6 +23,20 @@ Audio::Audio(QString filename)
     if (!(this->playing=this->openAudio(filename))) { // start a file playing
         BASS_Free();
     }
+
+    /* debug options to peaks */
+    this->killscan = false;
+    qDebug() << "peaks";
+    this->width = 1000;
+    QPair<QList<float>,QList<float> > peaks = this->ScanPeaks(this->chan2);
+    QList<float> esq = peaks.first;
+    QList<float> dir = peaks.second;
+    qDebug() << "(size) = " << esq.size();
+    qDebug() << esq;
+    qDebug() << dir;
+
+    /* only debug */
+
 }
 
 BOOL Audio::openAudio(QString filename){
@@ -36,9 +50,6 @@ BOOL Audio::openAudio(QString filename){
         qDebug("Can't play file");
         return FALSE; // Can't load the file
     }
-    this->bpp=BASS_ChannelGetLength(this->chan,BASS_POS_BYTE)/WIDTH; // bytes per pixel
-    DWORD bpp1=BASS_ChannelSeconds2Bytes(this->chan,0.001); // minimum 1ms per pixel
-    if (this->bpp<bpp1) this->bpp=bpp1;
 
     BASS_ChannelPlay(this->chan,FALSE); // start playing
 
@@ -78,23 +89,17 @@ void Audio::toPos(QWORD pos){
     BASS_ChannelSetPosition(this->chan,pos,BASS_POS_BYTE);
 }
 
-QPair<int, float *> Audio::calcpeaks(){
-    BASS_CHANNELINFO ci;
-    BASS_ChannelGetInfo(this->chan, &ci);
-    float *levels=(float*)malloc(ci.chans*sizeof(float)); // allocate an array for each channel's level
-    BASS_ChannelGetLevelEx(this->chan, levels, 0.02, 0); // get the levels
-    return QPair<int,float*>(ci.chans,levels);
-}
-
-void Audio::updateBpp(int width){
-    this->bpp  = BASS_ChannelGetLength(this->chan,BASS_POS_BYTE)/width;
+void Audio::updateBpp(){
+    this->bpp  = BASS_ChannelGetLength(this->chan,BASS_POS_BYTE)/this->width;
     DWORD bpp1 = BASS_ChannelSeconds2Bytes(this->chan,0.001); // minimum 1ms per pixel
     if (this->bpp<bpp1) this->bpp=bpp1;
 }
 
-void Audio::ScanPeaks(QWORD decoder, DWORD width, DWORD height){
+QPair<QList<float>,QList<float> > Audio::ScanPeaks(QWORD decoder){
     DWORD pos=0;
-    float spp=BASS_ChannelBytes2Seconds(decoder,bpp); // seconds per pixel
+    QPair<QList<float>,QList<float> > peaks;
+    this->updateBpp();
+    float spp=BASS_ChannelBytes2Seconds(decoder,this->bpp); // seconds per pixel
     while (!this->killscan) {
         float peak[2];
         if (spp>1) { // more than 1 second per pixel, break it down...
@@ -111,24 +116,12 @@ void Audio::ScanPeaks(QWORD decoder, DWORD width, DWORD height){
         else{
             BASS_ChannelGetLevelEx(decoder,peak,spp,BASS_LEVEL_STEREO); // scan peaks
         }
-        for (DWORD a=0;a<peak[0]*(height/2);a++)
-            this->wavebuf[(height/2-1-a)*width+pos]=1+a; // draw left peak
-        for (DWORD a=0;a<peak[1]*(height/2);a++)
-            this->wavebuf[(height/2+1+a)*width+pos]=1+a; // draw right peak
+        peaks.first.push_back(peak[0]);
+        peaks.second.push_back(peak[1]);
         pos++;
-        if (pos>=width) break; // reached end of display
+        if (pos>=this->width) break; // reached end of display
         if (!BASS_ChannelIsActive(decoder)) break; // reached end of channel
     }
-    if (!this->killscan){
-        DWORD size;
-        BASS_ChannelSetPosition(decoder,(QWORD)-1,BASS_POS_BYTE|BASS_POS_SCAN); // build seek table (scan to end)
-        size=BASS_ChannelGetAttributeEx(decoder,BASS_ATTRIB_SCANINFO,0,0); // get seek table size
-        if (size) { // got it
-            void *info=malloc(size); // allocate a buffer
-            BASS_ChannelGetAttributeEx(decoder,BASS_ATTRIB_SCANINFO,info,size); // get the seek table
-            BASS_ChannelSetAttributeEx(this->chan,BASS_ATTRIB_SCANINFO,info,size); // apply it to the playback channel
-            free(info);
-        }
-    }
     BASS_StreamFree(decoder); // free the decoder
+    return peaks;
 }
