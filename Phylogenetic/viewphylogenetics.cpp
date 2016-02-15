@@ -84,29 +84,30 @@ void ViewPhylogenetics::showMtx()
     int nRows = this->species.size();
     QList< QList<bool> > mask = this->getPhylogenetic(this->MR,this->sizeIntervals,1);
     char f = 'g';
+    int precision = 8;
     for(int i=0; i < nRows; i++){
         for(int j=0; j < nCols; j++){
             QString l;
 
-            l=QString::number(this->MO.at(i).at(j).first,f,4); l+=" ( ";
-            l+=QString::number(this->MO.at(i).at(j).second,f,4); l+=" ) ";
+            l=QString::number(this->MO.at(i).at(j).first,f,precision); l+=" ( ";
+            l+=QString::number(this->MO.at(i).at(j).second,f,precision); l+=" ) ";
             QTableWidgetItem *itMO = new QTableWidgetItem();
             itMO->setText(l);
             this->ui->tableMO->setItem(i,j,itMO);
 
-            l=QString::number(this->ME.at(i).at(j).first,f,4); l+=" ( ";
-            l+=QString::number(this->ME.at(i).at(j).second,f,4); l+=" ) ";
+            l=QString::number(this->ME.at(i).at(j).first,f,precision); l+=" ( ";
+            l+=QString::number(this->ME.at(i).at(j).second,f,precision); l+=" ) ";
             QTableWidgetItem *itME = new QTableWidgetItem();
             itME->setText(l);
             this->ui->tableME->setItem(i,j,itME);
 
-            l=QString::number(this->MR.at(i).at(j).first,f,4); l+=" ( ";
-            l+=QString::number(this->MR.at(i).at(j).second,f,4); l+=" ) ";
+            l=QString::number(this->MR.at(i).at(j).first,f,precision); l+=" ( ";
+            l+=QString::number(this->MR.at(i).at(j).second,f,precision); l+=" ) ";
             QTableWidgetItem *itMR = new QTableWidgetItem();
             itMR->setText(l);
             this->ui->tableMR->setItem(i,j,itMR);
 
-            l=QString::number(this->MP.at(i).at(j),f,4);
+            l=QString::number(this->MP.at(i).at(j),f,precision);
             QTableWidgetItem* itMP = new QTableWidgetItem();
             itMP->setText(l);
             this->ui->tableMP->setItem(i,j,itMP);
@@ -216,6 +217,7 @@ void ViewPhylogenetics::treatMP(QList<QList<QPair<double,double> > > orig)
         QList<double> tmpMP;
         for(int j = 0; j < orig.at(i).size(); j++) {
             QPair<double,double> pv = orig.at(i).at(j);
+            qDebug() << pv;
             if(pv.first < pv.second) tmpMP.push_back(pv.first);
             else tmpMP.push_back(pv.second);
         }
@@ -230,11 +232,12 @@ void ViewPhylogenetics::updateMF()
     int interval = this->ui->intervalSlider->value();
     QList< QList<bool> > mask(this->getPhylogenetic(this->MR,this->sizeIntervals,interval));
     char f = 'f';
+    int precision = 8;
     for(int i=0; i < nRows; i++){
         for(int j=0; j < nCols; j++){
             QString l;
-            l=QString::number(this->MR.at(i).at(j).first,f,4); l+=" ( ";
-            l+=QString::number(this->MR.at(i).at(j).second,f,4); l+=" ) ";
+            l=QString::number(this->MR.at(i).at(j).first,f,precision); l+=" ( ";
+            l+=QString::number(this->MR.at(i).at(j).second,f,precision); l+=" ) ";
             QTableWidgetItem *itMF = new QTableWidgetItem();
             if(!mask.at(i).at(j)) itMF->setText(l);
             this->ui->tableMF->setItem(i,j,itMF);

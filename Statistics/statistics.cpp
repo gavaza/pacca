@@ -430,7 +430,7 @@ QPair<double,double> Statistics::V(QList<double> list){
     pair.first = mean;
     if (q>1){
         for (int p=0; p<q; p++){
-            EV += (list[p] - mean)*(list[p] - mean)/(q-1);
+            EV += ((list[p] - mean)*(list[p] - mean))/(q-1);
         }
         pair.second = EV;
     }

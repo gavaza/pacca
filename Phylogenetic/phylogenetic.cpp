@@ -20,6 +20,11 @@ void Phylogenetic::loadData(QMap<QString, QList<QVariantList > > sessions,
                             QList<QVariant> species, QList<QVariantList> behavior,
                             int sizeSeq, int sizeIntervals, int sizeStep, bool absolute)
 {
+    this->behavior.clear();
+    this->sessions.clear();
+    this->indexes.clear();
+    this->species.clear();
+
     this->behavior = behavior;
     this->sessions = sessions;
     this->indexes = indexes;
@@ -28,6 +33,8 @@ void Phylogenetic::loadData(QMap<QString, QList<QVariantList > > sessions,
     this->sizeIntervals = sizeIntervals;
     this->sizeStep = sizeStep;
     this->absolute = absolute;
+    delete this->statsModule;
+    this->statsModule = new Statistics(this->dynamic,this->absolute,this->sizeStep,this->sizeIntervals);
 }
 
 void Phylogenetic::calcData()
@@ -38,24 +45,25 @@ void Phylogenetic::calcData()
     stats_type st = residue;
     int totalCells = nCols*nRows;
     int counter = 0;
-    for(int i=0; i < nRows; i++){
-        QString spc = this->species.at(i).toString();
-        QList< QVariantList > sessions = this->sessions.value(spc);
+    for(int i=0; i < nRows; i++){ //For each specie
+        QString spc = this->species.at(i).toString(); //get the specie SPC
+        QList< QVariantList > sessions = this->sessions.value(spc); //getting all sessions of SPC
         list_behavior s = sessions;
         QList< QPair<double, double> > tmpMO, tmpME, tmpMR, tmpMP;
-        QList< QList<QVariantList> > randomized = this->ramdomize(sessions,this->indexes.value(spc));
-        for(int j=0; j < nCols; j++){
-            if(this->stopThread){
+        QList< QList<QVariantList> > randomized = this->ramdomize(sessions,this->indexes.value(spc)); //ramdomizing the lists
+        for(int j=0; j < nCols; j++){ //for each behavior (the permutation of events) eg. all diades
+            if(this->stopThread){ //control of thread
                 emit this->statusProcess(0.0);
                 emit this->threadStopped();
                 return;
             }
             counter++;
-            list_behavior us; us.push_back(this->behavior.at(j));
-            QPair<double,double> O = this->statsModule->V(us,s,Observed);
-            QPair<double,double> E = this->statsModule->V(us,s,Expected);
-            QPair<double,double> R = this->statsModule->V(us,s,Residue);
+            list_behavior us; us.push_back(this->behavior.at(j)); //getting a specific behavior US
+            QPair<double,double> O = this->statsModule->V(us,s,Observed); //calc Observed of US on the sessions of SPC
+            QPair<double,double> E = this->statsModule->V(us,s,Expected); //calc Expected of US on the sessions of SPC
+            QPair<double,double> R = this->statsModule->V(us,s,Residue); //calc Residue of US on the sessions of SPC
             QList<double> dist;
+            //for each random list, calculating the statistic (Observed, Expected or Residue) to create a distribution.
             for(int r=0; r<randomized.size(); r++){
                 list_behavior rand_behavior; rand_behavior = randomized.at(r);
                 switch (st) {
@@ -72,6 +80,7 @@ void Phylogenetic::calcData()
                     break;
                 }
             }
+            //with the distribution calculating the p-value.
             switch (st) {
             case observed:
                 tmpMP.push_back(this->statsModule->pvalue(O.first,dist));
@@ -85,8 +94,10 @@ void Phylogenetic::calcData()
             default:
                 break;
             }
+            //giving feedback about the progress
             double ratio = ((double) counter)/totalCells;
             emit this->statusProcess(ratio);
+            //saving the data
             tmpMO.push_back(O);
             tmpME.push_back(E);
             tmpMR.push_back(R);

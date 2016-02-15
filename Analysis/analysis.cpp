@@ -231,24 +231,24 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
         QMap< QString, QList< QList<QVariant> > > mapSequences;
         QMap< QString, QList< QList<int> > > indexes;
 
-        if(this->ui->sessions->selectedItems().size() == 0){
+        if(this->ui->sessions->selectedItems().size() == 0){ //calculating for all sessions
             for(int s=0; s < this->ui->sessions->rowCount(); s++){
-                unsigned int idSession = this->ui->sessions->item(s,0)->text().toUInt();
-                QString spcSession = this->ui->sessions->item(s,2)->text();
-                if(!mapSequences.contains(spcSession)){
+                unsigned int idSession = this->ui->sessions->item(s,0)->text().toUInt(); //getting the session id
+                QString spcSession = this->ui->sessions->item(s,2)->text(); //getting the name of the specie
+                if(!mapSequences.contains(spcSession)){ //checking if already exist sessions with this specie
                     indexes.insert(spcSession,QList< QList<int> >());
                     mapSequences.insert(spcSession,QList< QList<QVariant> >());
                 }
-                QList<Actions> actions = db.getSequence(idSession);
+                QList<Actions> actions = db.getSequence(idSession); //getting the sequence of events
                 QList<QVariant> tmp_ev;
                 QList<int> tmp_idx;
-                for(int a = 0; a < actions.size(); a++){
+                for(int a = 0; a < actions.size(); a++){ //for each event, getting the description and position index
                     Actions act = actions.at(a);
                     QString ev = act.getEventDescription();
                     tmp_ev.push_back(ev);
                     tmp_idx.push_back(a);
                 }
-                mapSequences[spcSession].push_back(tmp_ev);
+                mapSequences[spcSession].push_back(tmp_ev); //Including in the map a new sequence of events for the specific specie
                 indexes[spcSession].push_back(tmp_idx);
             }
         } else {
@@ -279,12 +279,16 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                 sortedSpecies.push_back(this->ui->speciesTable->item(idx,0)->text());
         } else {
             int sizeCollumns = this->ui->speciesTable->columnCount();
-            for(int idx = 0; idx < this->ui->speciesTable->rowCount(); idx+=sizeCollumns)
+            qDebug() << sizeCollumns;
+            for(int idx = 0; idx < this->ui->speciesTable->selectedItems().size(); idx+=sizeCollumns){
                 sortedSpecies.push_back(this->ui->speciesTable->selectedItems().at(idx)->text());
+            }
         }
         this->permutation_list.clear();
         QList<int> idx;
-        this->permutation(this->events.toList(),idx,0,this->ui->sizeSeq->value());
+        this->permutation(this->events.toList(),idx,0,this->ui->sizeSeq->value()); //need to check this->events
+        qDebug() << "SPC LIST" << sortedSpecies;
+        qDebug() << "SPC KEYS MAP" << mapSequences.keys();
         module->loadData(mapSequences,indexes,sortedSpecies,
                          this->permutation_list,this->ui->sizeSeq->value(),
                          this->ui->mtxIntervals->value(),this->ui->stepsSize->value(),this->ui->absValMtx->isChecked());
@@ -341,12 +345,6 @@ void AnalysisWindow::genRandomSequence()
 
 void AnalysisWindow::showSessionStats()
 {
-    QPixmap pixmap(":/icons/splash.png");
-    pixmap.scaled(QApplication::desktop()->screenGeometry().width()*0.1,QApplication::desktop()->screenGeometry().height()*0.1);
-    QSplashScreen splash(pixmap);
-    splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
-    splash.show();
-
     Database db;
     QVariantList listEvents;
     if(this->ui->sessions->selectedItems().size() == 0){
@@ -374,17 +372,10 @@ void AnalysisWindow::showSessionStats()
     PlotWindow* plot = this->showFrequenceStats(listEvents,tr("Sessões"),tr("Frequência Absoluta"),tr("Frequência das Sessões"), true);
     this->mdi->addSubWindow(plot);
     plot->showMaximized();
-    splash.finish(this);
 }
 
 void AnalysisWindow::showSequenceStats()
 {
-    QPixmap pixmap(":/icons/splash.png");
-    pixmap.scaled(QApplication::desktop()->screenGeometry().width()*0.1,QApplication::desktop()->screenGeometry().height()*0.1);
-    QSplashScreen splash(pixmap);
-    splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
-    splash.show();
-
     Statistics stats(this->ui->dynamic->isChecked(),
                      this->ui->absolut->isChecked(),
                      this->ui->stepsSize->value(),
@@ -472,8 +463,6 @@ void AnalysisWindow::showSequenceStats()
             break;
         }
     }
-
-    splash.finish(this);
 }
 
 void AnalysisWindow::showPermutationStats()
@@ -906,13 +895,8 @@ void AnalysisWindow::drawSessionGraph()
 
 }
 
-void AnalysisWindow::statisticsTests(){
-    QPixmap pixmap(":/icons/splash.png");
-    pixmap.scaled(QApplication::desktop()->screenGeometry().width()*0.1,QApplication::desktop()->screenGeometry().height()*0.1);
-    QSplashScreen splash(pixmap);
-    splash.showMessage(tr("Processando ..."),Qt::AlignBottom | Qt::AlignHCenter	,Qt::darkRed);
-    splash.show();
-
+void AnalysisWindow::statisticsTests()
+{
     Statistics stats(this->ui->dynamic->isChecked(),
                      this->ui->absolut->isChecked(),
                      this->ui->stepsSize->value(),
@@ -986,7 +970,6 @@ void AnalysisWindow::statisticsTests(){
         this->showData(tmp_E,tmp_O,tmp_Rs,tmp_sessionsLabels,tmp_infos,s,Ps);
 
     }
-    splash.finish(this);
 }
 
 void AnalysisWindow::showProcessedDataPermutation()
