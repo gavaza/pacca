@@ -27,8 +27,8 @@ public:
     explicit Phylogenetic();
     ~Phylogenetic();
     void run();
-    void loadData(QMap<QString, QList<QVariantList> > sessions,
-                  QMap< QString, QList< QList<int> > > indexes,
+    void loadData(QMap<QString, StatisticMap> sessions,
+                  QMap<QString, QMap<int, QList<QList<int> > > > indexes,
                   QList<QVariant> species, QList<QVariantList> behavior,
                   int sizeSeq, int sizeIntervals, int sizeStep, bool absolute);
     void calcData();
@@ -43,8 +43,8 @@ public:
     QList<QVariantList> getBehaviors();
 
 private:
-    QMap< QString, QList< QVariantList > > sessions;
-    QMap< QString, QList< QList<int> > > indexes;
+    QMap< QString, StatisticMap > sessions;
+    QMap< QString, QMap<int, QList< QList<int> > > > indexes;
     QList<QVariant> species;
     QList<QVariantList> behavior;
     int sizeSeq;
@@ -61,7 +61,7 @@ private:
 
     void setSpecies(QList<QVariant> species);
     void setBehavior(QList<QVariantList> behavior);
-    QList< QList<QVariantList> > ramdomize(QList<QVariantList> sessions, QList< QList<int> > indexes);
+    QList<StatisticMap> randomize(StatisticMap sessions, QMap<int, QList< QList<int> > > indexes);
 
 signals:
     void dataProcessed();

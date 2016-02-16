@@ -228,16 +228,18 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
     }
     if (r == QMessageBox::Yes || !this->hasPhyloData) {
         Database db;
-        QMap< QString, QList< QList<QVariant> > > mapSequences;
-        QMap< QString, QList< QList<int> > > indexes;
+        QMap< QString, StatisticMap > mapSequences;
+        QMap< QString, QMap< int, QList< QList<int> > > > indexes;
 
         if(this->ui->sessions->selectedItems().size() == 0){ //calculating for all sessions
             for(int s=0; s < this->ui->sessions->rowCount(); s++){
                 unsigned int idSession = this->ui->sessions->item(s,0)->text().toUInt(); //getting the session id
+                QString sbjSession = this->ui->sessions->item(s,1)->text(); //getting the name of the specie
+                int idSubject = db.getSubjects(sbjSession).getId().toInt();
                 QString spcSession = this->ui->sessions->item(s,2)->text(); //getting the name of the specie
                 if(!mapSequences.contains(spcSession)){ //checking if already exist sessions with this specie
-                    indexes.insert(spcSession,QList< QList<int> >());
-                    mapSequences.insert(spcSession,QList< QList<QVariant> >());
+                    indexes.insert(spcSession,QMap< int, QList< QList<int> > >());
+                    mapSequences.insert(spcSession,StatisticMap());
                 }
                 QList<Actions> actions = db.getSequence(idSession); //getting the sequence of events
                 QList<QVariant> tmp_ev;
@@ -248,17 +250,26 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                     tmp_ev.push_back(ev);
                     tmp_idx.push_back(a);
                 }
-                mapSequences[spcSession].push_back(tmp_ev); //Including in the map a new sequence of events for the specific specie
-                indexes[spcSession].push_back(tmp_idx);
+                if(!mapSequences[spcSession].contains(idSubject)){
+                    list_behavior list; list.push_back(tmp_ev);
+                    QList< QList<int> > idx; idx.push_back(tmp_idx);
+                    mapSequences[spcSession].insert(idSubject,list);
+                    indexes[spcSession].insert(idSubject,idx);
+                } else {
+                    mapSequences[spcSession][idSubject].push_back(tmp_ev);
+                    indexes[spcSession][idSubject].push_back(tmp_idx);
+                }
             }
         } else {
             int sizeCollumns = this->ui->sessions->columnCount();
             for(int s=0; s < this->ui->sessions->selectedItems().size(); s=s+sizeCollumns){
                 unsigned int idSession = this->ui->sessions->selectedItems().at(s)->text().toUInt();
+                QString sbjSession = this->ui->sessions->selectedItems().at(s+1)->text();
+                int idSubject = db.getSubjects(sbjSession).getId().toInt();
                 QString spcSession = this->ui->sessions->selectedItems().at(s+2)->text();
                 if(!mapSequences.contains(spcSession)){
-                    indexes.insert(spcSession,QList< QList<int> >());
-                    mapSequences.insert(spcSession,QList< QList<QVariant> >());
+                    indexes.insert(spcSession,QMap< int, QList< QList<int> > >());
+                    mapSequences.insert(spcSession,StatisticMap());
                 }
                 QList<Actions> actions = db.getSequence(idSession);
                 QList<QVariant> tmp_ev;\
@@ -269,8 +280,15 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                     tmp_ev.push_back(ev);
                     tmp_idx.push_back(a);
                 }
-                mapSequences[spcSession].push_back(tmp_ev);
-                indexes[spcSession].push_back(tmp_idx);
+                if(!mapSequences[spcSession].contains(idSubject)){
+                    list_behavior list; list.push_back(tmp_ev);
+                    QList< QList<int> > idx; idx.push_back(tmp_idx);
+                    mapSequences[spcSession].insert(idSubject,list);
+                    indexes[spcSession].insert(idSubject,idx);
+                } else {
+                    mapSequences[spcSession][idSubject].push_back(tmp_ev);
+                    indexes[spcSession][idSubject].push_back(tmp_idx);
+                }
             }
         }
         QList<QVariant> sortedSpecies;

@@ -84,7 +84,7 @@ void ViewPhylogenetics::showMtx()
     int nRows = this->species.size();
     QList< QList<bool> > mask = this->getPhylogenetic(this->MR,this->sizeIntervals,1);
     char f = 'g';
-    int precision = 8;
+    int precision = 4;
     for(int i=0; i < nRows; i++){
         for(int j=0; j < nCols; j++){
             QString l;
@@ -217,7 +217,6 @@ void ViewPhylogenetics::treatMP(QList<QList<QPair<double,double> > > orig)
         QList<double> tmpMP;
         for(int j = 0; j < orig.at(i).size(); j++) {
             QPair<double,double> pv = orig.at(i).at(j);
-            qDebug() << pv;
             if(pv.first < pv.second) tmpMP.push_back(pv.first);
             else tmpMP.push_back(pv.second);
         }
@@ -232,7 +231,7 @@ void ViewPhylogenetics::updateMF()
     int interval = this->ui->intervalSlider->value();
     QList< QList<bool> > mask(this->getPhylogenetic(this->MR,this->sizeIntervals,interval));
     char f = 'f';
-    int precision = 8;
+    int precision = 4;
     for(int i=0; i < nRows; i++){
         for(int j=0; j < nCols; j++){
             QString l;

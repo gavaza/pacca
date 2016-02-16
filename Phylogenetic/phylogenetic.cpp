@@ -15,8 +15,8 @@ void Phylogenetic::setBehavior(QList<QVariantList> behavior){
     this->behavior = behavior;
 }
 
-void Phylogenetic::loadData(QMap<QString, QList<QVariantList > > sessions,
-                            QMap<QString, QList<QList<int> > > indexes,
+void Phylogenetic::loadData(QMap<QString, StatisticMap > sessions,
+                            QMap< QString, QMap< int, QList< QList<int> > > > indexes,
                             QList<QVariant> species, QList<QVariantList> behavior,
                             int sizeSeq, int sizeIntervals, int sizeStep, bool absolute)
 {
@@ -47,10 +47,10 @@ void Phylogenetic::calcData()
     int counter = 0;
     for(int i=0; i < nRows; i++){ //For each specie
         QString spc = this->species.at(i).toString(); //get the specie SPC
-        QList< QVariantList > sessions = this->sessions.value(spc); //getting all sessions of SPC
-        list_behavior s = sessions;
+        StatisticMap sessions = this->sessions.value(spc); //getting all sessions of SPC
+        StatisticMap s = sessions;
         QList< QPair<double, double> > tmpMO, tmpME, tmpMR, tmpMP;
-        QList< QList<QVariantList> > randomized = this->ramdomize(sessions,this->indexes.value(spc)); //ramdomizing the lists
+        QList< StatisticMap > randomized = this->randomize(sessions,this->indexes.value(spc)); //ramdomizing the lists
         for(int j=0; j < nCols; j++){ //for each behavior (the permutation of events) eg. all diades
             if(this->stopThread){ //control of thread
                 emit this->statusProcess(0.0);
@@ -65,7 +65,7 @@ void Phylogenetic::calcData()
             QList<double> dist;
             //for each random list, calculating the statistic (Observed, Expected or Residue) to create a distribution.
             for(int r=0; r<randomized.size(); r++){
-                list_behavior rand_behavior; rand_behavior = randomized.at(r);
+                StatisticMap rand_behavior; rand_behavior = randomized[r];
                 switch (st) {
                 case observed:
                     dist.push_back(this->statsModule->V(us,rand_behavior,Observed).first);
@@ -160,19 +160,33 @@ void Phylogenetic::setSpecies(QList<QVariant> species){
     this->species = species;
 }
 
-QList< QList<QVariantList> > Phylogenetic::ramdomize(QList<QVariantList> sessions, QList<QList<int> > indexes)
+QList<StatisticMap> Phylogenetic::randomize(StatisticMap sessions, QMap<int, QList< QList<int> > > indexes)
 {
-    QList< QList<QVariantList> > randomized;
+    QList< StatisticMap > randomized;
     QSettings s("NuEvo","Pacca");
     s.beginGroup("ConfigAnalysis");
     int nperm = s.value("nPermutation",50).toInt();
     s.endGroup();
+    QList<int> keys = sessions.keys();
     for(int n=0; n<nperm; n++){
-      QList<QVariantList> tmp;
-      for(int i=0; i < sessions.size(); i++){
-          tmp.push_back(this->statsModule->bootstrap(sessions.at(i),indexes.at(i),1).first());
-      }
-      randomized.push_back(tmp);
+        StatisticMap tmp;
+        QListIterator<int> i(keys);
+        while(i.hasNext()){
+            int key = i.next();
+            list_behavior list = sessions[key];
+            QList< QList<int> > idx = indexes[key];
+            QVariantList r;
+            for(int i=0; i < list.size(); i++){
+                r  = this->statsModule->bootstrap(list.at(i),idx.at(i),1).first();
+            }
+            if(!tmp.contains(key)){
+                list_behavior lb; lb.push_back(r);
+                tmp.insert(key,lb);
+            } else {
+                tmp[key].push_back(r);
+            }
+        }
+        randomized.push_back(tmp);
     }
     return randomized;
 }
