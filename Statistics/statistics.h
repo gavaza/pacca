@@ -103,6 +103,17 @@ public:
      * \param absolute
      * \return
      */
+    QMap<int, QPair<double, double> > V_Map(list_behavior u,
+             StatisticMap behavior,
+             enum types_of_variances type);
+
+    /*!
+     * \brief V
+     * \param u
+     * \param behavior
+     * \param absolute
+     * \return
+     */
     QPair<double, double> V(list_behavior u,
              StatisticMap behavior,
              enum types_of_variances type);

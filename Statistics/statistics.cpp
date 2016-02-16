@@ -485,9 +485,9 @@ QList< QPair<double,double> > Statistics::pvalue(QList<double> values, QList<dou
 }
 
 
-QPair<double,double> Statistics::V(list_behavior u, StatisticMap behavior,
+QMap<int, QPair<double,double> > Statistics::V_Map(list_behavior u, StatisticMap behavior,
                                    enum types_of_variances type){
-    QList<double> Mcalc;
+    QMap<int, QPair<double, double> > Mcalc;
     QList<int> keys = behavior.uniqueKeys();
     QListIterator<int> i(keys);
 
@@ -515,10 +515,22 @@ QPair<double,double> Statistics::V(list_behavior u, StatisticMap behavior,
         else if (type==Probability){
             sample = this->P(u,subject_behavior);
         }
-        Mcalc.push_back(this->V(sample).first);
-    }
+        QPair<double,double> result = V(sample);
+        Mcalc.insert(key,result);
 
-    return this->V(Mcalc);
+    }
+    return Mcalc;
+}
+
+QPair<double,double> Statistics::V(list_behavior u, StatisticMap behavior,
+                                   enum types_of_variances type){
+    QMap<int, QPair<double, double> > Mcalc_map = this->V_Map(u,behavior,type);
+    QList<QPair<double, double> > Mcalc = Mcalc_map.values();
+    QList<double> sample;
+    for (int i=0; i<Mcalc.size(); i++){
+        sample.push_back(Mcalc.at(i).first);
+    }
+    return this->V(sample);
 }
 
 // for convenince
