@@ -129,7 +129,14 @@ public:
              list_behavior behavior,
              enum types_of_variances type);
 
-
+    /*!
+     * \brief V
+     * \param u
+     * \param behavior
+     * \param absolute
+     * \return
+     */
+    QPair<double, double> V(QMap<int, QPair<double, double> > M);
 
     /*!
      * \brief E calculate the expected value of u in behavior

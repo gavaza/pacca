@@ -522,7 +522,16 @@ QMap<int, QPair<double,double> > Statistics::V_Map(list_behavior u, StatisticMap
     return Mcalc;
 }
 
-QPair<double,double> Statistics::V(list_behavior u, StatisticMap behavior,
+QPair<double, double> Statistics::V(QMap<int, QPair<double, double> > M){
+    QList<QPair<double, double> > Mcalc = M.values();
+    QList<double> sample;
+    for (int i=0; i<Mcalc.size(); i++){
+        sample.push_back(Mcalc.at(i).first);
+    }
+    return this->V(sample);
+}
+
+QPair<double, double> Statistics::V(list_behavior u, StatisticMap behavior,
                                    enum types_of_variances type){
     QMap<int, QPair<double, double> > Mcalc_map = this->V_Map(u,behavior,type);
     QList<QPair<double, double> > Mcalc = Mcalc_map.values();
