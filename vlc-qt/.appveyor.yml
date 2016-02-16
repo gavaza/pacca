@@ -1,4 +1,4 @@
-version: 1.0.0.{build}
+version: 1.0.1.{build}
 
 branches:
   except:
@@ -7,8 +7,8 @@ branches:
     - feature/experiments
 
 environment:
-  vlcqt_version: 1.0.0
-  vlc_version: 2.2.1
+  vlcqt_version: 1.0.1
+  vlc_version: 2.2.2
 
   matrix:
   # MSVC x86
@@ -22,12 +22,6 @@ environment:
     platform: amd64
     qt: 5.5\msvc2013_64
     suffix: msvc2013
-
-  # MSVC x64 (Qt 5.4)
-  - name: win64
-    platform: amd64
-    qt: 5.4\msvc2013_64_opengl
-    suffix: msvc2013_5.4
 
   # MinGW
   - name: win32

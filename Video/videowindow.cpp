@@ -97,14 +97,20 @@ void VideoWindow::saveOrigText(int row, int col)
 
 void VideoWindow::remove()
 {
-    if(this->ui->sequence->selectedItems().size() > 0){
-        disconnect(this->ui->sequence,SIGNAL(itemSelectionChanged()),this,SLOT(review()));
-        int row = this->ui->sequence->selectedItems().first()->row();
-        this->eventsPositionInMiliseconds.removeAt(row);
-        this->ui->sequence->removeRow(row);
-        connect(this->ui->sequence,SIGNAL(itemSelectionChanged()),this,SLOT(review()));
-        this->checkSaveCondition();
+    QList<int> rows;
+    rows.push_back(this->ui->sequence->selectedItems().first()->row());
+    this->remove(rows);
+}
+
+void VideoWindow::remove(QList<int> rows){
+    disconnect(this->ui->sequence,SIGNAL(itemSelectionChanged()),this,SLOT(review()));
+    while(rows.size()>0){
+        this->eventsPositionInMiliseconds.removeAt(rows.last());
+        this->ui->sequence->removeRow(rows.last());
+        rows.pop_back();
     }
+    connect(this->ui->sequence,SIGNAL(itemSelectionChanged()),this,SLOT(review()));
+    this->checkSaveCondition();
 }
 
 void VideoWindow::checkSaveCondition()
@@ -143,20 +149,14 @@ void VideoWindow::saveSession()
         Actions a;
         QTime time; time = QTime::fromString(this->ui->sequence->item(i,0)->text());
         a.setTimeAction(time.hour()*3600+time.minute()*60+time.second());
-        QString st_temp = this->ui->sequence->item(i,1)->text();
-        int size_st = st_temp.size()-st_temp.indexOf(")",0)-1;
-        QString st = st_temp.right(size_st).simplified();
+        QString st = this->simplefiedText(this->ui->sequence->item(i,1)->text()).second;
         a.setState(States(st));
-        QString ev_temp = this->ui->sequence->item(i,2)->text();
-        int size_ev = ev_temp.size()-ev_temp.indexOf(")",0)-1;
-        QString ev = ev_temp.right(size_ev).simplified();
+        QString ev = this->simplefiedText(this->ui->sequence->item(i,2)->text()).second;
         a.setEvent(Events(ev));
         s.addAction(a);
     }
     int ret = db.saveSession(s);
-    qDebug() << ret;
     if(ret > 0){
-//        QMessageBox::information(this,tr("Sucesso"),tr("Os dados foram salvos com sucesso!"));
         this->close();
     } else {
         QMessageBox::critical(this,tr("Erro"),tr("Ocorreu um erro ao salvar! Tente novamente!"));
@@ -255,12 +255,7 @@ void VideoWindow::newEntry()
     QString time = QTime(0,0,0).addMSecs(ms).toString("hh:mm:ss");
     item_time->setText(time);
     item_time->setFlags(item_time->flags() & ~Qt::ItemIsEditable);
-    if (codeState.size()>0){
-        item_state->setText("("+codeState+") "+state);
-    }
-    else{
-        item_state->setText(state);
-    }
+    item_state->setText("("+codeState+") "+state);
     item_event->setText("("+code+") "+event);
     this->ui->sequence->insertRow(row);
     this->ui->sequence->setItem(row,0,item_time);
@@ -314,10 +309,10 @@ void VideoWindow::edit(int row, int col)
     QString event = this->dictionary.value(code,"").simplified();
     this->ui->sequence->item(row,col)->setText("("+code+") "+event);
     if(event == "" ){
-        if (col==0 || col==1){
+        if (col==0){
             this->ui->sequence->item(row,col)->setText(code);
         }
-        else if(col==2){
+        else if(col==1 || col==2){
             this->ui->sequence->item(row,col)->setText(this->origText);
         }
         this->origText="";
@@ -333,8 +328,13 @@ void VideoWindow::setFilename(QString filename)
 
 void VideoWindow::setDictionary(QString dict)
 {
+    this->dictionary_name = dict;
+    this->updateDictionary();
+}
+
+void VideoWindow::updateDictionary(){
     Database db;
-    this->dictionary = db.getDictionary(dict).getEntries();
+    this->dictionary = db.getDictionary(this->dictionary_name).getEntries();
     QMapIterator<QString, QString> i(this->dictionary);
     this->ui->dictView->setRowCount(0);
     int c = 0;
@@ -351,6 +351,44 @@ void VideoWindow::setDictionary(QString dict)
         this->ui->dictView->setItem(row,col,item);
         c++;
     }
+    this->updateEntryDict();
+    qDebug() << this->dictionary.keys();
+    qDebug() << this->dictionary.values();
+}
+
+void VideoWindow::updateEntryDict(){
+    QList<int> rows_remove;
+    for (int i=0; i<this->ui->sequence->rowCount(); i++){
+        QString state_code = this->simplefiedText(this->ui->sequence->item(i,1)->text()).first;
+        QString event_code = this->simplefiedText(this->ui->sequence->item(i,2)->text()).first;
+        QString state = this->dictionary.value(state_code);
+        QString event = this->dictionary.value(event_code);
+        this->ui->sequence->item(i,1)->setText("("+state_code+") " + state);
+        if(event == "" ){
+            rows_remove.push_back(i);
+        }
+        else{
+            this->ui->sequence->item(i,2)->setText("("+event_code+") " + event);
+        }
+    }
+    this->remove(rows_remove);
+}
+
+QPair<QString,QString> VideoWindow::simplefiedText(QString text){
+    QString str_temp;
+
+    // code
+    str_temp = text;
+    int code_start = str_temp.indexOf("(",0)+1;
+    int code_end = str_temp.indexOf(")",code_start)-1;
+    QString code = str_temp.remove(code_end+1,str_temp.size()).remove(0,code_start);
+
+    // information
+    str_temp = text;
+    int size_str = str_temp.size()-str_temp.indexOf(")",0)-1;
+    QString str = str_temp.right(size_str).simplified();
+
+    return QPair<QString, QString> (code,str);
 }
 
 void VideoWindow::hideVideo(QMdiSubWindow* video){
@@ -366,4 +404,21 @@ void VideoWindow::hideVideo(QMdiSubWindow* video){
 
 void VideoWindow::setSubWindow(QMdiSubWindow *subwindow){
     this->subwindow = subwindow;
+}
+
+void VideoWindow::hideVideoCommands(bool hide){
+    this->ui->b_play->setHidden(hide);
+    this->ui->b_stop->setHidden(hide);
+    this->ui->b_pause->setHidden(hide);
+    this->ui->speed->setHidden(hide);
+    this->ui->l_speed->setHidden(hide);
+    this->ui->speedBox->setHidden(hide);
+    this->ui->description->setHidden(hide);
+    this->ui->observer->setHidden(hide);
+    this->ui->label->setHidden(hide);
+    this->ui->label_2->setHidden(hide);
+    this->ui->l_observer->setHidden(hide);
+    this->ui->l_description->setHidden(hide);
+    this->ui->species->setHidden(hide);
+    this->ui->subject->setHidden(hide);
 }

@@ -61,6 +61,7 @@ void ControlDictionary::saveDict()
         db.insertDict(dict);
         this->loadDict();
         this->ui->nameDict->clear();
+        emit dictionary_updated();
     }
 }
 
@@ -74,6 +75,7 @@ void ControlDictionary::editDict(int r, int c)
         Database db;
         db.editDict(this->origText,newContent);
         this->loadDict();
+        emit dictionary_updated();
     } else {
         this->ui->listDict->item(r,c)->setText(this->origText);
     }
@@ -102,6 +104,7 @@ void ControlDictionary::editEntry(int r, int c)
         else
             db.editDictEntry(dictName,code,code,word);
         this->loadEntries();
+        emit dictionary_updated();
     } else {
         this->ui->entries->item(r,c)->setText(this->origText);
     }
@@ -125,6 +128,7 @@ void ControlDictionary::removeDict()
             this->ui->entries->clear();
             this->ui->entries->setRowCount(0);
             this->loadDict();
+            emit dictionary_updated();
         }
     }
 }
@@ -141,6 +145,7 @@ void ControlDictionary::saveEntry()
         this->ui->code->clear();
         this->ui->word->clear();
         this->ui->code->setFocus();
+        emit dictionary_updated();
     } else {
         QMessageBox::information(this,tr("Nova entrada"),
                                  tr("Todos os campos são obrigatórios!\nNão pode repetir entrada já existente no dicionário."));
@@ -164,6 +169,7 @@ void ControlDictionary::removeEntry()
                 db.removeDictEntry(dictName,code);
                 rows.push_back(this->ui->entries->selectedItems().at(i)->row());
             }
+            emit dictionary_updated();
             while(rows.size()>0){
                 this->ui->entries->removeRow(rows.last());
                 rows.pop_back();

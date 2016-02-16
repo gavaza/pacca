@@ -106,7 +106,7 @@ change_install_name /opt/local/lib/libvlccore.7.dylib @executable_path/../Framew
 change_install_name /opt/local/lib/libvlccore.7.dylib @executable_path/../Frameworks/libvlccore.7.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc.5.dylib
 
 # libvlc-qt.dylib
-version_libvlc="1.0.0"
+version_libvlc="1.0.1"
 
 change_install_name @rpath/VLCQtCore.framework/Versions/${version_libvlc}/VLCQtCore @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/MacOS/Pacca
 change_install_name @rpath/VLCQtCore.framework/Versions/${version_libvlc}/VLCQtCore @executable_path/../Frameworks/libvlc-qt.dylib ${LOCAL_PATH_}/${APP_NAME}/Contents/Frameworks/libvlc-qt-widgets.dylib

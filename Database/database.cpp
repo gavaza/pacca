@@ -595,12 +595,19 @@ Sessions Database::getSession(unsigned int id)
     return s;
 }
 
-QList<Actions> Database::getSequence(unsigned int idSession)
+QList<Actions> Database::getSequence(unsigned int idSession, bool reserved)
 {
     QList<Actions> sequence;
-    this->query.prepare("SELECT A.time, E.name, S.name, A.id FROM Actions as A "
-                        "JOIN States as S ON S.id = A.state JOIN Events as E ON E.id = A.event "
-                        "WHERE A.session = :idSession ORDER BY A.time;");
+    if (reserved){
+        this->query.prepare("SELECT A.time, E.name, S.name, A.id FROM Actions as A "
+                            "JOIN States as S ON S.id = A.state JOIN Events as E ON E.id = A.event "
+                            "WHERE A.session = :idSession ORDER BY A.time;");
+    }
+    else{
+        this->query.prepare("SELECT A.time, E.name, S.name, A.id FROM Actions as A "
+                            "JOIN States as S ON S.id = A.state JOIN Events as E ON E.id = A.event "
+                            "WHERE A.session = :idSession AND E.name <> '{end}' ORDER BY A.time;");
+    }
     this->query.bindValue(":idSession",idSession);
     if(!this->query.exec()){
         this->showError(this->query.lastError());

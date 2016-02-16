@@ -46,6 +46,9 @@ private slots:
     bool existEntry(QString code, QString word);
     bool existEntry(QString text, unsigned int col);
     bool existDict(QString name);
+
+signals:
+    void dictionary_updated();
 };
 
 #endif // CONTROLDICTIONARY_H

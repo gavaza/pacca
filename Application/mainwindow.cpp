@@ -94,6 +94,7 @@ void MainWindow::executeImportMedia(QString type)
                 VideoWindow *video_ui;
                 video_ui = new VideoWindow(type,this);
                 connect(video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed(QObject*)));
+                connect(this,SIGNAL(dictionary_updated()),video_ui,SLOT(updateDictionary()));
                 video_ui->setDictionary(dict);
                 video_ui->setFilename(filename);
                 video_ui->setAttribute(Qt::WA_DeleteOnClose);
@@ -194,7 +195,7 @@ void MainWindow::executeExportText(){
             QString filename = path_base + QString(itens.at(i)->text());
             filename = filename.append(".odf");
 
-            QList<Actions> actions = db.getSequence(idSession);
+            QList<Actions> actions = db.getSequence(idSession,true);
             QList<QString> infos;
             Sessions s = db.getSession(idSession);
             infos.push_back(s.getSpecies().toString());
@@ -326,6 +327,7 @@ void MainWindow::managerDict()
     if(this->dict_ui == NULL){
         this->dict_ui = new ControlDictionary(this->ui->mdiArea);
         connect(this->dict_ui,SIGNAL(destroyed(QObject*)),this,SLOT(dictClosed()));
+        connect(this->dict_ui,SIGNAL(dictionary_updated()),this,SIGNAL(dictionary_updated()));
         this->dict_ui->setAttribute(Qt::WA_DeleteOnClose);
         this->ui->mdiArea->addSubWindow(this->dict_ui);
     }
@@ -337,6 +339,7 @@ void MainWindow::managerSessions()
     if(this->ctl_sessions == NULL){
         this->ctl_sessions = new ControlSessions(this->ui->mdiArea);
         connect(this->ctl_sessions,SIGNAL(destroyed(QObject*)),this,SLOT(sessionsClosed()));
+        connect(this,SIGNAL(database_updated()),this->ctl_sessions,SLOT(load()));
         this->ctl_sessions->setAttribute(Qt::WA_DeleteOnClose);
         this->ui->mdiArea->addSubWindow(this->ctl_sessions);
 

@@ -5,7 +5,7 @@ Statistics::Statistics(bool dynamic, bool absolute, int stepSize, int stepStart)
     this->dynamic = dynamic;
     this->absolute = absolute;
     this->stepSize = stepSize;
-    this->stepStart = stepStart;
+    this->stepStart = stepStart-1;
 }
 
 Statistics::~Statistics()

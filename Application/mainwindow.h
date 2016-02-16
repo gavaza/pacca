@@ -103,6 +103,7 @@ private slots:
 
 signals:
     void database_updated();
+    void dictionary_updated();
 };
 
 #endif // MAINWINDOW_H

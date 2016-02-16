@@ -29,9 +29,11 @@ private:
 protected:
     void keyPressEvent(QKeyEvent *event);
 
+public slots:
+    void load();
+
 private slots:
     void save(int r, int c);
-    void load();
     void saveOrigText(int r, int c);
     void remove();
 };

@@ -54,7 +54,7 @@ public:
     int eventExist(QVariant name);
     QList<Sessions> getAllSessions();
     Sessions getSession(unsigned int id);
-    QList<Actions> getSequence(unsigned int idSession);
+    QList<Actions> getSequence(unsigned int idSession, bool reserved=false);
     int insertDict(Dictionary dict);
     int insertDictEntry(QString dict, QString code, QString word);
     int editDictEntry(QString dict, QString lastCode, QString code, QString word);

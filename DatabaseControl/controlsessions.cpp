@@ -11,8 +11,6 @@ ControlSessions::ControlSessions(QWidget *parent) :
     connect(this->ui->sessions,SIGNAL(cellEntered(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->sessions,SIGNAL(cellChanged(int,int)),this,SLOT(save(int,int)));
     connect(this->ui->remove,SIGNAL(clicked()),this,SLOT(remove()));
-    connect(this->parentWidget()->parentWidget()->parentWidget(),SIGNAL(database_updated()),this,SLOT(load()));
-
 }
 
 ControlSessions::~ControlSessions()

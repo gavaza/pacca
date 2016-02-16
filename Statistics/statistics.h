@@ -39,7 +39,7 @@ class Statistics : public QThread
 {
     Q_OBJECT
 public:
-    Statistics(bool dynamic=false, bool absolute=false, int step=1, int start=0);
+    Statistics(bool dynamic=false, bool absolute=false, int step=1, int start=1);
     ~Statistics();
     void run();
     void setTypeRun(char typeRun);
@@ -49,7 +49,6 @@ public:
     void setPermutationSize(int nPermutations);
     void setEvents(QList<QVariantList> events);
     void setIndexes(QList< QList<int> > indexes);
-//    void setStepSize(int stepSize);
     void setTailedAlpha(int tailed, double alpha);
     void setFilterPvalue(bool filter);
 

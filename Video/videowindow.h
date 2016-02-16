@@ -67,6 +67,7 @@ private:
     QString filename;
     QString origText;
     qreal ratioVideoProgress;
+    QString dictionary_name;
     QMap<QString,QString> dictionary;
     bool dictIsHiden;
     QList<unsigned int> eventsPositionInMiliseconds;
@@ -75,6 +76,13 @@ private:
     void createConnections();
     void loadSpeceis();
     void loadSubjects();
+
+    void remove(QList<int> rows);
+
+    QPair<QString,QString> simplefiedText(QString text);
+
+public slots:
+    void updateDictionary();
 
 private slots:
     void newEntry();
@@ -94,6 +102,9 @@ private slots:
 
     void showDict();
     void hideVideo(QMdiSubWindow *video);
+
+    void hideVideoCommands(bool hide=true);
+    void updateEntryDict();
 
 signals:
     void windowClosed();

@@ -505,7 +505,7 @@ void AnalysisWindow::showPermutationStats()
                 unsigned int idSession = this->ui->sessions->selectedItems().at(s)->text().toUInt();
                 int subject = db.getSession(idSession).getSubject().toInt();
                 QList<Actions> actions = db.getSequence(idSession);
-                QList<QVariant> behavior_session;\
+                QList<QVariant> behavior_session;
                 QVariantList tmp_ev;
                 QList<int> tmp_idx;
                 for(int a = 0; a < actions.size(); a++){
