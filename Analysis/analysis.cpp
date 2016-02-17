@@ -207,10 +207,9 @@ void AnalysisWindow::permutation(QStringList ev, QList<int> list, int i, int n)
             comb.push_back(ev.at(list.at(e)));
         }
         this->permutation_list.push_back(comb);
-        //        qDebug() << "List: " << comb;
     } else {
         for(int j=0; j < ev.size(); j++){
-            if(i!=j){
+            if(!list.contains(j)){
                 list.push_back(j);
                 permutation(ev,list,j,n);
                 list.pop_back();
@@ -305,8 +304,6 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
         this->permutation_list.clear();
         QList<int> idx;
         this->permutation(this->events.toList(),idx,0,this->ui->sizeSeq->value()); //need to check this->events
-        qDebug() << "SPC LIST" << sortedSpecies;
-        qDebug() << "SPC KEYS MAP" << mapSequences.keys();
         module->loadData(mapSequences,indexes,sortedSpecies,
                          this->permutation_list,this->ui->sizeSeq->value(),
                          this->ui->mtxIntervals->value(),this->ui->stepsSize->value(),this->ui->absValMtx->isChecked());
