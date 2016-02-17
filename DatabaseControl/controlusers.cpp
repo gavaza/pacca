@@ -97,6 +97,7 @@ void ControlUsers::create()
             QMessageBox::information(this,tr("Sucesso"),tr("Usuário criado com sucesso!"));
             this->ui->name->clear();
             this->refreshList();
+            emit this->users_updated();
         }else{
             QMessageBox::critical(this,tr("Falha"),tr("Não foi possível criar o usuário!"));
         }
@@ -115,6 +116,7 @@ void ControlUsers::save(int row, int col)
         if(db.editUsers(u) == 0){
             this->origText = "";
             this->ui->listUsers->item(row,col)->setText(last);
+            emit this->users_updated();
         }
     }
 }
@@ -135,6 +137,7 @@ void ControlUsers::remove()
                 db.removeUser(id);
                 rows.push_back(this->ui->listUsers->selectedItems().at(i)->row());
             }
+            emit this->users_updated();
             while(rows.size()>0){
                 this->ui->listUsers->removeRow(rows.last());
                 rows.pop_back();

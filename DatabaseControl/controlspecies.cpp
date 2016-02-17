@@ -14,7 +14,6 @@ ControlSpecies::ControlSpecies(QWidget *parent) :
     connect(this->ui->listSpecies,SIGNAL(cellEntered(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->b_excluir,SIGNAL(clicked()),this,SLOT(remove()));
     connect(this->ui->importFile,SIGNAL(clicked()),this,SLOT(importFromFile()));
-    connect(this->parentWidget()->parentWidget()->parentWidget(),SIGNAL(database_updated()),this,SLOT(refreshList()));
 }
 
 ControlSpecies::~ControlSpecies()
@@ -98,6 +97,7 @@ void ControlSpecies::create()
             QMessageBox::information(this,tr("Sucesso"),tr("Espécie criada com sucesso!"));
             this->ui->name->clear();
             this->refreshList();
+            emit this->species_updated();
         }else{
             QMessageBox::critical(this,tr("Falha"),tr("Não foi possível cadastrar a espécie!"));
         }
@@ -116,6 +116,7 @@ void ControlSpecies::save(int row, int col)
         if(db.editSpecies(u) == 0){
             this->origText = "";
             this->ui->listSpecies->item(row,col)->setText(last);
+            emit this->species_updated();
         }
     }
 }
@@ -138,6 +139,7 @@ void ControlSpecies::remove()
                 db.removeSpecie(id);
                 rows.push_back(this->ui->listSpecies->selectedItems().at(i)->row());
             }
+            emit this->species_updated();
             while(rows.size()>0){
                 this->ui->listSpecies->removeRow(rows.last());
                 rows.pop_back();
@@ -164,5 +166,6 @@ void ControlSpecies::importFromFile()
             }
         }
         this->refreshList();
+        emit this->species_updated();
     }
 }

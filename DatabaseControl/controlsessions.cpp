@@ -64,6 +64,7 @@ void ControlSessions::save(int r, int c)
             Database db;
             db.editSession(s);
         }
+        emit this->sessions_updated();
     }
 }
 
@@ -160,6 +161,7 @@ void ControlSessions::remove()
                 db.removeSession(id);
                 rows.push_back(this->ui->sessions->selectedItems().at(i)->row());
             }
+            emit this->sessions_updated();
             while(rows.size()>0){
                 this->ui->sessions->removeRow(rows.last());
                 rows.pop_back();

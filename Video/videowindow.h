@@ -25,6 +25,7 @@
 
 #include <QString>
 #include <QTime>
+#include <QCompleter>
 
 #include "database.h"
 #include "sessions.h"
@@ -54,6 +55,7 @@ public:
     void setFilename(QString filename);
     void setDictionary(QString dict_view);
     void setSubWindow(QMdiSubWindow* subwindow);
+    void setUserName(QString name);
     ~VideoWindow();
 
 protected:
@@ -72,10 +74,9 @@ private:
     bool dictIsHiden;
     QList<unsigned int> eventsPositionInMiliseconds;
     QMdiSubWindow *subwindow;
+    QString username;
 
     void createConnections();
-    void loadSpeceis();
-    void loadSubjects();
 
     void remove(QList<int> rows);
 
@@ -83,6 +84,10 @@ private:
 
 public slots:
     void updateDictionary();
+    void updatedDatabase();
+    void loadSpeceis();
+    void loadSubjects();
+    void loadUsers();
 
 private slots:
     void newEntry();
@@ -92,6 +97,7 @@ private slots:
     void edit(int row, int col);
     void saveOrigText(int row, int col);
     void remove();
+    void adjustShortcuts();
     void checkSaveCondition();
     void saveSession();
 

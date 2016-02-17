@@ -68,6 +68,7 @@ private:
     void setDatabaseStatus(bool status=false);
     QMdiSubWindow *swDict, *swSpc, *swUser, *swSsn;    
     QMap<QObject*, QMdiSubWindow*> swVidMap;
+    QString current_user;
 
 private slots:
     void login();
@@ -103,6 +104,10 @@ private slots:
 
 signals:
     void database_updated();
+    void users_updated();
+    void sessions_updated();
+    void species_updated();
+    void subjects_updated();
     void dictionary_updated();
 };
 

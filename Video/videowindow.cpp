@@ -26,6 +26,7 @@ VideoWindow::VideoWindow(QString typeMedia, QWidget *parent) :
 
     this->loadSpeceis();
     this->loadSubjects();
+    this->loadUsers();
     this->createConnections();
 }
 
@@ -57,6 +58,7 @@ void VideoWindow::createConnections()
     connect(this->ui->sequence,SIGNAL(cellEntered(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->b_excluir,SIGNAL(clicked()),this,SLOT(remove()));
     connect(this->ui->subject,SIGNAL(textChanged(QString)),this,SLOT(checkSaveCondition()));
+    connect(this->ui->species,SIGNAL(textChanged(QString)),this,SLOT(checkSaveCondition()));
     connect(this->ui->description,SIGNAL(textChanged(QString)),this,SLOT(checkSaveCondition()));
     connect(this->ui->b_save,SIGNAL(clicked()),this,SLOT(saveSession()));
     connect(this->ui->b_dict,SIGNAL(clicked()),this,SLOT(showDict()));
@@ -67,26 +69,48 @@ void VideoWindow::loadSpeceis()
 {
     Database db;
     QList<Species> species = db.getAllSpecies();
-    this->ui->species->clear();
+    QStringList completions;
     for(int l = 0; l < species.size(); l++){
         Species sp = species.at(l);
         QString name = sp.getName().toString();
-        QVariant id = sp.getId();
-        this->ui->species->addItem(name,id);
+        completions.push_back(name);
     }
+    QCompleter *completer = new QCompleter(completions, this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    this->ui->species->setCompleter(completer);
 }
 
 void VideoWindow::loadSubjects()
 {
     Database db;
     QList<Subjects> subjects = db.getAllSubjects();
-    this->ui->subject->clear();
+    QStringList completions;
     for(int l = 0; l < subjects.size(); l++){
         Subjects s = subjects.at(l);
         QString name = s.getName().toString();
-        QVariant id = s.getId();
-        this->ui->subject->addItem(name,id);
+        completions.push_back(name);
     }
+    QCompleter *completer = new QCompleter(completions, this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    this->ui->subject->setCompleter(completer);
+}
+
+void VideoWindow::loadUsers(){
+    Database db;
+    QList<Users> users = db.getAllUsers();
+    QStringList completions;
+    for(int l = 0; l < users.size(); l++){
+        Users u = users.at(l);
+        QString name = u.getName().toString();
+        completions.push_back(name);
+    }
+    QCompleter *completer = new QCompleter(completions, this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    this->ui->observer->setCompleter(completer);
+}
+
+void VideoWindow::setUserName(QString name){
+    this->username = name;
 }
 
 void VideoWindow::saveOrigText(int row, int col)
@@ -98,7 +122,9 @@ void VideoWindow::saveOrigText(int row, int col)
 void VideoWindow::remove()
 {
     QList<int> rows;
-    rows.push_back(this->ui->sequence->selectedItems().first()->row());
+    if (this->ui->sequence->selectedItems().size()>0){
+        rows.push_back(this->ui->sequence->selectedItems().first()->row());
+    }
     this->remove(rows);
 }
 
@@ -118,6 +144,8 @@ void VideoWindow::checkSaveCondition()
     bool check = true;
     if(this->ui->sequence->rowCount() == 0) check = false;
     if(this->ui->description->text().isEmpty()) check = false;
+    if(this->ui->species->text().isEmpty()) check = false;
+    if(this->ui->subject->text().isEmpty()) check = false;
 
     if(check){
         this->ui->b_save->setToolTip(tr("Salvar sessão!"));
@@ -143,8 +171,8 @@ void VideoWindow::saveSession()
     s.setObserver(this->ui->observer->text());
     if(this->ui->observer->text().isEmpty()) s.setObserver(user);
     s.setDescription(this->ui->description->text());
-    s.setSubject(this->ui->subject->currentData());
-    s.setSpecies(this->ui->species->currentData());
+    s.setSubject(this->ui->subject->text());
+    s.setSpecies(this->ui->species->text());
     for(int i = 0; i < this->ui->sequence->rowCount(); i++){
         Actions a;
         QTime time; time = QTime::fromString(this->ui->sequence->item(i,0)->text());
@@ -337,12 +365,15 @@ void VideoWindow::updateDictionary(){
     this->dictionary = db.getDictionary(this->dictionary_name).getEntries();
     QMapIterator<QString, QString> i(this->dictionary);
     this->ui->dictView->setRowCount(0);
+    QStringList completions;
     int c = 0;
     int row = -1;
     while (i.hasNext()) {
         i.next();
         QTableWidgetItem *item  = new QTableWidgetItem;
         item->setText(i.key()+" : "+i.value());
+        QString code = i.key();
+        completions.push_back(code);
         int col = c % this->ui->dictView->columnCount();
         if(col == 0){
             row = this->ui->dictView->rowCount();
@@ -352,8 +383,23 @@ void VideoWindow::updateDictionary(){
         c++;
     }
     this->updateEntryDict();
-    qDebug() << this->dictionary.keys();
-    qDebug() << this->dictionary.values();
+    QCompleter *completer = new QCompleter(completions, this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    this->ui->in_event->setCompleter(completer);
+    this->ui->in_state->setCompleter(completer);
+}
+
+void VideoWindow::updatedDatabase(){
+    this->updateDictionary();
+    this->loadSpeceis();
+    this->loadSubjects();
+    this->loadUsers();
+}
+
+void VideoWindow::adjustShortcuts()
+{
+    this->ui->b_play->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Up));
+    this->ui->b_stop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Down));
 }
 
 void VideoWindow::updateEntryDict(){

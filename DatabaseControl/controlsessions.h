@@ -36,6 +36,9 @@ private slots:
     void save(int r, int c);
     void saveOrigText(int r, int c);
     void remove();
+
+signals:
+    void sessions_updated();
 };
 
 #endif // CONTROLSESSIONS_H

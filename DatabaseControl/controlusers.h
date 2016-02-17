@@ -55,6 +55,9 @@ private slots:
      */
     void refreshList();
 
+signals:
+    void users_updated();
+
 };
 
 #endif // CONTROLUSERS_H

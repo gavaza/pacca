@@ -55,10 +55,15 @@ private slots:
      * \brief Import from a text file
      */
     void importFromFile();
+
+public slots:
     /*!
      * \brief Refresh subjects list
      */
     void refreshList();
+
+signals:
+    void subjects_updated();
 };
 
 #endif // CONTROLSUBJECTS_H

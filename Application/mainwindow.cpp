@@ -93,10 +93,15 @@ void MainWindow::executeImportMedia(QString type)
             if (type=="video"){
                 VideoWindow *video_ui;
                 video_ui = new VideoWindow(type,this);
+                video_ui->setDictionary(dict);
                 connect(video_ui,SIGNAL(destroyed(QObject*)),this,SLOT(videowClosed(QObject*)));
                 connect(this,SIGNAL(dictionary_updated()),video_ui,SLOT(updateDictionary()));
-                video_ui->setDictionary(dict);
+                connect(this,SIGNAL(database_updated()),video_ui,SLOT(updatedDatabase()));
+                connect(this,SIGNAL(species_updated()),video_ui,SLOT(loadSpeceis()));
+                connect(this,SIGNAL(subjects_updated()),video_ui,SLOT(loadSubjects()));
+                connect(this,SIGNAL(users_updated()),video_ui,SLOT(loadUsers()));
                 video_ui->setFilename(filename);
+                video_ui->setUserName(this->current_user);
                 video_ui->setAttribute(Qt::WA_DeleteOnClose);
                 connect(this->ui->mdiArea,SIGNAL(subWindowActivated(QMdiSubWindow*)),video_ui,SLOT(hideVideo(QMdiSubWindow*)));
                 QMdiSubWindow *subwindow = this->ui->mdiArea->addSubWindow(video_ui);
@@ -277,6 +282,7 @@ void MainWindow::login()
             settings.beginGroup("global");
             settings.setValue("user",username);
             settings.endGroup();
+            this->current_user = username;
             this->logoff(true);
         }
     }
@@ -315,6 +321,7 @@ void MainWindow::newuser()
     if(this->users_ui  == NULL){
         this->users_ui = new ControlUsers(this->ui->mdiArea);
         connect(this->users_ui,SIGNAL(destroyed(QObject*)),this,SLOT(usersClosed()));
+        connect(this->users_ui,SIGNAL(users_updated()),this,SIGNAL(users_updated()));
         this->users_ui->setAttribute(Qt::WA_DeleteOnClose);
         this->ui->mdiArea->addSubWindow(this->users_ui);
 
@@ -339,6 +346,7 @@ void MainWindow::managerSessions()
     if(this->ctl_sessions == NULL){
         this->ctl_sessions = new ControlSessions(this->ui->mdiArea);
         connect(this->ctl_sessions,SIGNAL(destroyed(QObject*)),this,SLOT(sessionsClosed()));
+        connect(this->ctl_sessions,SIGNAL(sessions_updated()),this,SIGNAL(sessions_updated()));
         connect(this,SIGNAL(database_updated()),this->ctl_sessions,SLOT(load()));
         this->ctl_sessions->setAttribute(Qt::WA_DeleteOnClose);
         this->ui->mdiArea->addSubWindow(this->ctl_sessions);
@@ -354,6 +362,8 @@ void MainWindow::managerSpecies()
     if(this->ctl_species == NULL){
         this->ctl_species = new ControlSpecies(this->ui->mdiArea);
         connect(this->ctl_species,SIGNAL(destroyed(QObject*)),this,SLOT(speciesClosed()));
+        connect(this->ctl_species,SIGNAL(species_updated()),this,SIGNAL(species_updated()));
+        connect(this,SIGNAL(database_updated()),this->ctl_species,SLOT(refreshList()));
         this->ctl_species->setAttribute(Qt::WA_DeleteOnClose);
         this->ui->mdiArea->addSubWindow(this->ctl_species);
 
@@ -366,6 +376,8 @@ void MainWindow::managerSubjects()
     if(this->ctl_subjects == NULL){
         this->ctl_subjects = new ControlSubjects(this->ui->mdiArea);
         connect(this->ctl_subjects,SIGNAL(destroyed(QObject*)),this,SLOT(subjectsClosed()));
+        connect(this->ctl_subjects,SIGNAL(subjects_updated()),this,SIGNAL(subjects_updated()));
+        connect(this,SIGNAL(database_updated()),this->ctl_subjects,SLOT(refreshList()));
         this->ctl_subjects->setAttribute(Qt::WA_DeleteOnClose);
         this->ui->mdiArea->addSubWindow(this->ctl_subjects);
 

@@ -14,7 +14,6 @@ ControlSubjects::ControlSubjects(QWidget *parent) :
     connect(this->ui->listSubjects,SIGNAL(cellEntered(int,int)),this,SLOT(saveOrigText(int,int)));
     connect(this->ui->b_excluir,SIGNAL(clicked()),this,SLOT(remove()));
     connect(this->ui->importFile,SIGNAL(clicked()),this,SLOT(importFromFile()));
-    connect(this->parentWidget()->parentWidget()->parentWidget(),SIGNAL(database_updated()),this,SLOT(refreshList()));
 }
 
 ControlSubjects::~ControlSubjects()
@@ -99,6 +98,7 @@ void ControlSubjects::create()
             QMessageBox::information(this,tr("Sucesso"),tr("Indivíduo criado com sucesso!"));
             this->ui->name->clear();
             this->refreshList();
+            emit this->subjects_updated();
         }else{
             QMessageBox::critical(this,tr("Falha"),tr("Não foi possível cadastrar o indivíduo!"));
         }
@@ -117,6 +117,7 @@ void ControlSubjects::save(int row, int col)
         if(db.editSubjects(u) == 0){
             this->origText = "";
             this->ui->listSubjects->item(row,col)->setText(last);
+            emit this->subjects_updated();
         }
     }
 }
@@ -135,10 +136,11 @@ void ControlSubjects::remove()
             Database db;
             QList<int> rows;
             for (int i=0; i<this->ui->listSubjects->selectedItems().size(); i+=2){
-                QString id = this->ui->listSubjects->selectedItems().at(i)->text();
-                db.removeSession(id);
+                unsigned int id = this->ui->listSubjects->selectedItems().at(i)->text().toInt();
+                db.removeSubject(id);
                 rows.push_back(this->ui->listSubjects->selectedItems().at(i)->row());
             }
+            emit this->subjects_updated();
             while(rows.size()>0){
                 this->ui->listSubjects->removeRow(rows.last());
                 rows.pop_back();
@@ -166,5 +168,6 @@ void ControlSubjects::importFromFile()
             }
         }
         this->refreshList();
+        emit this->subjects_updated();
     }
 }

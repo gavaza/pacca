@@ -127,29 +127,23 @@
      </property>
      <item row="0" column="0">
       <layout class="QGridLayout" name="gridLayout_9">
-       <item row="1" column="1" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-        <widget class="QLabel" name="l_observer">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="3" column="2">
+        <widget class="QLabel" name="label">
          <property name="text">
-          <string>Observador</string>
+          <string>Indivíduo</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
-       <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-        <widget class="QLabel" name="l_description">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="3" column="1">
+        <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Descrição</string>
+          <string>Espécie</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -185,36 +179,67 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
-        <widget class="QComboBox" name="subject"/>
+       <item row="1" column="1" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+        <widget class="QLabel" name="l_observer">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Observador</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+        <widget class="QLabel" name="l_description">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Descrição</string>
+         </property>
+        </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QComboBox" name="species">
-         <property name="editable">
-          <bool>false</bool>
+        <widget class="QLineEdit" name="species">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="insertPolicy">
-          <enum>QComboBox::InsertAlphabetically</enum>
+         <property name="minimumSize">
+          <size>
+           <width>161</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>160</width>
+           <height>21</height>
+          </size>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Espécie</string>
+       <item row="4" column="2">
+        <widget class="QLineEdit" name="subject">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Indivíduo</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+         <property name="maximumSize">
+          <size>
+           <width>160</width>
+           <height>21</height>
+          </size>
          </property>
         </widget>
        </item>

@@ -55,10 +55,15 @@ private slots:
      * \brief Import from a text file
      */
     void importFromFile();
+
+public slots:
     /*!
      * \brief Refresh species list
      */
     void refreshList();
+
+signals:
+    void species_updated();
 };
 
 #endif // CONTROLSPECIES_H
