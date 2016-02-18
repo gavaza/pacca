@@ -74,11 +74,6 @@ QVector<double> Statistics::getTicks()
     return this->sessionsTicks;
 }
 
-//void Statistics::setStepSize(int stepSize)
-//{
-//    this->stepSize = stepSize;
-//}
-
 void Statistics::setTailedAlpha(int tailed, double alpha)
 {
     this->tailed = tailed;
@@ -103,6 +98,21 @@ QList<double> Statistics::getO()
 QList<double> Statistics::getR()
 {
     return this->dataR;
+}
+
+QMap<int, QPair<double, double> > Statistics::getVE()
+{
+    return this->VE;
+}
+
+QMap<int, QPair<double, double> > Statistics::getVO()
+{
+    return this->VO;
+}
+
+QMap<int, QPair<double, double> > Statistics::getVR()
+{
+    return this->VR;
 }
 
 QList<QPair<double, double> > Statistics::getP()
@@ -179,6 +189,7 @@ QMap<QVariant, int> Statistics::frequence(QVariantList list, int nbars)
 // behavior = one
 double Statistics::P(QVariantList u,
                      QVariantList behavior){
+    if (u.contains("*")) return 1;
     double Pu = 0;
     double n = behavior.size();
     for (int i=0; i<u.size(); i++){
@@ -191,6 +202,7 @@ double Statistics::P(QVariantList u,
 // behavior = multiple
 double Statistics::P(QVariantList u,
                      list_behavior behavior){
+    if (u.contains("*")) return 1;
     double Pu = 0;
     for (int i=0; i<u.size(); i++){
         int n = 0;
@@ -296,15 +308,6 @@ double Statistics::R_unnamed(list_behavior u, StatisticMap behavior){
     QPair<double,double> Ra;
     Ra = this->V(u,behavior,Residue);
     return Ra.first/sqrt(Ra.second/behavior.size());
-}
-
-// investigated = one
-// behavior = multiple
-// for convenince
-double Statistics::R_unnamed(list_behavior u, list_behavior behavior){
-    StatisticMap tmp;
-    tmp.insert(0,behavior);
-    return this->R_unnamed(u,tmp);
 }
 
 // investigated = one
@@ -497,7 +500,7 @@ QMap<int, QPair<double,double> > Statistics::V_Map(list_behavior u, StatisticMap
         StatisticMap::const_iterator j = behavior.find(key);
 
         while (j != behavior.end() && j.key() == key) {
-            subject_behavior.append(j.value());
+            subject_behavior.push_back(j.value());
             j++;
         }
 
@@ -542,14 +545,6 @@ QPair<double, double> Statistics::V(list_behavior u, StatisticMap behavior,
     return this->V(sample);
 }
 
-// for convenince
-QPair<double,double> Statistics::V(list_behavior u, list_behavior behavior,
-                                   enum types_of_variances type){
-    StatisticMap tmp;
-    tmp.insert(0,behavior);
-    return this->V(u,tmp,type);
-}
-
 QList<QVariantList> Statistics::bootstrap(QVariantList events, QList<int> indexes, int nsamples)
 {
     QSettings s("NuEvo","Pacca");
@@ -584,6 +579,9 @@ void Statistics::calcPermutation()
         this->dataO.clear();
         this->dataR.clear();
         this->dataP.clear();
+        this->VE.clear();
+        this->VO.clear();
+        this->VR.clear();
 
         int totalSessions = sessions.size();
         QList<StatisticMap> distributions;
@@ -596,13 +594,9 @@ void Statistics::calcPermutation()
         for(int s=0; s < totalSessions; s++){
             list_behavior bootstrap_list = this->bootstrap(this->events.at(s),this->indexes.at(s),this->nPermutations);
             int subject = this->sessionsSubjects.at(s);
-            list_behavior session;
-            session.push_back(this->sessions.at(s));
-            behaivors.insert(subject,session);
+            behaivors.insertMulti(subject,this->sessions.at(s));
             for(int p=0; p < this->nPermutations; p++){
-                list_behavior dist;
-                dist.push_back(bootstrap_list.at(p));
-                distributions[p].insertMulti(subject,dist);
+                distributions[p].insertMulti(subject,bootstrap_list.at(p));
             }
         }
         int totalPermutations = this->permutation_list.size();
@@ -617,26 +611,56 @@ void Statistics::calcPermutation()
             set_us.push_back(this->permutation_list.at(s));
             for(int idu=0; idu<this->permutation_list.at(s).size(); idu++){
                 info.append(this->permutation_list.at(s).at(idu).toString()); info.append(", ");
+            }            
+            this->dataE.append(this->E(set_us,behaivors.values()));
+            if (this->absolute){
+                this->dataO.append(this->O(set_us,behaivors.values()));
             }
-            QPair<double,double> E_mean = this->V(set_us,behaivors,Expected);
-            QPair<double,double> O_mean = this->V(set_us,behaivors,Observed);
-            QPair<double,double> R_mean = this->V(set_us,behaivors,Residue);
+            else{
+                this->dataO.append(this->P(set_us,behaivors.values()));
+            }
+            this->dataR.append(this->R(set_us,behaivors.values()));
+
+
             QList<double> rand_dist;
             for(int d=0; d < this->nPermutations; d++){
                 rand_dist.push_back(this->V(set_us,distributions.at(d),Residue).first);
             }
-            QPair<double,double> P_value = this->pvalue(R_mean.first,rand_dist);
+
+//            QPair<double,double> P_value = this->pvalue(this->R,rand_dist);  // FIXME: não entendo
+//            this->dataP.push_back(P_value);
+
             this->sessionsLabels.push_back("P:"+QString::number(s));
             int tick = this->sessionsLabels.size();
             this->sessionsTicks.push_back(tick);
             this->infos.push_back(info);
-            this->dataP.push_back(P_value);
-            this->dataR.push_front(R_mean.first);
-            this->dataO.push_front(O_mean.first);
-            this->dataE.push_front(E_mean.first);
+            this->VE.unite(this->V_Map(set_us,behaivors,Expected));
+            if (this->absolute){
+                this->VO.unite(this->V_Map(set_us,behaivors,Observed));
+            }
+            else{
+                this->VO.unite(this->V_Map(set_us,behaivors,Probability));
+            }
+            this->VR.unite(this->V_Map(set_us,behaivors,Residue));
             double ratio = ((double) s)/totalPermutations;
             emit this->statusProcess(ratio);
         }
         emit this->dataProcessed();
     }
+}
+
+void Statistics::updateAbsolute(bool absolute){
+    this->absolute = absolute;
+}
+
+void Statistics::updateDynamic(bool dynamic){
+    this->dynamic = dynamic;
+}
+
+void Statistics::updateStepStart(int stepStart){
+    this->stepStart = stepStart;
+}
+
+void Statistics::updateStepSize(int stepSize){
+    this->stepSize = stepSize;
 }

@@ -173,17 +173,10 @@ QList<StatisticMap> Phylogenetic::randomize(StatisticMap sessions, QMap<int, QLi
         QListIterator<int> i(keys);
         while(i.hasNext()){
             int key = i.next();
-            list_behavior list = sessions[key];
-            QList< QList<int> > idx = indexes[key];
-            QVariantList r;
-            for(int i=0; i < list.size(); i++){
-                r  = this->statsModule->bootstrap(list.at(i),idx.at(i),1).first();
-            }
-            if(!tmp.contains(key)){
-                list_behavior lb; lb.push_back(r);
-                tmp.insert(key,lb);
-            } else {
-                tmp[key].push_back(r);
+            QList<QList<int> > idx = indexes.value(key);
+            for (int i=0; i<idx.size(); i++){
+                QVariantList r = this->statsModule->bootstrap(sessions.value(key),idx.at(i),1).first();
+                tmp.insert(key,r);
             }
         }
         randomized.push_back(tmp);

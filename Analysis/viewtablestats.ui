@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>394</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,13 @@
    <item row="0" column="0">
     <widget class="QListWidget" name="list">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+      <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
      </property>
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
@@ -29,6 +32,9 @@
    </item>
    <item row="1" column="0">
     <widget class="QTableWidget" name="table">
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
+     </property>
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
      </property>
@@ -50,27 +56,7 @@
      </column>
      <column>
       <property name="text">
-       <string>Média Observado</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Variância</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
        <string>Esperado</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Média Esperado</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Variância</string>
       </property>
      </column>
      <column>
@@ -80,17 +66,58 @@
      </column>
      <column>
       <property name="text">
+       <string>P-Valor</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QTableWidget" name="table_2">
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>Indivíduo</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Média Observado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Variância Observado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Média Esperado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Variância Esperado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Média Resíduo</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Variância</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>P-Valor</string>
+       <string>Variância Resíduo</string>
       </property>
      </column>
     </widget>

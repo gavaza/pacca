@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QSplashScreen>
 #include <cmath>
+#include <QDebug>
 
 #include "database.h"
 #include "qcustomplot.h"
@@ -118,6 +119,8 @@ private:
     QColor colorMean;
     QColor colorVar;
 
+    QList<QList<double> > calc_statistics(list_behavior set_us, list_behavior behaivors);
+
 private slots:
     void hideSubWindow(QMdiSubWindow* w);
     /*!
@@ -162,6 +165,9 @@ private slots:
     void showSequenceStats();
     void showPermutationStats();
     void showData(QList<double> tmp_E, QList<double> tmp_O, QList<double> tmp_Rs,
+                  QMap<int, QPair<double, double> > VE,
+                  QMap<int, QPair<double, double> > VO,
+                  QMap<int, QPair<double, double> > VR,
                   QVector<QString> tmp_sessionsLabels, QVector<QString> tmp_infos, int s,
                   QList< QPair<double,double> > Ps = QList< QPair<double,double> >());
     void showGraphicStats(QList<double> E, QList<double> O, QList<double> R,
@@ -172,6 +178,9 @@ private slots:
                       QVector<QString> sessionsLabels, QVector<QString> infos,
                       QList<double> pvalues = QList<double>());
     void showTableStats(QList<double> E, QList<double> O, QList<double> R,
+                        QMap<int, QPair<double,double> > VE,
+                        QMap<int, QPair<double,double> > VO,
+                        QMap<int, QPair<double,double> > VR,
                         QVector<QString> sessionsLabels, QVector<QString> infos, int n,
                         QList<double> pvalues = QList<double>());
     void showNetStats(QList<double> E, QList<double> O, QList<double> R,

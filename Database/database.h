@@ -63,6 +63,7 @@ public:
     bool removeDictEntry(QString name, QString code);
     Dictionary getDictionary(QString name);
     int editDict(QString oldName, QString newName);
+    int subjectExist(QVariant name);
 
 private:
     QSqlQuery query;
@@ -81,7 +82,6 @@ private:
 
     int userExist(QVariant name);
     int specieExist(QVariant name);
-    int subjectExist(QVariant name);
     int stateExist(QVariant name);
     int dictExist(QVariant name);
     int dictEntryExist(QVariant name, QString code);

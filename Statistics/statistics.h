@@ -22,9 +22,9 @@ const char SEPARATE_REGEX=';';
 #define STATISTICS_VARIABLES
 #endif // STATISTICS_VARIABLES
 
-typedef  QList<QVariantList> list_behavior;
-
-typedef QMap<int,list_behavior> StatisticMap;
+typedef QList<QVariantList> list_behavior;
+typedef QList<QVariantList> behaviors;
+typedef QMap<int,QVariantList> StatisticMap;
 
 enum types_of_variances{
     Residue,
@@ -58,6 +58,9 @@ public:
     QList<double> getE();
     QList<double> getO();
     QList<double> getR();
+    QMap<int, QPair<double,double> > getVE();
+    QMap<int, QPair<double,double> > getVO();
+    QMap<int, QPair<double,double> > getVR();
     QList< QPair<double,double> > getP();
     bool getFilterPvalue();
     bool getStopThreadStatus();
@@ -91,7 +94,6 @@ public:
      */
 
     double R_unnamed(list_behavior u, StatisticMap behavior);
-    double R_unnamed(list_behavior u, list_behavior behavior);
 
     double R_all(list_behavior u,
                     list_behavior behavior);
@@ -116,17 +118,6 @@ public:
      */
     QPair<double, double> V(list_behavior u,
              StatisticMap behavior,
-             enum types_of_variances type);
-
-    /*!
-     * \brief V
-     * \param u
-     * \param behavior
-     * \param absolute
-     * \return
-     */
-    QPair<double, double> V(list_behavior u,
-             list_behavior behavior,
              enum types_of_variances type);
 
     /*!
@@ -203,6 +194,10 @@ private:
     QList<double> dataE;
     QList<double> dataO;
     QList<double> dataR;
+    QMap<int, QPair<double,double> > VE;
+    QMap<int, QPair<double,double> > VO;
+    QMap<int, QPair<double,double> > VR;
+
     QList< QPair<double,double> > dataP;
     int stepSize;
     int stepStart;
@@ -213,6 +208,11 @@ private:
     bool filterPvalue;
     bool stopThread;
 
+public slots:
+    void updateAbsolute(bool absolute);
+    void updateDynamic(bool dynamic);
+    void updateStepStart(int stepStart);
+    void updateStepSize(int stepSize);
 
 signals:
     void dataProcessed();
