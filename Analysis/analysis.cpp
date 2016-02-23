@@ -382,8 +382,7 @@ void AnalysisWindow::showSequenceStats()
     Database db;
     StatisticMap behaivors;
 
-
-    QVector<double> sessionsTicks;
+    QList<QVector<double> > set_sessionsTicks;
     QList<int> idSession;
     QList<QString> set_line;
     QList<QList<double> > set_E;
@@ -409,7 +408,7 @@ void AnalysisWindow::showSequenceStats()
 
     QVector<QString> sessionsLabels;
     QVector<QString> infos;
-
+    QVector<double> sessionsTicks;
     for (int i=0; i<idSession.size(); i++){
         QList<Actions> actions = db.getSequence(idSession[i]);
         QVariantList behavior_session;
@@ -420,7 +419,7 @@ void AnalysisWindow::showSequenceStats()
         }
         behaivors.insertMulti(db.subjectExist(db.getSession(idSession[i]).getSubject()),behavior_session);
         sessionsLabels.push_back("S:"+QString::number(idSession[i]));
-//        sessionsTicks.push_back(s+2); //FIXME
+        sessionsTicks.push_back(i+2);
         infos.push_back(db.getSession(idSession[i]).getDescription().toString());
     }
 
@@ -475,26 +474,33 @@ void AnalysisWindow::showSequenceStats()
         set_R.push_back(R);
         set_sessionsLabels.push_back(sessionsLabels);
         set_infos.push_back(infos);
-
-
+        set_sessionsTicks.push_back(sessionsTicks);
     }
 
-    switch (this->showtype) {
-    case 0:
-//        this->showGraphicStats(E,O,R,sessionsLabels,infos,sessionsTicks);
-        break;
-    case 1:
-        this->showTableStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos);
-        break;
-    case 2:
-//        this->showNetStats(E,O,R,sessionsLabels,infos);
-        break;
-    case 3:
-//        this->saveCsvStats(E,O,R,sessionsLabels,infos);
-        break;
-    default:
-        break;
-    }
+     if (this->showtype == 1){
+         this->showTableStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos);
+     }
+     else{
+         for (int i=0;i<set_line.size();i++){
+             switch (this->showtype) {
+             case 0:
+                 this->showGraphicStats(set_E.at(i),set_O.at(i),set_R.at(i),
+                                        set_sessionsLabels.at(i),set_infos.at(i),
+                                        set_sessionsTicks.at(i));
+                 break;
+             case 2:
+                 this->showNetStats(set_E.at(i),set_O.at(i),set_R.at(i),
+                                    set_sessionsLabels.at(i),set_infos.at(i));
+                 break;
+             case 3:
+                 this->saveCsvStats(set_E.at(i),set_O.at(i),set_R.at(i),
+                                    set_sessionsLabels.at(i),set_infos.at(i));
+                 break;
+             default:
+                 break;
+             }
+         }
+     }
 }
 
 QList<QList<double> > AnalysisWindow::calc_statistics(list_behavior set_us, list_behavior behaivors){
@@ -605,7 +611,7 @@ void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp
         QList<double> O;
         QVector<QString> sessionsLabels;
         QVector<QString> infos;
-        for(int i = 0; i < Ps.at(j).size(); i++) {
+        for(int i=0; i<Ps.at(j).size(); i++) {
             QPair<double,double> pv = Ps.at(j).at(i);
             bool valid = false;
             if(this->filterPvalue){
@@ -635,10 +641,11 @@ void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp
                 E.push_back(tmp_E.at(j).at(i));
                 O.push_back(tmp_O.at(j).at(i));
                 Rs.push_back(tmp_Rs.at(j).at(i));
-                sessionsLabels.push_back(tmp_sessionsLabels.at(j).at(i));
-                tick++;
-                sessionsTicks.push_back(tick);
-                infos.push_back(tmp_infos.at(j).at(i));
+                sessionsLabels.push_back(QString::number(tick++));
+//                sessionsLabels.push_back(tmp_sessionsLabels.at(j).at(i));
+//                tick++;
+//                sessionsTicks.push_back(tick);
+//                infos.push_back(tmp_infos.at(j).at(i));
             }
         }
         set_Rs.push_back(Rs);
@@ -1008,14 +1015,16 @@ void AnalysisWindow::showProcessedDataPermutation()
     for (int i=0;i<p.size();i++){
         QString a;
         for(int j=0;j<p.at(i).size();j++){
+            a.append(QString::number(j+1));
+            a.append(": {");
             for(int k=0; k<p.at(i).at(j).size();k++){
                 a.append(p.at(i).at(j).at(k).toString());
                 a.append(", ");
             }
-            a.remove(a.size()-2,2);
-            a.append("; ");
+            a.remove(a.size()-1,1);
+            a.append("}; ");
         }
-        a.remove(a.size()-2,2);
+        a.remove(a.size()-1,1);
         set_line.push_back(a);
     }
     this->showData(set_line, this->statsModule->getE(),this->statsModule->getO(),this->statsModule->getR(),
