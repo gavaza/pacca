@@ -582,68 +582,83 @@ void AnalysisWindow::showPermutationStats()
     }
 }
 
-void AnalysisWindow::showData(QList<double> tmp_E, QList<double> tmp_O,
-                              QList<double> tmp_Rs, QMap<int, QPair<double, double> > VE,
-                              QMap<int, QPair<double, double> > VO,
-                              QMap<int, QPair<double, double> > VR, QVector<QString> tmp_sessionsLabels,
-                              QVector<QString> tmp_infos, int s, QList<QPair<double, double> > Ps)
+void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp_E, QList<QList<double> > tmp_O,
+                              QList<QList<double> > tmp_Rs, QList<QMap<int, QPair<double, double> > > VE,
+                              QList<QMap<int, QPair<double, double> > > VO,
+                              QList<QMap<int, QPair<double, double> > > VR,
+                              QList<QVector<QString> > tmp_sessionsLabels,
+                              QList<QVector<QString> > tmp_infos,
+                              int s,
+                              QList<QList<QPair<double, double> > > Ps)
 {
-    QList<double> Rs;
-    QList<double> E;
-    QList<double> O;
+    QList<QList<double> > set_Rs;
+    QList<QList<double> > set_E;
+    QList<QList<double> > set_O;
     QList<double> pvalues;
-    QVector<QString> sessionsLabels;
-    QVector<QString> infos;
+    QList<QVector<QString> > set_sessionsLabels;
+    QList<QVector<QString> > set_infos;
     QVector<double> sessionsTicks;
     int tick = 0;
-    for(int i = 0; i < Ps.size(); i++) {
-        QPair<double,double> pv = Ps.at(i);
-        bool valid = false;
-        if(this->filterPvalue){
-            double reference = this->alfa;
-            if(this->tailed == 0){
-                reference = this->alfa/2.0;
-                double p;
-                if(pv.first < pv.second) p=pv.first;
-                else p=pv.second;
-                if(p<=reference){
-                    pvalues.push_back(p);
+    for (int j=0; j<Ps.size(); j++){
+        QList<double> Rs;
+        QList<double> E;
+        QList<double> O;
+        QVector<QString> sessionsLabels;
+        QVector<QString> infos;
+        for(int i = 0; i < Ps.at(j).size(); i++) {
+            QPair<double,double> pv = Ps.at(j).at(i);
+            bool valid = false;
+            if(this->filterPvalue){
+                double reference = this->alfa;
+                if(this->tailed == 0){
+                    reference = this->alfa/2.0;
+                    double p;
+                    if(pv.first < pv.second) p=pv.first;
+                    else p=pv.second;
+                    if(p<=reference){
+                        pvalues.push_back(p);
+                        valid=true;
+                    }
+                } else if((pv.first < pv.second) && tailed == -1 && (pv.first <= reference)){
+                    pvalues.push_back(pv.first);
+                    valid=true;
+                } else if((pv.first >= pv.second) && tailed == 1 && (pv.second <= reference)){
+                    pvalues.push_back(pv.second);
                     valid=true;
                 }
-            } else if((pv.first < pv.second) && tailed == -1 && (pv.first <= reference)){
-                pvalues.push_back(pv.first);
+            }else {
                 valid=true;
-            } else if((pv.first >= pv.second) && tailed == 1 && (pv.second <= reference)){
-                pvalues.push_back(pv.second);
-                valid=true;
+                if(pv.first < pv.second) pvalues.push_back(pv.first);
+                else pvalues.push_back(pv.second);
             }
-        }else {
-            valid=true;
-            if(pv.first < pv.second) pvalues.push_back(pv.first);
-            else pvalues.push_back(pv.second);
+            if(valid){
+                E.push_back(tmp_E.at(j).at(i));
+                O.push_back(tmp_O.at(j).at(i));
+                Rs.push_back(tmp_Rs.at(j).at(i));
+                sessionsLabels.push_back(tmp_sessionsLabels.at(j).at(i));
+                tick++;
+                sessionsTicks.push_back(tick);
+                infos.push_back(tmp_infos.at(j).at(i));
+            }
         }
-        if(valid){
-            E.push_back(tmp_E.at(i));
-            O.push_back(tmp_O.at(i));
-            Rs.push_back(tmp_Rs.at(i));
-            sessionsLabels.push_back(tmp_sessionsLabels.at(i));
-            tick++;
-            sessionsTicks.push_back(tick);
-            infos.push_back(tmp_infos.at(i));
-        }
+        set_Rs.push_back(Rs);
+        set_E.push_back(E);
+        set_O.push_back(O);
+        set_sessionsLabels.push_back(sessionsLabels);
+        set_infos.push_back(infos);
     }
     switch (this->showtype) {
     case 0:
-        this->showGraphicStats(E,O,Rs,sessionsLabels,infos,sessionsTicks,pvalues);
+//        this->showGraphicStats(E,O,Rs,sessionsLabels,infos,sessionsTicks,pvalues);
         break;
     case 1:
-//        this->showTableStats(E,O,Rs,VE,VO,VR,sessionsLabels,infos,s,pvalues);
+        this->showTableStats(set_line,set_E,set_O,set_Rs,VE,VO,VR,set_sessionsLabels,set_infos);
         break;
     case 2:
-        this->showNetStats(E,O,Rs,sessionsLabels,infos,pvalues);
+//        this->showNetStats(E,O,Rs,sessionsLabels,infos,pvalues);
         break;
     case 3:
-        this->saveCsvStats(E,O,Rs,sessionsLabels,infos,pvalues);
+//        this->saveCsvStats(E,O,Rs,sessionsLabels,infos,pvalues);
         break;
     default:
         break;
@@ -977,7 +992,7 @@ void AnalysisWindow::statisticsTests()
         }
         QMap<int, QPair<double,double> > VR = this->statsModule->V_Map(set_us, behaivors, Residue);
 
-        this->showData(tmp_E,tmp_O,tmp_Rs,VE,VO,VR,tmp_sessionsLabels,tmp_infos,s,Ps);
+//        this->showData(tmp_E,tmp_O,tmp_Rs,VE,VO,VR,tmp_sessionsLabels,tmp_infos,Ps);
 
     }
 }
@@ -988,12 +1003,24 @@ void AnalysisWindow::showProcessedDataPermutation()
     this->ui->cancelProcess->setDisabled(true);
     this->hasData = true;
     this->ui->progressBar->setValue(0);
-    int np = this->statsModule->getPermutationSize();
-    for (int i=0; i<np; i++){
-        this->showData(this->statsModule->getE(i),this->statsModule->getO(i),this->statsModule->getR(i),
-                       this->statsModule->getVE(i), this->statsModule->getVO(i), this->statsModule->getVR(i),
-                       this->statsModule->getLabels(),this->statsModule->getInfos(),-1,this->statsModule->getP());
+    QList<QString> set_line;
+    QList<list_behavior> p=this->statsModule->getUs();
+    for (int i=0;i<p.size();i++){
+        QString a;
+        for(int j=0;j<p.at(i).size();j++){
+            for(int k=0; k<p.at(i).at(j).size();k++){
+                a.append(p.at(i).at(j).at(k).toString());
+                a.append(", ");
+            }
+            a.remove(a.size()-2,2);
+            a.append("; ");
+        }
+        a.remove(a.size()-2,2);
+        set_line.push_back(a);
     }
+    this->showData(set_line, this->statsModule->getE(),this->statsModule->getO(),this->statsModule->getR(),
+                   this->statsModule->getVE(), this->statsModule->getVO(), this->statsModule->getVR(),
+                   this->statsModule->getLabels(),this->statsModule->getInfos(),-1,this->statsModule->getP());
 }
 
 void AnalysisWindow::cancelProcessPermutation()

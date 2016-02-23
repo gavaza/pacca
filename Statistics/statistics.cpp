@@ -63,12 +63,22 @@ void Statistics::setIndexes(QList< QList<int> > indexes)
     this->indexes = indexes;
 }
 
-QVector<QString> Statistics::getLabels()
+QList<QVector<QString> > Statistics::getLabels()
 {
     return this->sessionsLabels;
 }
 
-QVector<QString> Statistics::getInfos()
+QVector<QString> Statistics::getLabels(int i)
+{
+    return this->sessionsLabels.at(i);
+}
+
+QVector<QString> Statistics::getInfos(int i)
+{
+    return this->infos.at(i);
+}
+
+QList<QVector<QString> > Statistics::getInfos()
 {
     return this->infos;
 }
@@ -119,7 +129,44 @@ QMap<int, QPair<double, double> > Statistics::getVR(int i)
     return this->VR.at(i);
 }
 
-QList<QPair<double, double> > Statistics::getP()
+QList<QPair<double, double> > Statistics::getP(int i)
+{
+    return this->dataP.at(i);
+}
+
+list_behavior Statistics::getUs(int i){
+    return this->set_us.at(i);
+}
+
+QList<list_behavior> Statistics::getUs(){
+    return this->set_us;
+}
+
+QList<QList<double> > Statistics::getE(){
+    return this->dataE;
+}
+
+QList<QList<double> > Statistics::getR(){
+    return this->dataR;
+}
+
+QList<QList<double> > Statistics::getO(){
+    return this->dataO;
+}
+
+QList<QMap<int, QPair<double,double> > > Statistics::getVE(){
+    return this->VE;
+}
+
+QList<QMap<int, QPair<double,double> > > Statistics::getVO(){
+    return this->VO;
+}
+
+QList<QMap<int, QPair<double,double> > > Statistics::getVR(){
+    return this->VR;
+}
+
+QList<QList<QPair<double, double> > > Statistics::getP()
 {
     return this->dataP;
 }
@@ -611,7 +658,7 @@ void Statistics::calcPermutation()
         this->VE.clear();
         this->VO.clear();
         this->VR.clear();
-        this->set_us_random.clear();
+        this->set_us.clear();
 
         int totalSessions = sessions.size();
         QList<StatisticMap> distributions;
@@ -630,6 +677,8 @@ void Statistics::calcPermutation()
             }
         }
         int totalPermutations = this->permutation_list.size();
+        QVector<QString> sessionsLabels;
+        QVector<QString> infos;
         for(int s=0; s < totalPermutations; s++){
             list_behavior set_us;
             QString info;
@@ -639,7 +688,7 @@ void Statistics::calcPermutation()
                 return;
             }
             set_us.push_back(this->permutation_list.at(s));
-            this->set_us_random.push_back(set_us); // keep set_us
+            this->set_us.push_back(set_us); // keep set_us
             for(int idu=0; idu<this->permutation_list.at(s).size(); idu++){
                 info.append(this->permutation_list.at(s).at(idu).toString()); info.append(", ");
             }            
@@ -658,13 +707,13 @@ void Statistics::calcPermutation()
                 rand_dist.push_back(this->V(set_us,distributions.at(d),Residue).first);
             }
 
-//            QPair<double,double> P_value = this->pvalue(this->R,rand_dist);  // FIXME: não entendo
-//            this->dataP.push_back(P_value);
+            QList<QPair<double,double> > P_value = this->pvalue(this->dataR.last(),rand_dist);
+            this->dataP.push_back(P_value);
 
-            this->sessionsLabels.push_back("P:"+QString::number(s));
+            sessionsLabels.push_back("P:"+QString::number(s));
             int tick = this->sessionsLabels.size();
             this->sessionsTicks.push_back(tick);
-            this->infos.push_back(info);
+            infos.push_back(info);
 
             this->VE.push_back(this->V_Map(set_us,behaivors,Expected));
             if (this->absolute){
@@ -677,6 +726,8 @@ void Statistics::calcPermutation()
             double ratio = ((double) s)/totalPermutations;
             emit this->statusProcess(ratio);
         }
+        this->sessionsLabels.push_back(sessionsLabels);
+        this->infos.push_back(infos);
         emit this->dataProcessed();
     }
 }

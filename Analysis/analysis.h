@@ -164,12 +164,13 @@ private slots:
     void showSessionStats();
     void showSequenceStats();
     void showPermutationStats();
-    void showData(QList<double> tmp_E, QList<double> tmp_O, QList<double> tmp_Rs,
-                  QMap<int, QPair<double, double> > VE,
-                  QMap<int, QPair<double, double> > VO,
-                  QMap<int, QPair<double, double> > VR,
-                  QVector<QString> tmp_sessionsLabels, QVector<QString> tmp_infos, int s,
-                  QList< QPair<double,double> > Ps = QList< QPair<double,double> >());
+    void showData(QList<QString> set_line, QList<QList<double> > tmp_E,
+                  QList<QList<double> > tmp_O, QList<QList<double> > tmp_Rs,
+                  QList<QMap<int, QPair<double, double> > > VE,
+                  QList<QMap<int, QPair<double, double> > > VO,
+                  QList<QMap<int, QPair<double, double> > > VR,
+                  QList<QVector<QString> > tmp_sessionsLabels, QList<QVector<QString> > tmp_infos, int s,
+                  QList<QList<QPair<double, double> > > Ps = QList<QList< QPair<double,double> > >());
     void showGraphicStats(QList<double> E, QList<double> O, QList<double> R,
                           QVector<QString> sessionsLabels, QVector<QString> infos,
                           QVector<double> sessionsTicks,
