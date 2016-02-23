@@ -396,70 +396,82 @@ void AnalysisWindow::showSequenceStats()
 {
     Database db;
     StatisticMap behaivors;
-    QVector<QString> sessionsLabels;
-    QVector<QString> infos;
+
+
     QVector<double> sessionsTicks;
-    int stepSize = this->ui->stepsSize->value();
-    if(this->ui->sessions->selectedItems().size() == 0){
-        for(int s=0; s < this->ui->sessions->rowCount(); s++){
-            unsigned int idSession = this->ui->sessions->item(s,0)->text().toUInt();
-            QList<Actions> actions = db.getSequence(idSession);
-            QVariantList behavior_session;
-            for(int a = 0; a < actions.size(); a++){
-                Actions act = actions.at(a);
-                QVariant ev = act.getEventDescription();
-                behavior_session.push_back(ev);
-            }
-            behaivors.insertMulti(db.subjectExist(db.getSession(idSession).getSubject()),behavior_session);
-            sessionsLabels.push_back("S:"+QString::number(idSession));
-            sessionsTicks.push_back(s+2);
-            infos.push_back(db.getSession(idSession).getDescription().toString());
-        }
-    } else {
+    QList<int> idSession;
+    QList<QString> set_line;
+    QList<QList<double> > set_E;
+    QList<QList<double> > set_O;
+    QList<QList<double> > set_R;
+    QList<QMap<int, QPair<double,double> > > set_VE;
+    QList<QMap<int, QPair<double,double> > > set_VO;
+    QList<QMap<int, QPair<double,double> > > set_VR;
+    QList<QVector<QString> > set_sessionsLabels;
+    QList<QVector<QString> > set_infos;
+
+    if (this->ui->sessions->selectedItems().size() == 0){
+       for(int s=0; s < this->ui->sessions->rowCount(); s++){
+           idSession.push_back(this->ui->sessions->item(s,0)->text().toUInt());
+       }
+    }
+    else{
         int sizeCollumns = this->ui->sessions->columnCount();
         for(int s=0; s < this->ui->sessions->selectedItems().size(); s=s+sizeCollumns){
-            unsigned int idSession = this->ui->sessions->selectedItems().at(s)->text().toUInt();
-            QList<Actions> actions = db.getSequence(idSession);
-            QVariantList behavior_session;
-            for(int a = 0; a < actions.size(); a++){
-                Actions act = actions.at(a);
-                QVariant ev = act.getEventDescription();
-                behavior_session.push_back(ev);
-            }
-            behaivors.insertMulti(db.subjectExist(db.getSession(idSession).getSubject()),behavior_session);
-            sessionsLabels.push_back("S:"+QString::number(idSession));
-            sessionsTicks.push_back(s+2);
-            infos.push_back(db.getSession(idSession).getDescription().toString());
+            idSession.push_back(this->ui->sessions->selectedItems().at(s)->text().toUInt());
         }
     }
+
+    QVector<QString> sessionsLabels;
+    QVector<QString> infos;
+
+    for (int i=0; i<idSession.size(); i++){
+        QList<Actions> actions = db.getSequence(idSession[i]);
+        QVariantList behavior_session;
+        for(int a = 0; a < actions.size(); a++){
+            Actions act = actions.at(a);
+            QVariant ev = act.getEventDescription();
+            behavior_session.push_back(ev);
+        }
+        behaivors.insertMulti(db.subjectExist(db.getSession(idSession[i]).getSubject()),behavior_session);
+        sessionsLabels.push_back("S:"+QString::number(idSession[i]));
+//        sessionsTicks.push_back(s+2); //FIXME
+        infos.push_back(db.getSession(idSession[i]).getDescription().toString());
+    }
+
     for(int s=0; s < this->sequences.size(); s++){
-        list_behavior set_us;
+        list_behavior list_us;
+        QString line_us;
         for(int l=0; l < this->sequences.at(s)->count(); l++){
-            set_us.push_back(QVariantList());
+            list_us.push_back(QVariantList());
             QString line = this->sequences.at(s)->item(l)->text();
+            line_us.append(line);
+            line_us.append("; ");
             line.remove(0,line.indexOf("{")+1);
             line.remove("}");
             line.remove(" ");
             QStringList us = line.split(",",QString::SkipEmptyParts);
             QString u;
             foreach (u, us) {
-                set_us.last().push_back(u);
+                list_us.last().push_back(u);
             }
         }
-        QList<QList<double> > result = this->calc_statistics(set_us,behaivors.values());
+        line_us.remove(line_us.size()-1,1);
+        set_line.push_back(line_us);
+        QList<QList<double> > result = this->calc_statistics(list_us,behaivors.values());
         QList<double> E = result.at(0);
         QList<double> O = result.at(1);
         QList<double> R = result.at(2);
 
-        QMap<int, QPair<double,double> > VE = this->statsModule->V_Map(set_us, behaivors, Expected);
+        QMap<int, QPair<double,double> > VE = this->statsModule->V_Map(list_us, behaivors, Expected);
         QMap<int, QPair<double,double> > VO;
         if (this->ui->absolut->isChecked()){
-            VO = this->statsModule->V_Map(set_us, behaivors, Observed);
+            VO = this->statsModule->V_Map(list_us, behaivors, Observed);
         }
         else{
-            VO = this->statsModule->V_Map(set_us, behaivors, Probability);
+            VO = this->statsModule->V_Map(list_us, behaivors, Probability);
         }
-        QMap<int, QPair<double,double> > VR = this->statsModule->V_Map(set_us, behaivors, Residue);
+        QMap<int, QPair<double,double> > VR = this->statsModule->V_Map(list_us, behaivors, Residue);
 
 
         QPair<double, double> E_all = this->statsModule->V(VE);
@@ -470,22 +482,33 @@ void AnalysisWindow::showSequenceStats()
         VO.insertMulti(-1,O_all);
         VR.insertMulti(-1,R_all);
 
-        switch (this->showtype) {
-        case 0:
-            this->showGraphicStats(E,O,R,sessionsLabels,infos,sessionsTicks);
-            break;
-        case 1:
-            this->showTableStats(E,O,R,VE,VO,VR,sessionsLabels,infos,s);
-            break;
-        case 2:
-            this->showNetStats(E,O,R,sessionsLabels,infos);
-            break;
-        case 3:
-            this->saveCsvStats(E,O,R,sessionsLabels,infos);
-            break;
-        default:
-            break;
-        }
+        set_VE.push_back(VE);
+        set_VO.push_back(VO);
+        set_VR.push_back(VR);
+        set_E.push_back(E);
+        set_O.push_back(O);
+        set_R.push_back(R);
+        set_sessionsLabels.push_back(sessionsLabels);
+        set_infos.push_back(infos);
+
+
+    }
+
+    switch (this->showtype) {
+    case 0:
+//        this->showGraphicStats(E,O,R,sessionsLabels,infos,sessionsTicks);
+        break;
+    case 1:
+        this->showTableStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos);
+        break;
+    case 2:
+//        this->showNetStats(E,O,R,sessionsLabels,infos);
+        break;
+    case 3:
+//        this->saveCsvStats(E,O,R,sessionsLabels,infos);
+        break;
+    default:
+        break;
     }
 }
 
@@ -523,55 +546,44 @@ void AnalysisWindow::showPermutationStats()
         list_behavior behaivors;
         QList< QVariantList > events;
         QList< QList<int> > indexes;
-        QList< int > subjects;
+        QList<int> subjects;
+        QList<int> idSession;
 
-        if(this->ui->sessions->selectedItems().size() == 0){
-            for(int s=0; s < this->ui->sessions->rowCount(); s++){
-                unsigned int idSession = this->ui->sessions->item(s,0)->text().toUInt();
-                int subject = db.getSession(idSession).getSubject().toInt();
-                QList<Actions> actions = db.getSequence(idSession);
-                QList<QVariant> behavior_session;
-                QVariantList tmp_ev;
-                QList<int> tmp_idx;
-                for(int a = 0; a < actions.size(); a++){
-                    Actions act = actions.at(a);
-                    QString ev = act.getEventDescription();
-                    behavior_session.push_back(ev);
-                    tmp_ev.push_back(ev);
-                    tmp_idx.push_back(a);
-                }
-                events.push_back(tmp_ev);
-                indexes.push_back(tmp_idx);
-                behaivors.push_back(behavior_session);
-                subjects.push_back(subject);
-            }
-        } else {
+        if (this->ui->sessions->selectedItems().size() == 0){
+           for(int s=0; s < this->ui->sessions->rowCount(); s++){
+               idSession.push_back(this->ui->sessions->item(s,0)->text().toUInt());
+           }
+        }
+        else{
             int sizeCollumns = this->ui->sessions->columnCount();
             for(int s=0; s < this->ui->sessions->selectedItems().size(); s=s+sizeCollumns){
-                unsigned int idSession = this->ui->sessions->selectedItems().at(s)->text().toUInt();
-                int subject = db.getSession(idSession).getSubject().toInt();
-                QList<Actions> actions = db.getSequence(idSession);
-                QList<QVariant> behavior_session;
-                QVariantList tmp_ev;
-                QList<int> tmp_idx;
-                for(int a = 0; a < actions.size(); a++){
-                    Actions act = actions.at(a);
-                    QString ev = act.getEventDescription();
-                    behavior_session.push_back(ev);
-                    tmp_ev.push_back(ev);
-                    tmp_idx.push_back(a);
-                }
-                events.push_back(tmp_ev);
-                indexes.push_back(tmp_idx);
-                behaivors.push_back(behavior_session);
-                subjects.push_back(subject);
+                idSession.push_back(this->ui->sessions->selectedItems().at(s)->text().toUInt());
             }
         }
+
+        for (int i=0; i<idSession.size(); i++){
+            int subject = db.subjectExist(db.getSession(idSession[i]).getSubject());
+            QList<Actions> actions = db.getSequence(idSession[i]);
+            QList<QVariant> behavior_session;
+            QVariantList tmp_ev;
+            QList<int> tmp_idx;
+            for(int a = 0; a < actions.size(); a++){
+                Actions act = actions.at(a);
+                QString ev = act.getEventDescription();
+                behavior_session.push_back(ev);
+                tmp_ev.push_back(ev);
+                tmp_idx.push_back(a);
+            }
+            events.push_back(tmp_ev);
+            indexes.push_back(tmp_idx);
+            behaivors.push_back(behavior_session);
+            subjects.push_back(subject);
+        }
+
         this->statsModule->setEvents(events);
         this->statsModule->setIndexes(indexes);
         this->statsModule->setSessions(behaivors,subjects);
         this->statsModule->setPermutationList(this->permutation_list);
-//        this->statsModule->setStepSize(this->ui->stepsSize->value());
         this->statsModule->setPermutationSize(this->nPermutations);
         this->statsModule->setTypeRun('P');
         this->statsModule->setTailedAlpha(this->tailed,this->alfa);
@@ -640,7 +652,7 @@ void AnalysisWindow::showData(QList<double> tmp_E, QList<double> tmp_O,
         this->showGraphicStats(E,O,Rs,sessionsLabels,infos,sessionsTicks,pvalues);
         break;
     case 1:
-        this->showTableStats(E,O,Rs,VE,VO,VR,sessionsLabels,infos,s,pvalues);
+//        this->showTableStats(E,O,Rs,VE,VO,VR,sessionsLabels,infos,s,pvalues);
         break;
     case 2:
         this->showNetStats(E,O,Rs,sessionsLabels,infos,pvalues);
@@ -771,64 +783,17 @@ void AnalysisWindow::saveCsvStats(QList<double> E, QList<double> O, QList<double
     }
 }
 
-void AnalysisWindow::showTableStats(QList<double> E, QList<double> O, QList<double> R,
-                                    QMap<int, QPair<double, double> > VE,
-                                    QMap<int, QPair<double, double> > VO,
-                                    QMap<int, QPair<double, double> > VR,
-                                    QVector<QString> sessionsLabels, QVector<QString> infos, int n, QList<double> pvalues)
-{
+void AnalysisWindow::showTableStats(QList<QString> set_line, QList<QList<double> > E, QList<QList<double> > O, QList<QList<double> > R,
+                                    QList<QMap<int, QPair<double, double> > > VE,
+                                    QList<QMap<int, QPair<double, double> > > VO,
+                                    QList<QMap<int, QPair<double, double> > > VR,
+                                    QList<QVector<QString> > sessionsLabels,
+                                    QList<QVector<QString> > infos,
+                                    QList<QList<double> > pvalues)
+{   
     ViewTableStats* view = new ViewTableStats(this->mdi);
-    QString title;
-    if(n<0){
-        view->insertListLine(tr("Permutações"));
-        for(int l=0; l < infos.size(); l++){
-            view->insertListLine(sessionsLabels.at(l)+": "+infos.at(l));
-        }
-        title = tr("Estatísticas ")+QString::number(nwin)+tr(" - Permutações: ");
-    } else {
-        view->insertListLine(tr("Sequência"));
-        for(int l=0; l < this->sequences.at(n)->count(); l++){
-            view->insertListLine(this->sequences.at(n)->item(l)->text());
-        }
-        title = tr("Estatísticas ")+QString::number(nwin)+tr(" - Sequência: ")+QString::number(n+1);
-    }
-    for(int v=0; v < E.size(); v++){
-        QVariant pvalue = -1;
-        if(!pvalues.isEmpty()) pvalue = pvalues.at(v);
-        view->insertTableLine(sessionsLabels.at(v),O.at(v),
-                              E.at(v),R.at(v),pvalue);
-    }
-    QList<int> keys = VE.uniqueKeys();
-    QListIterator<int> i(keys);
-    Database db;
-    while (i.hasNext()){
-        int key = i.next();
-        QPair<double,double> MeanVarE = VE.value(key);
-        QPair<double,double> MeanVarO = VO.value(key);
-        QPair<double,double> MeanVarR = VR.value(key);
-        QVariant VarE = MeanVarE.second;
-        QVariant VarO = MeanVarO.second;
-        QVariant VarR = MeanVarR.second;
-        if (VarE.toInt() == -1) VarE = "-";
-        if (VarO.toInt() == -1) VarO = "-";
-        if (VarR.toInt() == -1) VarR = "-";
-        QString name;
-        if (key==-1){
-            name="Todas";
-        }
-        else{
-            name = db.getSubjects(key).getName().toString();
-        }
-        view->insertTable2Line(name,
-                               MeanVarO.first,
-                               VarO,
-                               MeanVarE.first,
-                               VarE,
-                               MeanVarR.first,
-                               VarR);
-    }
-
-    view->setWindowTitle(title);
+    view->setData(set_line,sessionsLabels,infos,O,E,R,pvalues,VE,VO,VR);
+//    view->setWindowTitle(title);
     this->mdi->addSubWindow(view);
     view->show();
 }
@@ -1042,9 +1007,12 @@ void AnalysisWindow::showProcessedDataPermutation()
     this->ui->cancelProcess->setDisabled(true);
     this->hasData = true;
     this->ui->progressBar->setValue(0);
-    this->showData(this->statsModule->getE(),this->statsModule->getO(),this->statsModule->getR(),
-                   this->statsModule->getVE(), this->statsModule->getVO(), this->statsModule->getVR(),
-                   this->statsModule->getLabels(),this->statsModule->getInfos(),-1,this->statsModule->getP());
+    int np = this->statsModule->getPermutationSize();
+    for (int i=0; i<np; i++){
+        this->showData(this->statsModule->getE(i),this->statsModule->getO(i),this->statsModule->getR(i),
+                       this->statsModule->getVE(i), this->statsModule->getVO(i), this->statsModule->getVR(i),
+                       this->statsModule->getLabels(),this->statsModule->getInfos(),-1,this->statsModule->getP());
+    }
 }
 
 void AnalysisWindow::cancelProcessPermutation()

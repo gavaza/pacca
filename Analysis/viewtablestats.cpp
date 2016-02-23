@@ -6,6 +6,7 @@ ViewTableStats::ViewTableStats(QWidget *parent) :
     ui(new Ui::ViewTableStats)
 {
     ui->setupUi(this);
+    connect(this->ui->list,SIGNAL(currentRowChanged(int)),this,SLOT(alter_line(int)));
 }
 
 ViewTableStats::~ViewTableStats()
@@ -54,7 +55,7 @@ void ViewTableStats::insertTableLine(QString session, QVariant obs,
     }
 }
 
-void ViewTableStats::insertTable2Line(QString subject, QVariant MO, QVariant vobs,
+void ViewTableStats::insertTable2Line(QVariant subject, QVariant MO, QVariant vobs,
                                      QVariant ME, QVariant vspec,
                                      QVariant MR, QVariant vres){
     int row = 0;
@@ -66,7 +67,7 @@ void ViewTableStats::insertTable2Line(QString subject, QVariant MO, QVariant vob
         QTableWidgetItem *item = new QTableWidgetItem();
         switch (c) {
         case 0:
-            item->setText(subject);
+            item->setText(subject.toString());
             break;
         case 1:
             item->setText(MO.toString());
@@ -90,5 +91,61 @@ void ViewTableStats::insertTable2Line(QString subject, QVariant MO, QVariant vob
             break;
         }
         this->ui->table_2->setItem(row,c,item);
+    }
+}
+
+void ViewTableStats::setData(QList<QString> set_line,
+                             QList<QVector<QString> > sessionLabels,
+                             QList<QVector<QString> > infos,
+                             QList<QList<double> > obs, QList<QList<double> > spec, QList<QList<double> > res,
+                             QList<QList<double> > pvalor,
+                             QList<QMap<int, QPair<double, double> > > VE,
+                             QList<QMap<int, QPair<double, double> > > VO,
+                             QList<QMap<int, QPair<double, double> > > VR){
+
+    for (int i=0; i<set_line.size(); i++){
+        this->ui->list->addItem(set_line.at(i));
+    }
+
+    this->session = sessionLabels;
+    this->infos = infos;
+    this->obs = obs;
+    this->spec = spec;
+    this->res = res;
+    this->pvalor = pvalor;
+    this->VE = VE;
+    this->VO = VO;
+    this->VR = VR;
+}
+
+void ViewTableStats::alter_line(int i){
+    this->ui->table->setRowCount(0);
+    this->ui->table_2->setRowCount(0);
+    for (int j=0; j<this->session.at(i).size(); j++){
+        this->insertTableLine(this->session.at(i).at(j),
+                              this->obs.at(i).at(j),
+                              this->spec.at(i).at(j),
+                              this->res.at(i).at(j));
+    }
+    QList<int> keys = this->VE.at(i).uniqueKeys();
+    QListIterator<int> j(keys);
+    while (j.hasNext()){
+        int key = j.next();
+        QPair<double,double> MeanVarE = VE.at(i).value(key);
+        QPair<double,double> MeanVarO = VO.at(i).value(key);
+        QPair<double,double> MeanVarR = VR.at(i).value(key);
+        QVariant VarE = MeanVarE.second;
+        QVariant VarO = MeanVarO.second;
+        QVariant VarR = MeanVarR.second;
+        if (VarE.toInt() == -1) VarE = "-";
+        if (VarO.toInt() == -1) VarO = "-";
+        if (VarR.toInt() == -1) VarR = "-";
+        this->insertTable2Line(key,
+                               MeanVarO.first,
+                               VarO,
+                               MeanVarE.first,
+                               VarE,
+                               MeanVarR.first,
+                               VarR);
     }
 }

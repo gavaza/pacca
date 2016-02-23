@@ -55,16 +55,17 @@ public:
     QVector<QString> getLabels();
     QVector<QString> getInfos();
     QVector<double> getTicks();
-    QList<double> getE();
-    QList<double> getO();
-    QList<double> getR();
-    QMap<int, QPair<double,double> > getVE();
-    QMap<int, QPair<double,double> > getVO();
-    QMap<int, QPair<double,double> > getVR();
+    QList<double> getE(int i);
+    QList<double> getO(int i);
+    QList<double> getR(int i);
+    QMap<int, QPair<double,double> > getVE(int i);
+    QMap<int, QPair<double,double> > getVO(int i);
+    QMap<int, QPair<double,double> > getVR(int i);
     QList< QPair<double,double> > getP();
     bool getFilterPvalue();
     bool getStopThreadStatus();
     void setStopThreadStatus(bool stop);
+    int getPermutationSize();
 
 
     /*!
@@ -191,12 +192,13 @@ private:
     QVector<QString> infos;
     QVector<double> sessionsTicks;
     QList<int> sessionsSubjects;
-    QList<double> dataE;
-    QList<double> dataO;
-    QList<double> dataR;
-    QMap<int, QPair<double,double> > VE;
-    QMap<int, QPair<double,double> > VO;
-    QMap<int, QPair<double,double> > VR;
+    QList<QList<double> > dataE;
+    QList<QList<double> > dataO;
+    QList<QList<double> > dataR;
+    QList<list_behavior> set_us_random;
+    QList<QMap<int, QPair<double,double> > > VE;
+    QList<QMap<int, QPair<double,double> > > VO;
+    QList<QMap<int, QPair<double,double> > > VR;
 
     QList< QPair<double,double> > dataP;
     int stepSize;
