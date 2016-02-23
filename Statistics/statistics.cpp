@@ -545,6 +545,31 @@ QPair<double, double> Statistics::V(list_behavior u, StatisticMap behavior,
     return this->V(sample);
 }
 
+QList<QVariantList> Statistics::bootstrap(QVariantList events, int nsamples)
+{
+    QSettings s("NuEvo","Pacca");
+    s.beginGroup("ConfigAnalysis");
+    int seed = s.value("seed",-1).toInt();
+    s.endGroup();
+    if(seed == -1) seed = QTime::currentTime().msecsSinceStartOfDay();
+    srand(seed);
+    QList<int> indexes;
+    for(int n=0; n < events.size(); n++) indexes.push_back(n);
+    int sizeSequence = indexes.size();
+    QList< QVariantList > bootstrap_list;
+    for(int n=0; n < nsamples; n++){
+        QList<int> tmp = indexes;
+        QVariantList sample;
+        for(int i=0; i < sizeSequence; i++){
+            int sorted = rand() % tmp.size();
+            sample.push_back(events.at(tmp.at(sorted)));
+            tmp.removeAt(sorted);
+        }
+        bootstrap_list.push_back(sample);
+    }
+    return bootstrap_list;
+}
+
 QList<QVariantList> Statistics::bootstrap(QVariantList events, QList<int> indexes, int nsamples)
 {
     QSettings s("NuEvo","Pacca");
@@ -553,11 +578,11 @@ QList<QVariantList> Statistics::bootstrap(QVariantList events, QList<int> indexe
     s.endGroup();
     if(seed == -1) seed = QTime::currentTime().msecsSinceStartOfDay();
     srand(seed);
+    int sizeSequence = indexes.size();
     QList< QVariantList > bootstrap_list;
     for(int n=0; n < nsamples; n++){
         QList<int> tmp = indexes;
         QVariantList sample;
-        int sizeSequence = indexes.size();
         for(int i=0; i < sizeSequence; i++){
             int sorted = rand() % tmp.size();
             sample.push_back(events.at(tmp.at(sorted)));
@@ -592,7 +617,7 @@ void Statistics::calcPermutation()
             distributions.push_back(tmp);
         }
         for(int s=0; s < totalSessions; s++){
-            list_behavior bootstrap_list = this->bootstrap(this->events.at(s),this->indexes.at(s),this->nPermutations);
+            list_behavior bootstrap_list = this->bootstrap(this->events.at(s),this->nPermutations);
             int subject = this->sessionsSubjects.at(s);
             behaivors.insertMulti(subject,this->sessions.at(s));
             for(int p=0; p < this->nPermutations; p++){

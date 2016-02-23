@@ -63,6 +63,7 @@ void AnalysisWindow::createConnection()
     connect(this->ui->stopMtx,SIGNAL(clicked()),this,SLOT(cancelProcessPhylo()));
     connect(this->phyloModule,SIGNAL(dataProcessed()),this,SLOT(showProcessedDataPhylo()));
     connect(this->phyloModule,SIGNAL(statusProcess(double)),this,SLOT(updateProgressPhylo(double)));
+    connect(this->phyloModule,SIGNAL(statusProcessLabel(QString)),this->ui->label_phylo,SLOT(setText(QString)));
     connect(this->ui->absolut,SIGNAL(clicked(bool)),this->statsModule,SLOT(updateAbsolute(bool)));
     connect(this->ui->dynamic,SIGNAL(clicked(bool)),this->statsModule,SLOT(updateDynamic(bool)));
     connect(this->ui->startStep,SIGNAL(valueChanged(int)),this->statsModule,SLOT(updateStepStart(int)));
@@ -233,7 +234,6 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
     if (r == QMessageBox::Yes || !this->hasPhyloData) {
         Database db;
         QMap< QString, StatisticMap > mapSequences;
-        QMap< QString, QMap< int, QList< QList<int> > > > indexes;
 
         if(this->ui->sessions->selectedItems().size() == 0){ //calculating for all sessions
             for(int s=0; s < this->ui->sessions->rowCount(); s++){
@@ -242,25 +242,19 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                 int idSubject = db.getSubjects(sbjSession).getId().toInt();
                 QString spcSession = this->ui->sessions->item(s,2)->text(); //getting the name of the specie
                 if(!mapSequences.contains(spcSession)){ //checking if already exist sessions with this specie
-                    indexes.insert(spcSession,QMap< int, QList< QList<int> > >());
                     mapSequences.insert(spcSession,StatisticMap());
                 }
                 QList<Actions> actions = db.getSequence(idSession); //getting the sequence of events
                 QList<QVariant> tmp_ev;
-                QList<int> tmp_idx;
                 for(int a = 0; a < actions.size(); a++){ //for each event, getting the description and position index
                     Actions act = actions.at(a);
                     QString ev = act.getEventDescription();
                     tmp_ev.push_back(ev);
-                    tmp_idx.push_back(a);
                 }
-                if(!mapSequences[spcSession].contains(idSubject)){
-                    QList< QList<int> > idx; idx.push_back(tmp_idx);
+                if(!mapSequences.value(spcSession).contains(idSubject)){
                     mapSequences[spcSession].insert(idSubject,tmp_ev);
-                    indexes[spcSession].insert(idSubject,idx);
                 } else {
-                    mapSequences[spcSession][idSubject].push_back(tmp_ev);
-                    indexes[spcSession][idSubject].push_back(tmp_idx);
+                    mapSequences[spcSession].insertMulti(idSubject,tmp_ev);
                 }
             }
         } else {
@@ -271,25 +265,19 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                 int idSubject = db.getSubjects(sbjSession).getId().toInt();
                 QString spcSession = this->ui->sessions->selectedItems().at(s+2)->text();
                 if(!mapSequences.contains(spcSession)){
-                    indexes.insert(spcSession,QMap< int, QList< QList<int> > >());
                     mapSequences.insert(spcSession,StatisticMap());
                 }
                 QList<Actions> actions = db.getSequence(idSession);
                 QList<QVariant> tmp_ev;
-                QList<int> tmp_idx;
                 for(int a = 0; a < actions.size(); a++){
                     Actions act = actions.at(a);
                     QString ev = act.getEventDescription();
                     tmp_ev.push_back(ev);
-                    tmp_idx.push_back(a);
                 }
                 if(!mapSequences[spcSession].contains(idSubject)){
-                    QList< QList<int> > idx; idx.push_back(tmp_idx);
                     mapSequences[spcSession].insert(idSubject,tmp_ev);
-                    indexes[spcSession].insert(idSubject,idx);
                 } else {
-                    mapSequences[spcSession][idSubject].push_back(tmp_ev);
-                    indexes[spcSession][idSubject].push_back(tmp_idx);
+                    mapSequences[spcSession].insertMulti(idSubject,tmp_ev);
                 }
             }
         }
@@ -307,7 +295,7 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
         this->permutation_list.clear();
         QList<int> idx;
         this->permutation(this->events.toList(),idx,0,this->ui->sizeSeq->value()); //need to check this->events
-        module->loadData(mapSequences,indexes,sortedSpecies,
+        module->loadData(mapSequences,sortedSpecies,
                          this->permutation_list,this->ui->sizeSeq->value(),
                          this->ui->mtxIntervals->value(),this->ui->stepsSize->value(),this->ui->absValMtx->isChecked());
     }
@@ -338,14 +326,11 @@ void AnalysisWindow::genRandomSequence()
     int nlines = this->ui->sequence->count();
     if(nlines > 1){
         QVariantList ev;
-        QList<int> indexes;
         for(int l=0; l < nlines; l++){
             QString current = this->ui->sequence->item(l)->text().split(',').last();
             ev.push_back(current);
-            indexes.push_back(l);
         }
-        qDebug() << "NPerm: " << this->nPermutations;
-        this->bootstrap_list = this->statsModule->bootstrap(ev,indexes,this->nPermutations);
+        this->bootstrap_list = this->statsModule->bootstrap(ev,this->nPermutations);
         this->ui->tableRandom->setRowCount(0);
         this->ui->tableRandom->setColumnCount(this->nPermutations);
         for(int i=0; i < nlines; i++){
@@ -958,7 +943,6 @@ void AnalysisWindow::statisticsTests()
     QVector<QString> tmp_infos;
     if(this->ui->sessions->selectedItems().size() == 0){
         for(int s=0; s < this->ui->sessions->rowCount(); s++){
-            QList<int> indexes;
             QVariantList events;
             unsigned int idSession = this->ui->sessions->item(s,0)->text().toUInt();
             QList<Actions> actions = db.getSequence(idSession);
@@ -967,10 +951,9 @@ void AnalysisWindow::statisticsTests()
                 Actions act = actions.at(a);
                 QVariant ev=act.getEventDescription();
                 behavior_session.push_back(ev);
-                indexes.push_back(a);
                 events.push_back(ev);
             }
-            this->bootstrap_list = this->statsModule->bootstrap(events,indexes,this->nPermutations);
+            this->bootstrap_list = this->statsModule->bootstrap(events,this->nPermutations);
             random_behavior.append(this->bootstrap_list);
             behaivors.insertMulti(db.subjectExist(db.getSession(idSession).getSubject()),behavior_session);
             tmp_sessionsLabels.push_back("S:"+QString::number(idSession));
@@ -979,7 +962,6 @@ void AnalysisWindow::statisticsTests()
     } else {
         int sizeCollumns = this->ui->sessions->columnCount();
         for(int s=0; s < this->ui->sessions->selectedItems().size(); s=s+sizeCollumns){
-            QList<int> indexes;
             QVariantList events;
             unsigned int idSession = this->ui->sessions->selectedItems().at(s)->text().toUInt();
             QList<Actions> actions = db.getSequence(idSession);
@@ -988,11 +970,10 @@ void AnalysisWindow::statisticsTests()
                 Actions act = actions.at(a);
                 QVariant ev = act.getEventDescription();
                 behavior_session.push_back(ev);
-                indexes.push_back(a);
                 events.push_back(ev);
             }
 
-            this->bootstrap_list = this->statsModule->bootstrap(events,indexes,this->nPermutations);
+            this->bootstrap_list = this->statsModule->bootstrap(events,this->nPermutations);
             random_behavior.append(this->bootstrap_list);
             behaivors.insert(db.subjectExist(db.getSession(idSession).getSubject()), behavior_session);
             tmp_sessionsLabels.push_back("S:"+QString::number(idSession));
