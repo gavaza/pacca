@@ -22,13 +22,13 @@ public:
     ~ViewPhylogenetics();
     void showPhylogenetis(QList<QList<QPair<double, double> > > MO, QList<QList<QPair<double, double> > > ME,
                           QList<QList<QPair<double, double> > > MR, QList<QList<QPair<double, double> > > MP,
-                          QList<QVariant> species, QList<QVariantList> behavior, int sizeIntervals);
+                          QList<QVariant> species, QList<list_behavior> behavior, int sizeIntervals);
 
 private:
     Ui::ViewPhylogenetics *ui;
 
     QList<QVariant> species;
-    QList<QVariantList> behavior;
+    QList<list_behavior> behavior;
     int sizeIntervals;
     QList<QList<QPair<double, double> > > MO;
     QList<QList<QPair<double, double> > > ME;

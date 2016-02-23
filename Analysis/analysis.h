@@ -88,7 +88,7 @@ private:
     void permutation(QStringList ev, QList<int> list, int i, int n);
     void preparePhylogenetic(Phylogenetic *module);
 
-    QList<QVariantList> permutation_list;
+    QList<list_behavior> permutation_list;
     QList< QVariantList > bootstrap_list;
     Statistics* statsModule;
     Phylogenetic* phyloModule;
@@ -120,6 +120,18 @@ private:
     QColor colorVar;
 
     QList<QList<double> > calc_statistics(list_behavior set_us, list_behavior behaivors);
+
+    void showResults(QList<QString> set_line,
+                     QList<QList<double> > set_E,
+                     QList<QList<double> > set_O,
+                     QList<QList<double> > set_R,
+                     QList<QMap<int, QPair<double, double> > > set_VE,
+                     QList<QMap<int, QPair<double, double> > > set_VO,
+                     QList<QMap<int, QPair<double, double> > > set_VR,
+                     QList<QVector<QString> > set_sessionsLabels,
+                     QList<QVector<QString> > set_infos,
+                     QList<QVector<double> > set_sessionsTicks = QList<QVector<double> > (),
+                     QList<QList<double> > set_pvalues = QList<QList<double> > ());
 
 private slots:
     void hideSubWindow(QMdiSubWindow* w);

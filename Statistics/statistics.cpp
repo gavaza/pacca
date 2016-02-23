@@ -39,7 +39,7 @@ void Statistics::setSequences(QList<list_behavior> sequences)
     this->sequences = sequences;
 }
 
-void Statistics::setPermutationList(QList<QVariantList> permutation_list)
+void Statistics::setPermutationList(QList<list_behavior> permutation_list)
 {
     this->permutation_list = permutation_list;
 }
@@ -687,10 +687,10 @@ void Statistics::calcPermutation()
                 emit this->threadStopped();
                 return;
             }
-            set_us.push_back(this->permutation_list.at(s));
+            set_us = this->permutation_list.at(s);
             this->set_us.push_back(set_us); // keep set_us
             for(int idu=0; idu<this->permutation_list.at(s).size(); idu++){
-                info.append(this->permutation_list.at(s).at(idu).toString()); info.append(", ");
+                info.append(this->permutation_list.at(s).at(idu).first().toString()); info.append(", ");
             }            
             this->dataE.push_back(this->E(set_us,behaivors.values()));
             if (this->absolute){
@@ -723,9 +723,19 @@ void Statistics::calcPermutation()
                 this->VO.push_back(this->V_Map(set_us,behaivors,Probability));
             }
             this->VR.push_back(this->V_Map(set_us,behaivors,Residue));
+
+            QPair<double, double> E_all = this->V(this->VE.last());
+            QPair<double, double> O_all = this->V(this->VO.last());
+            QPair<double, double> R_all = this->V(this->VR.last());
+            sessionsTicks.push_front(1);
+            this->VE.last().insertMulti(-1,E_all);
+            this->VO.last().insertMulti(-1,O_all);
+            this->VR.last().insertMulti(-1,R_all);
+
             double ratio = ((double) s)/totalPermutations;
             emit this->statusProcess(ratio);
         }
+
         this->sessionsLabels.push_back(sessionsLabels);
         this->infos.push_back(infos);
         emit this->dataProcessed();

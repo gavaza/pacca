@@ -19,7 +19,7 @@ ViewPhylogenetics::~ViewPhylogenetics()
 
 void ViewPhylogenetics::showPhylogenetis(QList<QList<QPair<double, double> > > MO, QList<QList<QPair<double, double> > > ME, QList<QList<QPair<double, double> > > MR,
                                          QList<QList< QPair<double,double> > > MP,
-                                         QList<QVariant> species, QList<QVariantList> behavior, int sizeIntervals)
+                                         QList<QVariant> species, QList<list_behavior> behavior, int sizeIntervals)
 {
     this->MO.clear(); this->ME.clear();this->MR.clear();this->MP.clear();this->MF.clear();this->MFs.clear();
     this->behavior = behavior;
@@ -55,7 +55,7 @@ void ViewPhylogenetics::showPhylogenetis(QList<QList<QPair<double, double> > > M
        s.append("SEQ: "); s.append(QString::number(i)); s.append(" :");
        int sizeSeq = behavior.at(i).size();
        for(int j=0; j < sizeSeq; j++){
-           s.append("{");s.append(behavior.at(i).at(j).toString());s.append("}");
+           s.append("{");s.append(behavior.at(i).at(j).first().toString());s.append("}");
        }
        this->ui->infos->insertItem(i,s);
     }

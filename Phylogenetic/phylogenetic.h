@@ -28,7 +28,7 @@ public:
     ~Phylogenetic();
     void run();
     void loadData(QMap<QString, StatisticMap> sessions,
-                  QList<QVariant> species, QList<QVariantList> behavior,
+                  QList<QVariant> species, QList<list_behavior> behavior,
                   int sizeSeq, int sizeIntervals, int sizeStep, bool absolute);
     void calcData();
     bool getStopThreadStatus();
@@ -39,12 +39,12 @@ public:
     QList<QList<QPair<double, double> > > getMR();
     QList<QList<QPair<double, double> > > getMP();
     QList<QVariant> getSpecies();
-    QList<QVariantList> getBehaviors();
+    QList<list_behavior> getBehaviors();
 
 private:
     QMap< QString, StatisticMap > sessions;
     QList<QVariant> species;
-    QList<QVariantList> behavior;
+    QList<list_behavior> behavior;
     int sizeSeq;
     int sizeIntervals;
     int sizeStep;
@@ -58,7 +58,7 @@ private:
     bool stopThread;
 
     void setSpecies(QList<QVariant> species);
-    void setBehavior(QList<QVariantList> behavior);
+    void setBehavior(QList<list_behavior> behavior);
     QList<StatisticMap> randomize(StatisticMap sessions);
     QList<StatisticMap> randomize2(StatisticMap sessions);
 

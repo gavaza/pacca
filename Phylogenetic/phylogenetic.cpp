@@ -11,12 +11,12 @@ Phylogenetic::~Phylogenetic()
     delete this->statsModule;
 }
 
-void Phylogenetic::setBehavior(QList<QVariantList> behavior){
+void Phylogenetic::setBehavior(QList<list_behavior> behavior){
     this->behavior = behavior;
 }
 
 void Phylogenetic::loadData(QMap<QString, StatisticMap > sessions,
-                            QList<QVariant> species, QList<QVariantList> behavior,
+                            QList<QVariant> species, QList<list_behavior> behavior,
                             int sizeSeq, int sizeIntervals, int sizeStep, bool absolute)
 {
     this->behavior.clear();
@@ -56,7 +56,7 @@ void Phylogenetic::calcData()
                 return;
             }
             counter++;
-            list_behavior us; us.push_back(this->behavior.at(j)); //getting a specific behavior US
+            list_behavior us = this->behavior.at(j); //getting a specific behavior US
             QPair<double,double> O = this->statsModule->V(us,s,Observed); //calc Observed of US on the sessions of SPC
             QPair<double,double> E = this->statsModule->V(us,s,Expected); //calc Expected of US on the sessions of SPC
             QPair<double,double> R = this->statsModule->V(us,s,Residue); //calc Residue of US on the sessions of SPC
@@ -152,7 +152,7 @@ QList<QVariant> Phylogenetic::getSpecies()
     return this->species;
 }
 
-QList<QVariantList> Phylogenetic::getBehaviors()
+QList<list_behavior> Phylogenetic::getBehaviors()
 {
     return this->behavior;
 }

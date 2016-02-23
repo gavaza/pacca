@@ -45,7 +45,7 @@ public:
     void setTypeRun(char typeRun);
     void setSessions(list_behavior sessions, QList<int> sessionsSubjects);
     void setSequences(QList<list_behavior> sequences);
-    void setPermutationList(QList<QVariantList> permutation_list);
+    void setPermutationList(QList<list_behavior> permutation_list);
     void setPermutationSize(int nPermutations);
     void setEvents(QList<QVariantList> events);
     void setIndexes(QList< QList<int> > indexes);
@@ -196,7 +196,7 @@ private:
     char typeRun;
     list_behavior sessions;
     QList<list_behavior> sequences;
-    QList<QVariantList> permutation_list;
+    QList<list_behavior> permutation_list;
     int nPermutations;
     QList< QVariantList > events;
     QList< QList<int> > indexes;
