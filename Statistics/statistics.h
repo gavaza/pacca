@@ -173,7 +173,8 @@ public:
 
     QPair<double,double> pvalue(double value, QList<double> distribution);
     QList< QPair<double,double> > pvalue(QList<double> values, QList<double> distribution);
-    QList< QVariantList > bootstrap(QVariantList events, QList<int> indexes, int nsamples);
+    QList< QVariantList > bootstrap(QVariantList events, int nsamples);
+    QList<QVariantList> bootstrap(QVariantList events, QList<int> indexes, int nsamples);
 
     double P_all(list_behavior u, list_behavior behavior);
 

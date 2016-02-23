@@ -16,18 +16,15 @@ void Phylogenetic::setBehavior(QList<QVariantList> behavior){
 }
 
 void Phylogenetic::loadData(QMap<QString, StatisticMap > sessions,
-                            QMap< QString, QMap< int, QList< QList<int> > > > indexes,
                             QList<QVariant> species, QList<QVariantList> behavior,
                             int sizeSeq, int sizeIntervals, int sizeStep, bool absolute)
 {
     this->behavior.clear();
     this->sessions.clear();
-    this->indexes.clear();
     this->species.clear();
 
     this->behavior = behavior;
     this->sessions = sessions;
-    this->indexes = indexes;
     this->species = species;
     this->sizeSeq = sizeSeq;
     this->sizeIntervals = sizeIntervals;
@@ -50,10 +47,11 @@ void Phylogenetic::calcData()
         StatisticMap sessions = this->sessions.value(spc); //getting all sessions of SPC
         StatisticMap s = sessions;
         QList< QPair<double, double> > tmpMO, tmpME, tmpMR, tmpMP;
-        QList< StatisticMap > randomized = this->randomize(sessions,this->indexes.value(spc)); //ramdomizing the lists
+        QList< StatisticMap > randomized = this->randomize2(sessions); //ramdomizing the lists
         for(int j=0; j < nCols; j++){ //for each behavior (the permutation of events) eg. all diades
             if(this->stopThread){ //control of thread
                 emit this->statusProcess(0.0);
+                emit this->statusProcessLabel(tr("Abortado"));
                 emit this->threadStopped();
                 return;
             }
@@ -97,6 +95,8 @@ void Phylogenetic::calcData()
             //giving feedback about the progress
             double ratio = ((double) counter)/totalCells;
             emit this->statusProcess(ratio);
+            QString label = QString::number(ratio*100,'f',2)+"% - "+tr("Analisando: ")+spc;
+            emit this->statusProcessLabel(label);
             //saving the data
             tmpMO.push_back(O);
             tmpME.push_back(E);
@@ -108,6 +108,7 @@ void Phylogenetic::calcData()
         this->MP.push_back(tmpMP);
     }
     emit dataProcessed();
+    emit this->statusProcessLabel(tr("Finalizado!"));
 }
 
 void Phylogenetic::run()
@@ -160,26 +161,67 @@ void Phylogenetic::setSpecies(QList<QVariant> species){
     this->species = species;
 }
 
-QList<StatisticMap> Phylogenetic::randomize(StatisticMap sessions, QMap<int, QList< QList<int> > > indexes)
+QList<StatisticMap> Phylogenetic::randomize(StatisticMap sessions)
 {
     QList< StatisticMap > randomized;
     QSettings s("NuEvo","Pacca");
     s.beginGroup("ConfigAnalysis");
     int nperm = s.value("nPermutation",50).toInt();
     s.endGroup();
-    QList<int> keys = sessions.keys();
+    QMapIterator<int,QVariantList> i(sessions);
+    QList< QList<int> > indexes;
+    while(i.hasNext()){
+        i.next();
+        QVariantList session = i.value();
+        QList<int> idx;
+        for(int n=0; n < session.size(); n++) idx.push_back(n);
+        indexes.push_back(idx);
+    }
     for(int n=0; n<nperm; n++){
         StatisticMap tmp;
-        QListIterator<int> i(keys);
+        unsigned int idx = 0;
+        QMapIterator<int,QVariantList> i(sessions);
         while(i.hasNext()){
-            int key = i.next();
-            QList<QList<int> > idx = indexes.value(key);
-            for (int i=0; i<idx.size(); i++){
-                QVariantList r = this->statsModule->bootstrap(sessions.value(key),idx.at(i),1).first();
-                tmp.insert(key,r);
-            }
+            i.next();
+            QVariantList session = i.value();
+            QVariantList r = this->statsModule->bootstrap(session,indexes.at(idx),1).first();
+            tmp.insertMulti(i.key(),r);
+            idx++;
         }
         randomized.push_back(tmp);
+    }
+    return randomized;
+}
+
+QList<StatisticMap> Phylogenetic::randomize2(StatisticMap sessions)
+{
+    QList< StatisticMap > randomized;
+    QSettings s("NuEvo","Pacca");
+    s.beginGroup("ConfigAnalysis");
+    int nperm = s.value("nPermutation",50).toInt();
+    s.endGroup();
+    QMapIterator<int,QVariantList> j(sessions);
+    QList< QList<int> > indexes;
+    while(j.hasNext()){
+        j.next();
+        int size = j.value().size();
+        QList<int> idx;
+        for(int n=0; n < size; n++) idx.push_back(n);
+        indexes.push_back(idx);
+    }
+    for(int n=0; n<nperm; n++){
+        StatisticMap tmp;
+        randomized.push_back(tmp);
+    }
+    unsigned int idx = 0;
+    QMapIterator<int,QVariantList> i(sessions);
+    while(i.hasNext()){
+        i.next();
+        QVariantList session = i.value();
+        QList<QVariantList> r = this->statsModule->bootstrap(session,indexes.at(idx),nperm);
+        for(int n=0; n<nperm; n++)
+            randomized[n].insertMulti(i.key(),r.at(n));
+        idx++;
     }
     return randomized;
 }

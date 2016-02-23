@@ -685,15 +685,15 @@
             </layout>
            </item>
            <item row="2" column="0" colspan="3">
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
+            <layout class="QGridLayout" name="gridLayout_14">
+             <item row="0" column="0">
               <widget class="QProgressBar" name="progressPhylo">
                <property name="value">
                 <number>0</number>
                </property>
               </widget>
              </item>
-             <item>
+             <item row="0" column="1">
               <widget class="QToolButton" name="stopMtx">
                <property name="text">
                 <string/>
@@ -701,6 +701,13 @@
                <property name="icon">
                 <iconset resource="../Application/resource.qrc">
                  <normaloff>:/icons/remove24x24.png</normaloff>:/icons/remove24x24.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_phylo">
+               <property name="text">
+                <string/>
                </property>
               </widget>
              </item>
