@@ -2,7 +2,7 @@
 
 Phylogenetic::Phylogenetic()
 {
-    this->statsModule = new Statistics(this->dynamic,this->absolute,this->sizeStep,this->sizeIntervals);
+    this->statsModule = NULL;
     this->stopThread = false;
 }
 
@@ -29,9 +29,10 @@ void Phylogenetic::loadData(QMap<QString, StatisticMap > sessions,
     this->sizeSeq = sizeSeq;
     this->sizeIntervals = sizeIntervals;
     this->sizeStep = sizeStep;
-    this->absolute = absolute;
-    delete this->statsModule;
-    this->statsModule = new Statistics(this->dynamic,this->absolute,this->sizeStep,this->sizeIntervals);
+    this->observedType = Probability;
+    if(absolute) this->observedType = Observed;
+    if(this->statsModule != NULL) delete this->statsModule;
+    this->statsModule = new Statistics(this->dynamic,absolute,this->sizeStep,this->sizeIntervals);
 }
 
 void Phylogenetic::calcData()
@@ -57,22 +58,22 @@ void Phylogenetic::calcData()
             }
             counter++;
             list_behavior us = this->behavior.at(j); //getting a specific behavior US
-            QPair<double,double> O = this->statsModule->V(us,s,Observed); //calc Observed of US on the sessions of SPC
-            QPair<double,double> E = this->statsModule->V(us,s,Expected); //calc Expected of US on the sessions of SPC
-            QPair<double,double> R = this->statsModule->V(us,s,Residue); //calc Residue of US on the sessions of SPC
+            QPair<double,double> O = this->statsModule->V(this->statsModule->V_Map(us,s,this->observedType)); //calc Observed of US on the sessions of SPC
+            QPair<double,double> E = this->statsModule->V(this->statsModule->V_Map(us,s,Expected)); //calc Expected of US on the sessions of SPC
+            QPair<double,double> R = this->statsModule->V(this->statsModule->V_Map(us,s,Residue)); //calc Residue of US on the sessions of SPC
             QList<double> dist;
             //for each random list, calculating the statistic (Observed, Expected or Residue) to create a distribution.
             for(int r=0; r<randomized.size(); r++){
                 StatisticMap rand_behavior; rand_behavior = randomized[r];
                 switch (st) {
                 case observed:
-                    dist.push_back(this->statsModule->V(us,rand_behavior,Observed).first);
+                    dist.push_back(this->statsModule->V(this->statsModule->V_Map(us,rand_behavior,this->observedType)).first);
                     break;
                 case expected:
-                    dist.push_back(this->statsModule->V(us,rand_behavior,Expected).first);
+                    dist.push_back(this->statsModule->V(this->statsModule->V_Map(us,rand_behavior,Expected)).first);
                     break;
                 case residue:
-                    dist.push_back(this->statsModule->V(us,rand_behavior,Residue).first);
+                    dist.push_back(this->statsModule->V(this->statsModule->V_Map(us,rand_behavior,Residue)).first);
                     break;
                 default:
                     break;

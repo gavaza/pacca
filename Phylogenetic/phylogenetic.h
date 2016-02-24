@@ -49,7 +49,7 @@ private:
     int sizeIntervals;
     int sizeStep;
     bool dynamic;
-    bool absolute;
+    enum types_of_variances observedType;
     QList<QList<QPair<double, double> > > MO;
     QList<QList<QPair<double, double> > > ME;
     QList<QList<QPair<double, double> > > MR;

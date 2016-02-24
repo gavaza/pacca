@@ -476,7 +476,7 @@ QPair<double,double> Statistics::V(QList<double> list){
     double mean = 0;
     double EV = 0;
     double q = list.size();
-    QPair<double,double> pair(-1,0);
+    QPair<double,double> pair(0,-1);
     for (int p=0; p<q; p++){
         mean += list.at(p);
     }
@@ -496,7 +496,7 @@ QPair<double, double> Statistics::V(QVariantList list)
     double mean = 0;
     double EV = 0;
     double q = list.size();
-    QPair<double,double> pair(-1,0);
+    QPair<double,double> pair(0,-1);
     for (int p=0; p<q; p++){
         mean += list.at(p).toDouble();
     }
