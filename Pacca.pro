@@ -12,7 +12,6 @@ SUBDIRS += Text \
            Analysis \
            Application \
 
-
 Application.depends = Text
 Application.depends = Analysis
 Application.depends = DatabaseControl

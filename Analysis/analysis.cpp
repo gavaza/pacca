@@ -1071,16 +1071,22 @@ void AnalysisWindow::refreshTableEvents()
 
 void AnalysisWindow::showProcessedDataPhylo()
 {
-    this->hasPhyloData = true;
-    this->ui->showMtx->setEnabled(true);
-    this->ui->stopMtx->setEnabled(false);
-    ViewPhylogenetics *view = new ViewPhylogenetics(this->mdi);
-    view->showPhylogenetis(this->phyloModule->getMO(),this->phyloModule->getME(),
-                          this->phyloModule->getMR(),this->phyloModule->getMP(),
-                          this->phyloModule->getSpecies(),this->phyloModule->getBehaviors(),
-                          this->ui->mtxIntervals->value());
-    this->mdi->addSubWindow(view);
-    view->show();
+    if(this->showtype == 3){
+        QString filename = QFileDialog::getSaveFileName(this, tr("Salvar Arquivo XLSX"), QDir::homePath(),".xlsx");
+        this->phyloModule->saveFile(filename);
+    } else {
+        this->hasPhyloData = true;
+        this->ui->showMtx->setEnabled(true);
+        this->ui->stopMtx->setEnabled(false);
+        ViewPhylogenetics *view = new ViewPhylogenetics(this->mdi);
+        view->showPhylogenetis(this->phyloModule->getMO(),this->phyloModule->getME(),
+                               this->phyloModule->getMR(),this->phyloModule->getMP(),
+                               this->phyloModule->getMFs(),
+                               this->phyloModule->getSpecies(),this->phyloModule->getBehaviors(),
+                               this->ui->mtxIntervals->value());
+        this->mdi->addSubWindow(view);
+        view->show();
+    }
 }
 
 void AnalysisWindow::cancelProcessPhylo()

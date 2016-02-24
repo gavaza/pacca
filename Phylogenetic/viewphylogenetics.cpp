@@ -18,7 +18,7 @@ ViewPhylogenetics::~ViewPhylogenetics()
 }
 
 void ViewPhylogenetics::showPhylogenetis(QList<QList<QPair<double, double> > > MO, QList<QList<QPair<double, double> > > ME, QList<QList<QPair<double, double> > > MR,
-                                         QList<QList< QPair<double,double> > > MP,
+                                         QList<QList< QPair<double,double> > > MP, QList<QList<significant_type> > MFs,
                                          QList<QVariant> species, QList<list_behavior> behavior, int sizeIntervals)
 {
     this->MO.clear(); this->ME.clear();this->MR.clear();this->MP.clear();this->MF.clear();this->MFs.clear();
@@ -29,56 +29,23 @@ void ViewPhylogenetics::showPhylogenetis(QList<QList<QPair<double, double> > > M
     this->ME = ME;
     this->MR = MR;
     this->treatMP(MP);
-    this->MFs = this->getSignificantPhylogenetic(this->MR);
+    this->MFs = MFs;
 
-    this->ui->intervalSlider->setMinimum(1);
-    this->ui->intervalSlider->setMaximum(sizeIntervals);
+    QSettings s("NuEvo","Pacca");
+    s.beginGroup("ConfigAnalysis");
+    int view = s.value("showType",0).toInt();
+    s.endGroup();
 
-    int nCols = this->behavior.size();
-    int nRows = this->species.size();
-    this->ui->tableMO->setRowCount(nRows);
-    this->ui->tableME->setRowCount(nRows);
-    this->ui->tableMR->setRowCount(nRows);
-    this->ui->tableMP->setRowCount(nRows);
-    this->ui->tableMF->setRowCount(nRows);
-    this->ui->tableMFs->setRowCount(nRows);
-    this->ui->tableMO->setColumnCount(nCols);
-    this->ui->tableME->setColumnCount(nCols);
-    this->ui->tableMR->setColumnCount(nCols);
-    this->ui->tableMP->setColumnCount(nCols);
-    this->ui->tableMF->setColumnCount(nCols);
-    this->ui->tableMFs->setColumnCount(nCols);
-    QStringList labelsC;
-    for(int i=0; i < nCols; i++){
-       QString s;
-       labelsC.push_back(QString::number(i));
-       s.append("SEQ: "); s.append(QString::number(i)); s.append(" :");
-       int sizeSeq = behavior.at(i).size();
-       for(int j=0; j < sizeSeq; j++){
-           s.append("{");s.append(behavior.at(i).at(j).first().toString());s.append("}");
-       }
-       this->ui->infos->insertItem(i,s);
+    switch (view) {
+    case 1:
+        this->showTable();
+        break;
+    default:
+        break;
     }
-    this->ui->tableMO->setHorizontalHeaderLabels(labelsC);
-    this->ui->tableME->setHorizontalHeaderLabels(labelsC);
-    this->ui->tableMR->setHorizontalHeaderLabels(labelsC);
-    this->ui->tableMP->setHorizontalHeaderLabels(labelsC);
-    this->ui->tableMF->setHorizontalHeaderLabels(labelsC);
-    this->ui->tableMFs->setHorizontalHeaderLabels(labelsC);
-    QStringList labelsR;
-    for(int i=0; i < nRows; i++)
-        labelsR.push_back(this->species.at(i).toString());
-    this->ui->tableMO->setVerticalHeaderLabels(labelsR);
-    this->ui->tableME->setVerticalHeaderLabels(labelsR);
-    this->ui->tableMR->setVerticalHeaderLabels(labelsR);
-    this->ui->tableMP->setVerticalHeaderLabels(labelsR);
-    this->ui->tableMF->setVerticalHeaderLabels(labelsR);
-    this->ui->tableMFs->setVerticalHeaderLabels(labelsR);
-
-    this->showMtx();
 }
 
-void ViewPhylogenetics::showMtx()
+void ViewPhylogenetics::fillMtx()
 {
     int nCols = this->behavior.size();
     int nRows = this->species.size();
@@ -124,6 +91,55 @@ void ViewPhylogenetics::showMtx()
     this->ui->tableMR->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
     this->ui->tableMP->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
     this->ui->tableMFs->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+}
+
+void ViewPhylogenetics::showTable()
+{
+    this->ui->intervalSlider->setMinimum(1);
+    this->ui->intervalSlider->setMaximum(this->sizeIntervals);
+
+    int nCols = this->behavior.size();
+    int nRows = this->species.size();
+    this->ui->tableMO->setRowCount(nRows);
+    this->ui->tableME->setRowCount(nRows);
+    this->ui->tableMR->setRowCount(nRows);
+    this->ui->tableMP->setRowCount(nRows);
+    this->ui->tableMF->setRowCount(nRows);
+    this->ui->tableMFs->setRowCount(nRows);
+    this->ui->tableMO->setColumnCount(nCols);
+    this->ui->tableME->setColumnCount(nCols);
+    this->ui->tableMR->setColumnCount(nCols);
+    this->ui->tableMP->setColumnCount(nCols);
+    this->ui->tableMF->setColumnCount(nCols);
+    this->ui->tableMFs->setColumnCount(nCols);
+    QStringList labelsC;
+    for(int i=0; i < nCols; i++){
+       QString s;
+       labelsC.push_back(QString::number(i));
+       s.append("SEQ: "); s.append(QString::number(i)); s.append(" :");
+       int sizeSeq = behavior.at(i).size();
+       for(int j=0; j < sizeSeq; j++){
+           s.append("{");s.append(behavior.at(i).at(j).first().toString());s.append("}");
+       }
+       this->ui->infos->insertItem(i,s);
+    }
+    this->ui->tableMO->setHorizontalHeaderLabels(labelsC);
+    this->ui->tableME->setHorizontalHeaderLabels(labelsC);
+    this->ui->tableMR->setHorizontalHeaderLabels(labelsC);
+    this->ui->tableMP->setHorizontalHeaderLabels(labelsC);
+    this->ui->tableMF->setHorizontalHeaderLabels(labelsC);
+    this->ui->tableMFs->setHorizontalHeaderLabels(labelsC);
+    QStringList labelsR;
+    for(int i=0; i < nRows; i++)
+        labelsR.push_back(this->species.at(i).toString());
+    this->ui->tableMO->setVerticalHeaderLabels(labelsR);
+    this->ui->tableME->setVerticalHeaderLabels(labelsR);
+    this->ui->tableMR->setVerticalHeaderLabels(labelsR);
+    this->ui->tableMP->setVerticalHeaderLabels(labelsR);
+    this->ui->tableMF->setVerticalHeaderLabels(labelsR);
+    this->ui->tableMFs->setVerticalHeaderLabels(labelsR);
+
+    this->fillMtx();
 }
 
 double ViewPhylogenetics::getMaxStatitcs(QList<QList<QPair<double, double> > > statistcs)
@@ -173,33 +189,6 @@ QList<QList<bool> > ViewPhylogenetics::getPhylogenetic(QList<QList<QPair<double,
             }
             result.push_back(tmp);
         }
-    }
-    return result;
-}
-
-QList< QList<significant_type> > ViewPhylogenetics::getSignificantPhylogenetic(QList<QList<QPair<double, double> > > statistcs)
-{
-    QList< QList<significant_type> > result;
-    QSettings s("NuEvo","Pacca");
-    s.beginGroup("ConfigAnalysis");
-    double alpha = s.value("alfa",5).toDouble();
-    s.endGroup();
-
-    for (int i=0; i<statistcs.size(); i++){
-        QList<significant_type> tmp;
-        for(int j=0; j<statistcs.at(i).size(); j++){
-            /* mudar para ZERO as caselas que tiverem, em MP, valores não significativos (Pvalor especificado pelo usuário) */
-            if (this->MP.at(i).at(j) > alpha){
-                tmp.push_back(insignificant);
-            }
-            else if (statistcs.at(i).at(j).first >= 0){
-                tmp.push_back(positive_significant);
-            }
-            else{
-                tmp.push_back(negative_significant);
-            }
-        }
-        result.push_back(tmp);
     }
     return result;
 }

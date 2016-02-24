@@ -22,6 +22,7 @@ public:
     ~ViewPhylogenetics();
     void showPhylogenetis(QList<QList<QPair<double, double> > > MO, QList<QList<QPair<double, double> > > ME,
                           QList<QList<QPair<double, double> > > MR, QList<QList<QPair<double, double> > > MP,
+                          QList< QList<significant_type> > MFs,
                           QList<QVariant> species, QList<list_behavior> behavior, int sizeIntervals);
 
 private:
@@ -39,11 +40,11 @@ private:
 
     double maxdouble, mindbouble;
 
-    void showMtx();
+    void fillMtx();
+    void showTable();
     double getMaxStatitcs(QList<QList<QPair<double, double> > > statistcs);
     double getMinStatitcs(QList<QList<QPair<double, double> > > statistcs);
     QList<QList<bool> > getPhylogenetic(QList<QList<QPair<double, double> > > statistcs, int subdivisions, int element);
-    QList< QList<significant_type> > getSignificantPhylogenetic(QList<QList<QPair<double, double> > > statistcs);
     void treatMP(QList<QList<QPair<double, double> > > orig);
 
 private slots:

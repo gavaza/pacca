@@ -5,6 +5,9 @@
 #include <QList>
 #include <QSettings>
 #include <QThread>
+#include <QtXlsx>
+#include <QFileDialog>
+#include <QString>
 
 #include "statistics.h"
 
@@ -33,11 +36,13 @@ public:
     void calcData();
     bool getStopThreadStatus();
     void setStopThreadStatus(bool stop);
+    void saveFile(QString filename);
 
     QList<QList<QPair<double, double> > > getMO();
     QList<QList<QPair<double, double> > > getME();
     QList<QList<QPair<double, double> > > getMR();
     QList<QList<QPair<double, double> > > getMP();
+    QList< QList<significant_type> > getMFs();
     QList<QVariant> getSpecies();
     QList<list_behavior> getBehaviors();
 
@@ -54,13 +59,14 @@ private:
     QList<QList<QPair<double, double> > > ME;
     QList<QList<QPair<double, double> > > MR;
     QList< QList< QPair<double, double> > > MP;
+    QList< QList<significant_type> > MFs;
     Statistics* statsModule;
     bool stopThread;
 
     void setSpecies(QList<QVariant> species);
     void setBehavior(QList<list_behavior> behavior);
     QList<StatisticMap> randomize(StatisticMap sessions);
-    QList<StatisticMap> randomize2(StatisticMap sessions);
+    QList<QList<significant_type> > getSignificantPhylogenetic(QList<QList<QPair<double, double> > > statistcs);
 
 signals:
     void dataProcessed();

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core sql gui multimediawidgets multimedia
+QT       += core sql gui multimediawidgets multimedia xlsx
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 

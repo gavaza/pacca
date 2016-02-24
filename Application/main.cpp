@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QSettings>
 #include <QCoreApplication>
+#include <QtXlsx>
 
 #include "mainwindow.h"
 #include "dialogchooselanguage.h"
