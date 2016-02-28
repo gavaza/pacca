@@ -282,7 +282,8 @@ double Statistics::P(QVariantList u,
 // investigated = one
 // behavior = one
 double Statistics::P(list_behavior u, QVariantList behavior){
-    return this->O(u, behavior)/this->elements(u.size(),behavior.size());
+    int n = this->elements(u.size(),behavior.size());
+    return n>0?this->O(u, behavior)/n:0;
 }
 
 // investigated = one
@@ -291,7 +292,7 @@ QList<double> Statistics::P(list_behavior u, list_behavior behavior){
     QList<double> Pu;
     for (int i=0; i<behavior.size(); i++){
         int n = this->elements(u.size(),behavior.at(i).size());
-        Pu.push_back(this->O(u,behavior.at(i))/n);
+        Pu.push_back(n>0?this->O(u,behavior.at(i))/n:0);
     }
     return Pu;
 }
@@ -393,7 +394,6 @@ unsigned int Statistics::elements(int size_u, int size_behavior){
     for (int l=this->stepStart; l<=(size_behavior-size_u); l+=this->stepSize){
         n++;
     }
-    qDebug() << n;
     return n;
 }
 
