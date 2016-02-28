@@ -28,7 +28,7 @@ AnalysisWindow::AnalysisWindow(QMdiArea* mdi, unsigned int nwin, QWidget *parent
     this->hasData = false;
     this->hasPhyloData = false;
     this->ui->stopMtx->setEnabled(false);
-
+    this->ui->progressBar->setStyleSheet("QProgressBar::chunk {background-color: green; width: 10px;margin: 0.5px;}");
     this->config = new DialogConfigStats(this);
     this->refreshConfig();
 }
@@ -56,6 +56,7 @@ void AnalysisWindow::createConnection()
     connect(this->statsModule,SIGNAL(dataProcessed()),this,SLOT(showProcessedDataPermutation()));
     connect(this->statsModule,SIGNAL(dataEventsProcessed()),this,SLOT(showPermutationStats()));
     connect(this->statsModule,SIGNAL(statusProcess(double)),this,SLOT(updateProgressPemutation(double)));
+    connect(this->statsModule,SIGNAL(statusEventsProcess(double)),this,SLOT(updateProgressPemutation(double)));
     connect(this->ui->sessions,SIGNAL(itemSelectionChanged()),this,SLOT(refreshTableEvents()));
     connect(this->ui->cancelProcess,SIGNAL(clicked()),this,SLOT(cancelProcessPermutation()));
     connect(this->ui->spcUP,SIGNAL(clicked()),this,SLOT(upSpecie()));
@@ -322,7 +323,10 @@ void AnalysisWindow::genSelectedSeq()
         this->statsModule->setUS(this->events.toList());
         this->statsModule->setSizeU(this->ui->sizeSeq->value());
         this->statsModule->setTypeRun('E');
+        this->ui->genSeq->setEnabled(false);
+        this->ui->progressBar->setStyleSheet("QProgressBar::chunk {background-color: green; width: 10px;margin: 0.5px;}");
         this->statsModule->start();
+        this->ui->cancelProcess->setEnabled(true);
     }
     else if(this->hasData) {
         this->showProcessedDataPermutation();
@@ -623,6 +627,7 @@ void AnalysisWindow::showPermutationStats()
     this->statsModule->setFilterPvalue(this->filterPvalue);
     this->ui->genSeq->setEnabled(false);
     this->statsModule->start();
+    this->ui->progressBar->setStyleSheet("QProgressBar::chunk {background-color: blue; width: 10px;margin: 0.5px;}");
     this->ui->cancelProcess->setEnabled(true);
     this->hasData = false;
 }
@@ -995,6 +1000,7 @@ void AnalysisWindow::cancelProcessPermutation()
         this->statsModule->setStopThreadStatus(true);
         this->hasData = false;
         this->ui->genSeq->setEnabled(true);
+        this->ui->cancelProcess->setEnabled(false);
     }
 }
 

@@ -231,6 +231,7 @@ private:
     double alpha;
     bool filterPvalue;
     bool stopThread;
+    int totalEventsPermutations;
 
 public slots:
     void updateAbsolute(bool absolute);
@@ -243,6 +244,7 @@ signals:
     void statusProcess(double);
     void threadStopped();
     void dataEventsProcessed();
+    void statusEventsProcess(double);
 
 };
 #endif // STATISTICS_H

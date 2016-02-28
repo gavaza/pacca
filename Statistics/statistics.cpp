@@ -16,9 +16,11 @@ void Statistics::run()
 {
     switch (this->typeRun) {
     case 'P':
+        emit this->statusProcess(0.0);
         this->calcPermutation();
         break;
     case 'E':
+        emit this->statusEventsProcess(0.0);
         this->calcPermutationEvents();
         break;
     default:
@@ -391,6 +393,7 @@ unsigned int Statistics::elements(int size_u, int size_behavior){
     for (int l=this->stepStart; l<=(size_behavior-size_u); l+=this->stepSize){
         n++;
     }
+    qDebug() << n;
     return n;
 }
 
@@ -411,7 +414,6 @@ double Statistics::O(list_behavior u, QVariantList behavior){
             }
         }
         if (founded){
-//            std::cout << "found in l = " << l << std::endl;
             if (this->dynamic){
                 QVariantList new_found;
                 for(int i=0; i<k; i++){
@@ -658,9 +660,11 @@ void Statistics::calcPermutationEvents(){
     if (this->us.size()>0 && this->size_u>0){
         this->permutation_list.clear();
         this->stopThread = false;
+        this->totalEventsPermutations = pow(this->us.size(),this->size_u);
         this->combinations(this->us,0,this->size_u);
     }
-    emit this->dataEventsProcessed();
+    if (!this->stopThread)
+        emit this->dataEventsProcessed();
 }
 
 void Statistics::calcPermutation()
@@ -776,6 +780,11 @@ void Statistics::updateStepSize(int stepSize){
 }
 
 void Statistics::combinations(QList<QString> V, int depth,int expected_length, QList<QString> combination){
+    if(this->stopThread){
+        emit this->statusProcess(0.0);
+        emit this->threadStopped();
+        return;
+    }
     if(depth<expected_length){
         for(int i=0;i<V.size();i++){
             combination.push_back(V[i]);
@@ -791,5 +800,7 @@ void Statistics::combinations(QList<QString> V, int depth,int expected_length, Q
             us.push_back(ev);
         }
         this->permutation_list.push_back(us);
+        double ratio = ((double) this->permutation_list.size())/this->totalEventsPermutations;
+        emit this->statusEventsProcess(ratio);
     }
 }
