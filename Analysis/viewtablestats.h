@@ -24,12 +24,12 @@ public:
                                          QVariant MR, QVariant vres);
 
     void setData(QList<QString> set_line,
-                 QList<QVector<QString> > sessionLabels,
+                 QVector<QString> sessionLabels,
                  QList<QVector<QString> > infos,
                  QList<QList<double> > obs,
                  QList<QList<double> > spec,
                  QList<QList<double> > res,
-                 QList<QList<double> > pvalor,
+                 QList<QPair<double, double> > pvalor,
                  QList<QMap<int, QPair<double,double> > > VE,
                  QList<QMap<int, QPair<double,double> > > VO,
                  QList<QMap<int, QPair<double,double> > > VR);
@@ -38,12 +38,12 @@ private slots:
     void alter_line(int i);
 
 private:
-    QList<QVector<QString> > session;
+    QVector<QString> session;
     QList<QVector<QString> > infos;
     QList<QList<double> > obs;
     QList<QList<double> > spec;
     QList<QList<double> > res;
-    QList<QList<double> > pvalor;
+    QList<QPair<double,double> > pvalor;
     QList<QMap<int, QPair<double,double> > > VE;
     QList<QMap<int, QPair<double,double> > > VO;
     QList<QMap<int, QPair<double,double> > > VR;

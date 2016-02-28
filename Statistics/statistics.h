@@ -51,10 +51,12 @@ public:
     void setIndexes(QList< QList<int> > indexes);
     void setTailedAlpha(int tailed, double alpha);
     void setFilterPvalue(bool filter);
+    void setSessionsLabels(QVector<QString> labels);
+    void setUS(QList<QString> us);
+    void setSizeU(int size);
 
-    QList<QVector<QString> > getLabels();
+    QVector<QString> getLabels();
     QList<QVector<QString> > getInfos();
-    QVector<QString> getLabels(int i);
     QVector<QString> getInfos(int i);
     QVector<double> getTicks();
     QList<double> getE(int i);
@@ -77,7 +79,8 @@ public:
     bool getStopThreadStatus();
     void setStopThreadStatus(bool stop);
     int getPermutationSize();
-
+    void combinations(QList<QString> V, int depth, int expected_length,
+                   QList<QString> combination = QList<QString>());
 
     /*!
      * \brief R
@@ -189,9 +192,13 @@ public:
 
     double P_all(list_behavior u, list_behavior behavior);
 
+    QList<list_behavior> getPermutation_us();
+
+
 
 private:
     void calcPermutation();
+    void calcPermutationEvents();
     unsigned int elements(int size_u, int size_behavior);
     char typeRun;
     list_behavior sessions;
@@ -200,7 +207,7 @@ private:
     int nPermutations;
     QList< QVariantList > events;
     QList< QList<int> > indexes;
-    QList<QVector<QString> > sessionsLabels;
+    QVector<QString> sessionsLabels;
     QList<QVector<QString> > infos;
     QVector<double> sessionsTicks;
     QList<int> sessionsSubjects;
@@ -213,6 +220,9 @@ private:
     QList<QMap<int, QPair<double,double> > > VR;
 
     QList<QList< QPair<double,double> > > dataP;
+    QList<QString> us;
+    int size_u;
+
     int stepSize;
     int stepStart;
     bool absolute;
@@ -232,7 +242,7 @@ signals:
     void dataProcessed();
     void statusProcess(double);
     void threadStopped();
+    void dataEventsProcessed();
 
 };
-
 #endif // STATISTICS_H

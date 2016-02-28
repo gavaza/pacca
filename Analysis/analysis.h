@@ -89,7 +89,7 @@ private:
     void preparePhylogenetic(Phylogenetic *module);
 
     QList<list_behavior> permutation_list;
-    QList< QVariantList > bootstrap_list;
+    QList<QVariantList> bootstrap_list;
     Statistics* statsModule;
     Phylogenetic* phyloModule;
 
@@ -128,10 +128,10 @@ private:
                      QList<QMap<int, QPair<double, double> > > set_VE,
                      QList<QMap<int, QPair<double, double> > > set_VO,
                      QList<QMap<int, QPair<double, double> > > set_VR,
-                     QList<QVector<QString> > set_sessionsLabels,
+                     QVector<QString> set_sessionsLabels,
                      QList<QVector<QString> > set_infos,
                      QList<QVector<double> > set_sessionsTicks = QList<QVector<double> > (),
-                     QList<QList<double> > set_pvalues = QList<QList<double> > ());
+                     QList<QPair<double,double> > set_pvalues = QList<QPair<double, double> > ());
 
 private slots:
     void hideSubWindow(QMdiSubWindow* w);
@@ -174,14 +174,14 @@ private slots:
      */
     void genRandomSequence();
     void showSessionStats();
-    void showSequenceStats();
+    void showSequenceStats(bool statisticsTests=false);
     void showPermutationStats();
     void showData(QList<QString> set_line, QList<QList<double> > tmp_E,
                   QList<QList<double> > tmp_O, QList<QList<double> > tmp_Rs,
                   QList<QMap<int, QPair<double, double> > > VE,
                   QList<QMap<int, QPair<double, double> > > VO,
                   QList<QMap<int, QPair<double, double> > > VR,
-                  QList<QVector<QString> > tmp_sessionsLabels, QList<QVector<QString> > tmp_infos, int s,
+                  QVector<QString> sessionsLabels, QList<QVector<QString> > tmp_infos, int s,
                   QList<QList<QPair<double, double> > > Ps = QList<QList< QPair<double,double> > >());
     void showGraphicStats(QList<double> E, QList<double> O, QList<double> R,
                           QVector<QString> sessionsLabels, QVector<QString> infos,
@@ -197,9 +197,9 @@ private slots:
                         QList<QMap<int, QPair<double,double> > > VE,
                         QList<QMap<int, QPair<double,double> > > VO,
                         QList<QMap<int, QPair<double,double> > > VR,
-                        QList<QVector<QString> > sessionsLabels,
+                        QVector<QString> sessionsLabels,
                         QList<QVector<QString> > infos,
-                        QList<QList<double> > pvalues = QList<QList<double> >());
+                        QList<QPair<double,double> > pvalues = QList<QPair<double,double> >());
 
     void showNetStats(QList<double> E, QList<double> O, QList<double> R,
                       QVector<QString> sessionsLabels, QVector<QString> infos,
@@ -221,7 +221,6 @@ private slots:
     void upSpecie();
     void downSpecie();
     void showPhyloMtx();
-
 };
 
 #endif // ANALYSIS_H

@@ -23,6 +23,15 @@ void ViewTableStats::insertTableLine(QString session, QVariant obs,
                                      QVariant spec, QVariant res,
                                      QVariant pvalor)
 {
+    if (obs.type()==QVariant::Bool)
+        if (obs.toBool()==false) return;
+    if (spec.type()==QVariant::Bool)
+        if (spec.toBool()==false) return;
+    if (res.type()==QVariant::Bool)
+        if (res.toBool()==false) return;
+    if (pvalor.type()==QVariant::Bool)
+        if (pvalor.toBool()==false) return;
+
     int row = 0;
     for(int c = 0; c < this->ui->table->columnCount(); c++){
         if(c==0){
@@ -95,10 +104,10 @@ void ViewTableStats::insertTable2Line(QVariant subject, QVariant MO, QVariant vo
 }
 
 void ViewTableStats::setData(QList<QString> set_line,
-                             QList<QVector<QString> > sessionLabels,
+                             QVector<QString> sessionLabels,
                              QList<QVector<QString> > infos,
                              QList<QList<double> > obs, QList<QList<double> > spec, QList<QList<double> > res,
-                             QList<QList<double> > pvalor,
+                             QList<QPair<double, double> > pvalor,
                              QList<QMap<int, QPair<double, double> > > VE,
                              QList<QMap<int, QPair<double, double> > > VO,
                              QList<QMap<int, QPair<double, double> > > VR){
@@ -121,8 +130,8 @@ void ViewTableStats::setData(QList<QString> set_line,
 void ViewTableStats::alter_line(int i){
     this->ui->table->setRowCount(0);
     this->ui->table_2->setRowCount(0);
-    for (int j=0; j<this->session.at(i).size(); j++){
-        this->insertTableLine(this->session.at(i).at(j),
+    for (int j=0; j<this->session.size(); j++){
+        this->insertTableLine(this->session.at(j),
                               this->obs.at(i).at(j),
                               this->spec.at(i).at(j),
                               this->res.at(i).at(j));
