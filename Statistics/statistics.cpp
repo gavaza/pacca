@@ -484,6 +484,56 @@ double Statistics::P_all(list_behavior u, list_behavior behavior){
 
 }
 
+QList<list_behavior> Statistics::getPermutation_us()
+{
+    return this->permutation_list;
+}
+
+QPair<bool,double> Statistics::isSignificativePvalue(QPair<double, double> pv)
+{
+    QSettings s("NuEvo","Pacca");
+    s.beginGroup("ConfigAnalysis");
+    bool filterPvalue = s.value("filterPvalue",false).toBool();
+    double alfa = s.value("alfa",5).toDouble();
+    int tailed = s.value("tailed",0).toInt();
+    s.endGroup();
+
+    bool valid = false;
+    double pvalue;
+    if(filterPvalue){
+        double reference = alfa;
+        if(tailed == 0){
+            reference = alfa/2.0;
+            double p;
+            if(pv.first < pv.second) p=pv.first;
+            else p=pv.second;
+            if(p<=reference){
+                pvalue=p;
+                valid=true;
+            }
+        } else if((pv.first < pv.second) && tailed == -1 && (pv.first <= reference)){
+            pvalue=pv.first;
+            valid=true;
+        } else if((pv.first >= pv.second) && tailed == 1 && (pv.second <= reference)){
+            pvalue=pv.second;
+            valid=true;
+        }
+    }else {
+        valid=true;
+        if(pv.first < pv.second) pvalue=pv.first;
+        else pvalue=pv.second;
+    }
+    return QPair<bool,double>(valid,pvalue);
+}
+
+QList< QPair<bool,double> > Statistics::isSignificativePvalue(QList<QPair<double, double> > list_pv)
+{
+    QList< QPair<bool,double> > list;
+    for(int i=0; i<list_pv.size(); i++)
+        list.push_back(this->isSignificativePvalue(list_pv.at(i)));
+    return list;
+}
+
 QPair<double,double> Statistics::V(QList<double> list){
     double mean = 0;
     double EV = 0;

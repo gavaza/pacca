@@ -86,12 +86,15 @@ private:
                       QVector<QString> labels, QString labX, QString labY, QString title, QColor lColor, QColor uColor);
     PlotWindow *showFrequenceStats(QVariantList data, QString xlabel, QString title, QString legend, bool sorted);
     void permutation(QStringList ev, QList<int> list, int i, int n);
-    void preparePhylogenetic(Phylogenetic *module);
+    void preparePhylogenetic();
 
     QList<list_behavior> permutation_list;
     QList<QVariantList> bootstrap_list;
     Statistics* statsModule;
     Phylogenetic* phyloModule;
+    Statistics* phyloStats;
+    QMap< QString, StatisticMap > mapSequences;
+    QList<QVariant> sortedSpecies;
 
 //subwindow control
     QMdiSubWindow* phyloSW;
@@ -221,6 +224,7 @@ private slots:
     void upSpecie();
     void downSpecie();
     void showPhyloMtx();
+    void calcPhyloMtx();
 };
 
 #endif // ANALYSIS_H

@@ -193,12 +193,11 @@ public:
     double P_all(list_behavior u, list_behavior behavior);
 
     QList<list_behavior> getPermutation_us();
-
-
+    QPair<bool,double> isSignificativePvalue(QPair<double,double> pv);
+    QList< QPair<bool,double> > isSignificativePvalue(QList< QPair<double,double> > list_pv);
 
 private:
     void calcPermutation();
-    void calcPermutationEvents();
     unsigned int elements(int size_u, int size_behavior);
     char typeRun;
     list_behavior sessions;
@@ -238,6 +237,7 @@ public slots:
     void updateDynamic(bool dynamic);
     void updateStepStart(int stepStart);
     void updateStepSize(int stepSize);
+    void calcPermutationEvents();
 
 signals:
     void dataProcessed();

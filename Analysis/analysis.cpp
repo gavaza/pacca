@@ -229,7 +229,7 @@ void AnalysisWindow::permutation(QStringList ev, QList<int> list, int i, int n)
     }
 }
 
-void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
+void AnalysisWindow::preparePhylogenetic()
 {
     QMessageBox::StandardButton r = QMessageBox::No;
     if(this->hasPhyloData){
@@ -238,7 +238,7 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
     }
     if (r == QMessageBox::Yes || !this->hasPhyloData) {
         Database db;
-        QMap< QString, StatisticMap > mapSequences;
+        this->mapSequences.clear();
 
         if(this->ui->sessions->selectedItems().size() == 0){ //calculating for all sessions
             for(int s=0; s < this->ui->sessions->rowCount(); s++){
@@ -246,8 +246,8 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                 QString sbjSession = this->ui->sessions->item(s,1)->text(); //getting the name of the specie
                 int idSubject = db.getSubjects(sbjSession).getId().toInt();
                 QString spcSession = this->ui->sessions->item(s,2)->text(); //getting the name of the specie
-                if(!mapSequences.contains(spcSession)){ //checking if already exist sessions with this specie
-                    mapSequences.insert(spcSession,StatisticMap());
+                if(!this->mapSequences.contains(spcSession)){ //checking if already exist sessions with this specie
+                    this->mapSequences.insert(spcSession,StatisticMap());
                 }
                 QList<Actions> actions = db.getSequence(idSession); //getting the sequence of events
                 QList<QVariant> tmp_ev;
@@ -256,10 +256,10 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                     QString ev = act.getEventDescription();
                     tmp_ev.push_back(ev);
                 }
-                if(!mapSequences.value(spcSession).contains(idSubject)){
-                    mapSequences[spcSession].insert(idSubject,tmp_ev);
+                if(!this->mapSequences.value(spcSession).contains(idSubject)){
+                    this->mapSequences[spcSession].insert(idSubject,tmp_ev);
                 } else {
-                    mapSequences[spcSession].insertMulti(idSubject,tmp_ev);
+                    this->mapSequences[spcSession].insertMulti(idSubject,tmp_ev);
                 }
             }
         } else {
@@ -269,8 +269,8 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                 QString sbjSession = this->ui->sessions->selectedItems().at(s+1)->text();
                 int idSubject = db.getSubjects(sbjSession).getId().toInt();
                 QString spcSession = this->ui->sessions->selectedItems().at(s+2)->text();
-                if(!mapSequences.contains(spcSession)){
-                    mapSequences.insert(spcSession,StatisticMap());
+                if(!this->mapSequences.contains(spcSession)){
+                    this->mapSequences.insert(spcSession,StatisticMap());
                 }
                 QList<Actions> actions = db.getSequence(idSession);
                 QList<QVariant> tmp_ev;
@@ -279,30 +279,34 @@ void AnalysisWindow::preparePhylogenetic(Phylogenetic* module)
                     QString ev = act.getEventDescription();
                     tmp_ev.push_back(ev);
                 }
-                if(!mapSequences[spcSession].contains(idSubject)){
-                    mapSequences[spcSession].insert(idSubject,tmp_ev);
+                if(!this->mapSequences[spcSession].contains(idSubject)){
+                    this->mapSequences[spcSession].insert(idSubject,tmp_ev);
                 } else {
-                    mapSequences[spcSession].insertMulti(idSubject,tmp_ev);
+                    this->mapSequences[spcSession].insertMulti(idSubject,tmp_ev);
                 }
             }
         }
-        QList<QVariant> sortedSpecies;
+        this->sortedSpecies.clear();
         if(this->ui->speciesTable->selectedItems().size() == 0){
             for(int idx = 0; idx < this->ui->speciesTable->rowCount(); idx++)
-                sortedSpecies.push_back(this->ui->speciesTable->item(idx,0)->text());
+                this->sortedSpecies.push_back(this->ui->speciesTable->item(idx,0)->text());
         } else {
             int sizeCollumns = this->ui->speciesTable->columnCount();
-            qDebug() << sizeCollumns;
             for(int idx = 0; idx < this->ui->speciesTable->selectedItems().size(); idx+=sizeCollumns){
-                sortedSpecies.push_back(this->ui->speciesTable->selectedItems().at(idx)->text());
+                this->sortedSpecies.push_back(this->ui->speciesTable->selectedItems().at(idx)->text());
             }
         }
-        this->permutation_list.clear();
-        QList<int> idx;
-        this->permutation(this->events.toList(),idx,0,this->ui->sizeSeq->value()); //need to check this->events
-        module->loadData(mapSequences,sortedSpecies,
-                         this->permutation_list,this->ui->sizeSeq->value(),
-                         this->ui->mtxIntervals->value(),this->ui->stepsSize->value(),this->ui->absValMtx->isChecked());
+        QThread* t = new QThread();
+        Statistics* s = new Statistics();
+        this->phyloStats = s;
+        s->setUS(this->events.toList());
+        s->setSizeU(this->ui->sizeSeq->value());
+        s->moveToThread(t);
+        connect(t,SIGNAL(started()),s,SLOT(calcPermutationEvents()));
+        connect(s,SIGNAL(dataEventsProcessed()),t,SLOT(quit()));
+        connect(s,SIGNAL(dataEventsProcessed()),this,SLOT(calcPhyloMtx()));
+        connect(t,SIGNAL(finished()),t,SLOT(deleteLater()));
+        t->start();
     }
 }
 
@@ -657,31 +661,33 @@ void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp
         QVector<QString> infos;
         for(int i=0; i<Ps.at(j).size(); i++) {
             QPair<double,double> pv = Ps.at(j).at(i);
-            bool valid = false;
-            if(this->filterPvalue){
-                double reference = this->alfa;
-                if(this->tailed == 0){
-                    reference = this->alfa/2.0;
-                    double p;
-                    if(pv.first < pv.second) p=pv.first;
-                    else p=pv.second;
-                    if(p<=reference){
-                        pvalues.push_back(p);
-                        valid=true;
-                    }
-                } else if((pv.first < pv.second) && tailed == -1 && (pv.first <= reference)){
-                    pvalues.push_back(pv.first);
-                    valid=true;
-                } else if((pv.first >= pv.second) && tailed == 1 && (pv.second <= reference)){
-                    pvalues.push_back(pv.second);
-                    valid=true;
-                }
-            }else {
-                valid=true;
-                if(pv.first < pv.second) pvalues.push_back(pv.first);
-                else pvalues.push_back(pv.second);
-            }
-            if(valid){
+            QPair<bool,double> check_pv = this->statsModule->isSignificativePvalue(pv);
+//            bool valid = false;
+//            if(this->filterPvalue){
+//                double reference = this->alfa;
+//                if(this->tailed == 0){
+//                    reference = this->alfa/2.0;
+//                    double p;
+//                    if(pv.first < pv.second) p=pv.first;
+//                    else p=pv.second;
+//                    if(p<=reference){
+//                        pvalues.push_back(p);
+//                        valid=true;
+//                    }
+//                } else if((pv.first < pv.second) && tailed == -1 && (pv.first <= reference)){
+//                    pvalues.push_back(pv.first);
+//                    valid=true;
+//                } else if((pv.first >= pv.second) && tailed == 1 && (pv.second <= reference)){
+//                    pvalues.push_back(pv.second);
+//                    valid=true;
+//                }
+//            }else {
+//                valid=true;
+//                if(pv.first < pv.second) pvalues.push_back(pv.first);
+//                else pvalues.push_back(pv.second);
+//            }
+            if(check_pv.first){
+                pvalues.push_back(check_pv.second);
                 E.push_back(tmp_E.at(j).at(i));
                 O.push_back(tmp_O.at(j).at(i));
                 Rs.push_back(tmp_Rs.at(j).at(i));
@@ -1109,13 +1115,21 @@ void AnalysisWindow::showPhyloMtx()
     }
     if (r == QMessageBox::Yes || !this->hasPhyloData){
         this->ui->progressBar->setValue(0);
-        this->preparePhylogenetic(this->phyloModule);
-        this->phyloModule->start();
         this->ui->showMtx->setEnabled(false);
         this->ui->stopMtx->setEnabled(true);
+        this->preparePhylogenetic();
     } else {
         this->showProcessedDataPhylo();
     }
+}
+
+void AnalysisWindow::calcPhyloMtx()
+{
+    this->phyloModule->loadData(this->mapSequences,this->sortedSpecies,
+                     this->phyloStats->getPermutation_us(),this->ui->sizeSeq->value(),
+                     this->ui->mtxIntervals->value(),this->ui->stepsSize->value(),this->ui->absValMtx->isChecked());
+    this->phyloStats->deleteLater();
+    this->phyloModule->start();
 }
 
 bool AnalysisWindow::checkDuplicated(int id)
