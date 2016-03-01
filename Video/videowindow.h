@@ -75,6 +75,7 @@ private:
     QList<unsigned int> eventsPositionInMiliseconds;
     QMdiSubWindow *subwindow;
     QString username;
+    bool playing;
 
     void createConnections();
 

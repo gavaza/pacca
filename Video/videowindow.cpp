@@ -28,6 +28,8 @@ VideoWindow::VideoWindow(QString typeMedia, QWidget *parent) :
     this->loadSubjects();
     this->loadUsers();
     this->createConnections();
+
+    this->playing = true;
 }
 
 VideoWindow::~VideoWindow()
@@ -193,11 +195,12 @@ void VideoWindow::saveSession()
 
 void VideoWindow::play()
 {
+    this->playing = true;
     this->ui->sequence->clearSelection();
     this->_player->play();
     this->setSpeed(this->ui->speed->value());
     this->ui->in_event->setFocus();
-    connect(this->ui->in_event,SIGNAL(returnPressed()),this,SLOT(newEntry()));
+//    connect(this->ui->in_event,SIGNAL(returnPressed()),this,SLOT(newEntry()));
 }
 
 void VideoWindow::pause()
@@ -208,12 +211,13 @@ void VideoWindow::pause()
 
 void VideoWindow::stop()
 {
+    this->playing = false;
     this->_player->stop();
     this->ui->sequence->scrollToTop();
     this->ui->sequence->clearSelection();
     this->highlight(0);
     this->ui->in_event->setFocus();
-    disconnect(this->ui->in_event,SIGNAL(returnPressed()),this,SLOT(newEntry()));
+//    disconnect(this->ui->in_event,SIGNAL(returnPressed()),this,SLOT(newEntry()));
 }
 
 void VideoWindow::highlight(int ms)
@@ -246,6 +250,7 @@ void VideoWindow::showDict()
 
 void VideoWindow::newEntry()
 {
+    if (!this->playing) return;
     QString code = this->ui->in_event->text().simplified();
     QString event = this->dictionary.value(code,"");
     if(event.size() == 0){

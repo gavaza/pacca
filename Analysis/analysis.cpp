@@ -76,15 +76,17 @@ void AnalysisWindow::createConnection()
 void AnalysisWindow::addSession()
 {
     DialogSelectSession d;
-    bool duplicated = false;
     if(d.exec()){
         int row = 0;
+        bool duplicated = false;
         QList<QTableWidgetItem*> itens = d.getSelectedItens();
         for(int i=0; i<itens.size(); i++){
             int column = i%6;
-            duplicated = this->checkDuplicated(itens.at(i)->text().toInt());
+            if(column == 0){
+                duplicated = this->checkDuplicated(itens.at(i)->text().toInt());
+            }
             if(!duplicated){
-                if(column == 0){
+                if (column == 0){
                     row = this->ui->sessions->rowCount();
                     this->ui->sessions->insertRow(row);
                 }
