@@ -1,7 +1,12 @@
 #include <QApplication>
 #include <QSettings>
 #include <QCoreApplication>
+
+#ifdef MAC_OS_X_VERSION_MAX_ALLOWED
 #include <QtXlsx>
+#else
+#include <QtXlsx/xlsxdocument.h>
+#endif
 
 #include "mainwindow.h"
 #include "dialogchooselanguage.h"

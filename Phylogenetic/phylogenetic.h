@@ -5,7 +5,13 @@
 #include <QList>
 #include <QSettings>
 #include <QThread>
+
+#ifdef MAC_OS_X_VERSION_MAX_ALLOWED
 #include <QtXlsx>
+#else
+#include <QtXlsx/xlsxdocument.h>
+#endif
+
 #include <QFileDialog>
 #include <QString>
 
