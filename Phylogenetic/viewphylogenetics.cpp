@@ -30,19 +30,8 @@ void ViewPhylogenetics::showPhylogenetis(QList<QList<QPair<double, double> > > M
     this->MR = MR;
     this->treatMP(MP);
     this->MFs = MFs;
+    this->showTable();
 
-    QSettings s("NuEvo","Pacca");
-    s.beginGroup("ConfigAnalysis");
-    int view = s.value("showType",0).toInt();
-    s.endGroup();
-
-    switch (view) {
-    case 1:
-        this->showTable();
-        break;
-    default:
-        break;
-    }
 }
 
 void ViewPhylogenetics::fillMtx()
