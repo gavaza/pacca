@@ -16,21 +16,8 @@ windeployqt --release ${APP_NAME}
 cd -
 
 # Graphviz library
-cp -f ${GRAPHVIZ_PATH}/cgraph.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/gvc.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/zlib1.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/cdt.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/Pathplan.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/libexpat.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/ltdl.dll ${OUTPUT_DIR}
 cp -f ${GRAPHVIZ_PATH}/config6 ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/gvplugin_core.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/gvplugin_dot_layout.dll ${OUTPUT_DIR}
-#cp -f ${GRAPHVIZ_PATH}/gvplugin_gd.dll ${OUTPUT_DIR}
-#cp -f ${GRAPHVIZ_PATH}/gvplugin_gdiplus.dll ${OUTPUT_DIR}
-#cp -f ${GRAPHVIZ_PATH}/gvplugin_neato_layout.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/gvplugin_pango.dll ${OUTPUT_DIR}
-cp -f ${GRAPHVIZ_PATH}/libglib-2.0-0.dll ${OUTPUT_DIR}
+cp -f ${GRAPHVIZ_PATH}/*.dll ${OUTPUT_DIR}
 
 
 # VLC-Qt library

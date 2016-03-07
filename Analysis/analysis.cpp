@@ -406,6 +406,7 @@ void AnalysisWindow::showSequenceStats(bool statisticsTests)
 {
     Database db;
     StatisticMap behaivors;
+    list_behavior behaivors_list;
     QVector<QString> sessionsLabels;
     QList<QVector<double> > set_sessionsTicks;
     QList<int> idSession;
@@ -446,6 +447,7 @@ void AnalysisWindow::showSequenceStats(bool statisticsTests)
             }
         }
         behaivors.insertMulti(db.subjectExist(db.getSession(idSession[i]).getSubject()),behavior_session);
+        behaivors_list.push_back(behavior_session);
         sessionsLabels.push_back("S:"+QString::number(idSession[i]));
         sessionsTicks.push_back(i+2);
         infos.push_back(db.getSession(idSession[i]).getDescription().toString());
@@ -473,7 +475,7 @@ void AnalysisWindow::showSequenceStats(bool statisticsTests)
         }
         line_us.remove(line_us.size()-1,1);
         set_line.push_back(line_us);
-        QList<QList<double> > result = this->calc_statistics(list_us,behaivors.values());
+        QList<QList<double> > result = this->calc_statistics(list_us, behaivors_list);
         QList<double> E = result.at(0);
         QList<double> O = result.at(1);
         QList<double> R = result.at(2);
