@@ -536,29 +536,31 @@ void AnalysisWindow::showResults(QList<QString> set_line,
                                  QList<QVector<QString> > set_infos,
                                  QList<QVector<double> > set_sessionsTicks,
                                  QList<QPair<double, double> > set_pvalues){
-    if (this->showtype == 1){
-        this->showTableStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos, set_pvalues);
-    }
-    else{
+
+    switch (this->showtype) {
+    case 0:{
         for (int i=0;i<set_line.size();i++){
-            switch (this->showtype) {
-            case 0:
-                this->showGraphicStats(set_E.at(i),set_O.at(i),set_R.at(i),
-                                       set_sessionsLabels,set_infos.at(i),
-                                       set_sessionsTicks.at(i));
-                break;
-            case 2:
-                this->showNetStats(set_E.at(i),set_O.at(i),set_R.at(i),
-                                   set_sessionsLabels,set_infos.at(i));
-                break;
-            case 3:
-                this->saveCsvStats(set_E.at(i),set_O.at(i),set_R.at(i),
-                                   set_sessionsLabels,set_infos.at(i));
-                break;
-            default:
-                break;
-            }
+            this->showGraphicStats(set_E.at(i),set_O.at(i),set_R.at(i),
+                                   set_sessionsLabels,set_infos.at(i),
+                                   set_sessionsTicks.at(i));
         }
+        break;
+    }
+    case 1:
+        this->showTableStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos, set_pvalues);
+        break;
+    case 2:{
+        for (int i=0;i<set_line.size();i++){
+            this->showNetStats(set_E.at(i),set_O.at(i),set_R.at(i),
+                               set_sessionsLabels,set_infos.at(i));
+        }
+        break;
+    }
+    case 3:
+        this->saveFileStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos, set_pvalues);
+        break;
+    default:
+        break;
     }
 }
 
@@ -666,30 +668,6 @@ void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp
         for(int i=0; i<Ps.at(j).size(); i++) {
             QPair<double,double> pv = Ps.at(j).at(i);
             QPair<bool,double> check_pv = this->statsModule->isSignificativePvalue(pv);
-//            bool valid = false;
-//            if(this->filterPvalue){
-//                double reference = this->alfa;
-//                if(this->tailed == 0){
-//                    reference = this->alfa/2.0;
-//                    double p;
-//                    if(pv.first < pv.second) p=pv.first;
-//                    else p=pv.second;
-//                    if(p<=reference){
-//                        pvalues.push_back(p);
-//                        valid=true;
-//                    }
-//                } else if((pv.first < pv.second) && tailed == -1 && (pv.first <= reference)){
-//                    pvalues.push_back(pv.first);
-//                    valid=true;
-//                } else if((pv.first >= pv.second) && tailed == 1 && (pv.second <= reference)){
-//                    pvalues.push_back(pv.second);
-//                    valid=true;
-//                }
-//            }else {
-//                valid=true;
-//                if(pv.first < pv.second) pvalues.push_back(pv.first);
-//                else pvalues.push_back(pv.second);
-//            }
             if(check_pv.first){
                 pvalues.push_back(check_pv.second);
                 E.push_back(tmp_E.at(j).at(i));
@@ -836,6 +814,81 @@ void AnalysisWindow::saveCsvStats(QList<double> E, QList<double> O, QList<double
             csv << infos.at(v) << endl;
         }
         file.close();
+    }
+}
+
+void AnalysisWindow::saveFileStats(QList<QString> set_line,
+                                   QList< QList<double> > E, QList<QList<double> > O, QList<QList<double> > R,
+                                   QList<QMap<int, QPair<double, double> > > VE, QList<QMap<int, QPair<double, double> > > VO, QList<QMap<int, QPair<double, double> > > VR,
+                                   QVector<QString> sessionsLabels, QList<QVector<QString> > infos, QList<QPair<double, double> > pvalues)
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("Salvar Arquivo Xlsx"), QDir::homePath(),".xlsx");
+    if(filename != ""){
+        QXlsx::Document xlsx;
+        QXlsx::Format formatSetLine;
+        formatSetLine.setFontBold(true);
+        formatSetLine.setPatternBackgroundColor(Qt::yellow);
+        QXlsx::Format formatSessions;
+        formatSessions.setFontBold(true);
+        formatSessions.setPatternBackgroundColor(Qt::green);
+        QXlsx::Format formatSubjects;
+        formatSubjects.setFontBold(true);
+        formatSubjects.setPatternBackgroundColor(Qt::cyan);
+        unsigned int currentRow = 1;
+        Database db;
+        QList<Subjects> subjects = db.getAllSubjects();
+        QMap<int,QString> subjectsNames;
+        subjectsNames.insert(-1,tr("Todos"));
+        for(int i = 0; i < subjects.size(); ++i)
+            subjectsNames.insert(subjects[i].getId().toInt(),subjects[i].getName().toString());
+        for(int i = 0; i < set_line.size(); ++i){
+            xlsx.write(currentRow,1,set_line.at(i),formatSetLine);
+            ++currentRow;
+            xlsx.write(currentRow,1,tr("Sessão"),formatSessions);
+            xlsx.write(currentRow,2,tr("Observado"),formatSessions);
+            xlsx.write(currentRow,3,tr("Esperado"),formatSessions);
+            xlsx.write(currentRow,4,tr("Resíduo"),formatSessions);
+            for (int j=0; j< sessionsLabels.size(); j++){
+                ++currentRow;
+                xlsx.write(currentRow,1,sessionsLabels.at(j));
+                xlsx.write(currentRow,2,O.at(i).at(j));
+                xlsx.write(currentRow,3,E.at(i).at(j));
+                xlsx.write(currentRow,4,R.at(i).at(j));
+            }
+            ++currentRow;
+            xlsx.write(currentRow,1,tr("Indivíduo"),formatSubjects);
+            xlsx.write(currentRow,2,tr("Observado Médio"),formatSubjects);
+            xlsx.write(currentRow,3,tr("Variância do Observado"),formatSubjects);
+            xlsx.write(currentRow,4,tr("Esperado Médio"),formatSubjects);
+            xlsx.write(currentRow,5,tr("Variância do Esperado"),formatSubjects);
+            xlsx.write(currentRow,6,tr("Resíduo Médio"),formatSubjects);
+            xlsx.write(currentRow,7,tr("Variância do Resíduo"),formatSubjects);
+            QList<int> keys = VE.at(i).uniqueKeys();
+            QListIterator<int> j(keys);
+            while (j.hasNext()){
+                ++currentRow;
+                int key = j.next();
+                QPair<double,double> MeanVarE = VE.at(i).value(key);
+                QPair<double,double> MeanVarO = VO.at(i).value(key);
+                QPair<double,double> MeanVarR = VR.at(i).value(key);
+                QVariant VarE = MeanVarE.second;
+                QVariant VarO = MeanVarO.second;
+                QVariant VarR = MeanVarR.second;
+                if (VarE.toInt() == -1) VarE = "-";
+                if (VarO.toInt() == -1) VarO = "-";
+                if (VarR.toInt() == -1) VarR = "-";
+                xlsx.write(currentRow,1,subjectsNames.value(key));
+                xlsx.write(currentRow,2,MeanVarO.first);
+                xlsx.write(currentRow,3,VarO);
+                xlsx.write(currentRow,4,MeanVarE.first);
+                xlsx.write(currentRow,5,VarE);
+                xlsx.write(currentRow,6,MeanVarR.first);
+                xlsx.write(currentRow,7,VarR);
+            }
+            ++currentRow;
+            ++currentRow; //to create a blank line between the data.
+        }
+        xlsx.saveAs(filename);
     }
 }
 
