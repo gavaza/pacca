@@ -26,6 +26,8 @@ public:
                                    QVector<QString> labels, QString labX, QString labY, QString title, QColor lColor, QColor uColor);
     void showFrequenceStats(QMap<QVariant, int> freq, QString xlabel, QString legend, bool sorted);
 
+    QCustomPlot* plot();
+
 private slots:
     void titleDoubleClick(QMouseEvent *event, QCPPlotTitle *title);
     void axisLabelDoubleClick(QCPAxis* axis, QCPAxis::SelectablePart part);
@@ -58,6 +60,7 @@ private:
     int tailed;
     int nPermutations;
     double alfa;
+    QCPPlotTitle* title;
     QColor colorFrequence;
     QColor colorObserved;
     QColor colorExpected;

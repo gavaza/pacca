@@ -15,7 +15,8 @@ PlotWindow::PlotWindow(QWidget *parent) :
   ui->customPlot->axisRect()->setupFullAxesBox();
   
   ui->customPlot->plotLayout()->insertRow(0);
-  ui->customPlot->plotLayout()->addElement(0, 0, new QCPPlotTitle(ui->customPlot, tr("Título")));
+  this->title = new QCPPlotTitle(ui->customPlot, tr("Título"));
+  ui->customPlot->plotLayout()->addElement(0, 0, this->title);
   
   ui->customPlot->xAxis->setLabel("x");
   ui->customPlot->yAxis->setLabel("y");
@@ -36,8 +37,12 @@ PlotWindow::~PlotWindow()
     delete ui;
 }
 
-void PlotWindow::showHistogram(QVector<double> data, QVector<double> ticks, QPair<double, double> variances, QVector<QString> labels, QString labX, QString labY, QString title, QColor color)
+void PlotWindow::showHistogram(QVector<double> data, QVector<double> ticks, QPair<double, double> variances,
+                               QVector<QString> labels, QString labX, QString labY, QString title, QColor color)
 {
+    ui->customPlot->clearPlottables();
+    ui->customPlot->clearGraphs();
+    ui->customPlot->clearItems();
     ui->customPlot->legend->setVisible(this->showLegend);
     QCPBars *hist = new QCPBars(ui->customPlot->xAxis,ui->customPlot->yAxis);
     hist->setBrush(QBrush(color));
@@ -48,6 +53,7 @@ void PlotWindow::showHistogram(QVector<double> data, QVector<double> ticks, QPai
     ui->customPlot->xAxis->setTickLabelRotation(-90);
     ui->customPlot->xAxis->setLabel(labX);
     ui->customPlot->yAxis->setLabel(labY);
+    this->title->setText(title);
     double miny = 0;
     double maxy = 0;
     QMultiMap<double,QString> map;
@@ -222,6 +228,11 @@ void PlotWindow::showFrequenceStats(QMap<QVariant,int> freq, QString xlabel, QSt
     ui->customPlot->xAxis->scaleRange(1.1,ui->customPlot->xAxis->range().center());
     ui->customPlot->yAxis->scaleRange(1.1,ui->customPlot->yAxis->range().center());
     ui->customPlot->replot();
+}
+
+QCustomPlot *PlotWindow::plot()
+{
+    return this->ui->customPlot;
 }
 
 void PlotWindow::createConnections()

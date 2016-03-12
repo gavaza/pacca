@@ -539,11 +539,12 @@ void AnalysisWindow::showResults(QList<QString> set_line,
 
     switch (this->showtype) {
     case 0:{
-        for (int i=0;i<set_line.size();i++){
-            this->showGraphicStats(set_E.at(i),set_O.at(i),set_R.at(i),
-                                   set_sessionsLabels,set_infos.at(i),
-                                   set_sessionsTicks.at(i));
-        }
+//        for (int i=0;i<set_line.size();i++){
+//            this->showGraphicStats(set_E.at(i),set_O.at(i),set_R.at(i),
+//                                   set_sessionsLabels,set_infos.at(i),
+//                                   set_sessionsTicks.at(i));
+//        }
+        this->showGraphicStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos, set_pvalues);
         break;
     }
     case 1:
@@ -890,6 +891,20 @@ void AnalysisWindow::saveFileStats(QList<QString> set_line,
         }
         xlsx.saveAs(filename);
     }
+}
+
+void AnalysisWindow::showGraphicStats(QList<QString> set_line, QList<QList<double> > E, QList<QList<double> > O, QList<QList<double> > R,
+                                    QList<QMap<int, QPair<double, double> > > VE,
+                                    QList<QMap<int, QPair<double, double> > > VO,
+                                    QList<QMap<int, QPair<double, double> > > VR,
+                                    QVector<QString> sessionsLabels,
+                                    QList<QVector<QString> > infos,
+                                    QList<QPair<double, double> > pvalues)
+{
+    ViewGraphicStats* view = new ViewGraphicStats(this->mdi);
+    view->setData(set_line,sessionsLabels,infos,O,E,R,pvalues,VE,VO,VR);
+    this->mdi->addSubWindow(view);
+    view->show();
 }
 
 void AnalysisWindow::showTableStats(QList<QString> set_line, QList<QList<double> > E, QList<QList<double> > O, QList<QList<double> > R,

@@ -23,6 +23,7 @@
 #include "action.h"
 #include "dialogselectsession.h"
 #include "statistics.h"
+#include "viewgraphicstats.h"
 #include "viewtablestats.h"
 #include "dialogconfigstats.h"
 #include "graph.h"
@@ -200,6 +201,16 @@ private slots:
                       QVector<QString> sessionsLabels, QVector<QString> infos,
                       QList<double> pvalues = QList<double>());
     void saveFileStats(QList<QString> set_line,
+                        QList<QList<double> > E,
+                        QList<QList<double> > O,
+                        QList<QList<double> > R,
+                        QList<QMap<int, QPair<double,double> > > VE,
+                        QList<QMap<int, QPair<double,double> > > VO,
+                        QList<QMap<int, QPair<double,double> > > VR,
+                        QVector<QString> sessionsLabels,
+                        QList<QVector<QString> > infos,
+                        QList<QPair<double,double> > pvalues = QList<QPair<double,double> >());
+    void showGraphicStats(QList<QString> set_line,
                         QList<QList<double> > E,
                         QList<QList<double> > O,
                         QList<QList<double> > R,

@@ -18,17 +18,20 @@ DEFINES += ANALYSIS_LIBRARY
 
 SOURCES += analysis.cpp \
     dialogconfigstats.cpp \
-    viewtablestats.cpp
+    viewtablestats.cpp \
+    viewgraphicstats.cpp
 
 
 HEADERS += analysis.h\
     dialogconfigstats.h \
     viewtablestats.h \
-        analysis_global.h
+        analysis_global.h \
+    viewgraphicstats.h
 
 FORMS += analysis.ui \
        viewtablestats.ui \
-     dialogconfigstats.ui
+     dialogconfigstats.ui \
+    viewgraphicstats.ui
 
 LIBS += -L$$OUT_PWD/../lib/ -lGraph -lGraphWindowCore -lStatistics -lPhylogenetic -lDatabaseControl -lPlotWindow  -lDatabase
 
