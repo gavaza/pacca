@@ -125,23 +125,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="filter">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../Application/resource.qrc">
-         <normaloff>:/icons/filter32x32.png</normaloff>:/icons/filter32x32.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -177,6 +160,10 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
+  <include location="../Application/resource.qrc"/>
   <include location="../Application/resource.qrc"/>
   <include location="../Application/resource.qrc"/>
  </resources>

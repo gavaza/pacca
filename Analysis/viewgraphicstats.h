@@ -60,7 +60,14 @@ private:
     QVector<double> ticks;
     QVector<QString> labels;
 
+    QColor colorExpected;
+    QColor colorObserved;
+    QColor colorResidue;
+    QColor colorUpper;
+    bool filterPvalue;
+
     void createConnections();
+    void loadConfig();
 
 private slots:
     void alter_line(int i);
