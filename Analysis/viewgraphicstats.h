@@ -31,7 +31,7 @@ public:
                  QList<QList<double> > obs,
                  QList<QList<double> > spec,
                  QList<QList<double> > res,
-                 QList<QPair<double, double> > pvalor,
+                 QList<QPair<bool, double> > pvalor,
                  QList<QMap<int, QPair<double,double> > > VE,
                  QList<QMap<int, QPair<double,double> > > VO,
                  QList<QMap<int, QPair<double,double> > > VR);
@@ -45,7 +45,7 @@ private:
     QList<QList<double> > observed;
     QList<QList<double> > expected;
     QList<QList<double> > residue;
-    QList<QPair<double,double> > pvalues;
+    QList< QPair<bool,double> > pvalues;
     QList<QMap<int, QPair<double,double> > > VE;
     QList<QMap<int, QPair<double,double> > > VO;
     QList<QMap<int, QPair<double,double> > > VR;
@@ -58,7 +58,10 @@ private:
     QVector<double> veData;
     QVector<double> vrData;
     QVector<double> ticks;
+    QVector<double> ticksPvalue;
     QVector<QString> labels;
+    QVector<QString> labelsPvalue;
+    QMap<int,QString> subjectsNames;
 
     QColor colorExpected;
     QColor colorObserved;

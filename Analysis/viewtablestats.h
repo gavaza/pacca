@@ -5,6 +5,8 @@
 #include <QVariant>
 #include <QDebug>
 
+#include "database.h"
+
 namespace Ui {
 class ViewTableStats;
 }
@@ -47,6 +49,7 @@ private:
     QList<QMap<int, QPair<double,double> > > VE;
     QList<QMap<int, QPair<double,double> > > VO;
     QList<QMap<int, QPair<double,double> > > VR;
+    QMap<int,QString> subjectsNames;
 
     Ui::ViewTableStats *ui;
 };

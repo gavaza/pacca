@@ -18,7 +18,7 @@ ViewGraphicStats::~ViewGraphicStats()
 void ViewGraphicStats::setData(QList<QString> set_line, QVector<QString> sessionLabels,
                                QList<QVector<QString> > infos, QList<QList<double> > obs,
                                QList<QList<double> > spec, QList<QList<double> > res,
-                               QList<QPair<double, double> > pvalor, QList<QMap<int, QPair<double, double> > > VE,
+                               QList< QPair<bool,double> > pvalor, QList<QMap<int, QPair<double, double> > > VE,
                                QList<QMap<int, QPair<double, double> > > VO, QList<QMap<int, QPair<double, double> > > VR)
 {
     this->ui->list->addItems(set_line);
@@ -32,7 +32,17 @@ void ViewGraphicStats::setData(QList<QString> set_line, QVector<QString> session
     this->VE = VE;
     this->VO = VO;
     this->VR = VR;
-    if(this->ui->list->count() > 0) this->ui->list->item(0)->setSelected(true);
+    if(this->pvalues.size() > 0){
+        for(int p=0; p < set_line.size(); ++p){
+            this->ticksPvalue.push_back(p+1);
+            this->labelsPvalue.push_back(set_line.at(p));
+            this->pvalData.push_back(this->pvalues.at(p).second);
+        }
+    }
+    if(this->ui->list->count() > 0){
+        this->ui->list->item(0)->setSelected(true);
+        this->alter_line(0);
+    }
 }
 
 void ViewGraphicStats::createConnections()
@@ -50,17 +60,16 @@ void ViewGraphicStats::loadConfig()
     this->colorUpper = s.value("colorUpper",QColor(150, 222, 0, 70)).value<QColor>();
     this->filterPvalue = s.value("filterPvalue",false).toBool();
     s.endGroup();
+
+    Database db;
+    QList<Subjects> subjects = db.getAllSubjects();
+    this->subjectsNames.insert(-1,tr("Todos"));
+    for(int k = 0; k < subjects.size(); ++k)
+        this->subjectsNames.insert(subjects[k].getId().toInt(),subjects[k].getName().toString());
 }
 
 void ViewGraphicStats::alter_line(int i){
     this->clearAll();
-    Database db;
-    QList<Subjects> subjects = db.getAllSubjects();
-    QMap<int,QString> subjectsNames;
-    subjectsNames.insert(-1,tr("Todos"));
-    for(int k = 0; k < subjects.size(); ++k)
-        subjectsNames.insert(subjects[k].getId().toInt(),subjects[k].getName().toString());
-
     for (int j=0; j<this->session.size(); ++j){
         this->obsData.push_back(this->observed.at(i).at(j));
         this->expData.push_back(this->expected.at(i).at(j));
@@ -69,7 +78,6 @@ void ViewGraphicStats::alter_line(int i){
         this->labels.push_back(this->session.at(j));
         this->ticks.push_back(j+1);
     }
-
     this->plotSessions();
 
     QList<int> keys = this->VE.at(i).uniqueKeys();
@@ -89,7 +97,7 @@ void ViewGraphicStats::alter_line(int i){
         if (VarO == -1) VarO = 0;
         if (VarR == -1) VarR = 0;
         this->ticks.push_back(pos);
-        this->labels.push_back(subjectsNames.value(key));
+        this->labels.push_back(this->subjectsNames.value(key));
         this->obsData.push_back(MeanVarO.first);
         this->expData.push_back(MeanVarE.first);
         this->resData.push_back(MeanVarR.first);
@@ -108,19 +116,19 @@ void ViewGraphicStats::plotSessions()
                                              tr("Sessões"),tr("Esperado"),tr("Valor Esperado - Sessões"),this->colorExpected);
     this->ui->plotResSessions->showHistogram(this->resData,this->ticks,QPair<double,double>(0,0),this->labels,
                                              tr("Sessões"),tr("Resíduo"),tr("Valor do Resíduo - Sessões"),this->colorResidue);
-    this->ui->plotPvalSessions->showHistogram(this->pvalData,this->ticks,QPair<double,double>(0,0),this->labels,
+    this->ui->plotPvalSessions->showHistogram(this->pvalData,this->ticksPvalue,QPair<double,double>(0,0),this->labelsPvalue,
                                              tr("Sessões"),tr("P-Valor"),tr("P-Valores - Sessões"),this->colorUpper);
 }
 
 void ViewGraphicStats::plotSubjects()
 {
-    this->ui->plotObsSubjects->showHistogram(this->obsData,this->ticks,QPair<double,double>(0,0),this->labels,
+    this->ui->plotObsSubjects->showHistogram(this->obsData,this->ticks,this->voData,0,this->labels,
                                              tr("Indivíduos"),tr("Observado"),tr("Valor Observado - Indivíduos"),this->colorObserved);
-    this->ui->plotExpSubjects->showHistogram(this->expData,this->ticks,QPair<double,double>(0,0),this->labels,
+    this->ui->plotExpSubjects->showHistogram(this->expData,this->ticks,this->veData,0,this->labels,
                                              tr("Indivíduos"),tr("Esperado"),tr("Valor Esperado - Indivíduos"),this->colorExpected);
-    this->ui->plotResSubjects->showHistogram(this->resData,this->ticks,QPair<double,double>(0,0),this->labels,
+    this->ui->plotResSubjects->showHistogram(this->resData,this->ticks,this->vrData,0,this->labels,
                                              tr("Indivíduos"),tr("Resíduo"),tr("Valor do Resíduo - Indivíduos"),this->colorResidue);
-    this->ui->plotPvalSubjects->showHistogram(this->pvalData,this->ticks,QPair<double,double>(0,0),this->labels,
+    this->ui->plotPvalSubjects->showHistogram(this->pvalData,this->ticksPvalue,QPair<double,double>(0,0),this->labelsPvalue,
                                              tr("Indivíduos"),tr("P-valor"),tr("P-Valores - Indivíduos"),this->colorUpper);
 }
 
@@ -129,7 +137,7 @@ void ViewGraphicStats::clearAll()
     this->obsData.clear();
     this->expData.clear();
     this->resData.clear();
-    this->pvalData.clear();
+//    this->pvalData.clear();
     this->voData.clear();
     this->veData.clear();
     this->vrData.clear();

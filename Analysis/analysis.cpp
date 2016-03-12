@@ -404,125 +404,125 @@ void AnalysisWindow::showSessionStats()
 
 void AnalysisWindow::showSequenceStats(bool statisticsTests)
 {
-    Database db;
-    StatisticMap behaivors;
-    list_behavior behaivors_list;
-    QVector<QString> sessionsLabels;
-    QList<QVector<double> > set_sessionsTicks;
-    QList<int> idSession;
-    QList<QString> set_line;
-    QList<QList<double> > set_E;
-    QList<QList<double> > set_O;
-    QList<QList<double> > set_R;
-    QList<QMap<int, QPair<double,double> > > set_VE;
-    QList<QMap<int, QPair<double,double> > > set_VO;
-    QList<QMap<int, QPair<double,double> > > set_VR;
-    QList<QVector<QString> > set_infos;
-    QList< QPair<double,double> > Ps;
+    if(this->sequences.size() > 0){
+        Database db;
+        StatisticMap behaivors;
+        list_behavior behaivors_list;
+        QVector<QString> sessionsLabels;
+        QList<QVector<double> > set_sessionsTicks;
+        QList<int> idSession;
+        QList<QString> set_line;
+        QList<QList<double> > set_E;
+        QList<QList<double> > set_O;
+        QList<QList<double> > set_R;
+        QList<QMap<int, QPair<double,double> > > set_VE;
+        QList<QMap<int, QPair<double,double> > > set_VO;
+        QList<QMap<int, QPair<double,double> > > set_VR;
+        QList<QVector<QString> > set_infos;
+        QList< QPair<double,double> > Ps;
 
-    if (this->ui->sessions->selectedItems().size() == 0){
-       for(int s=0; s < this->ui->sessions->rowCount(); s++){
-           idSession.push_back(this->ui->sessions->item(s,0)->text().toUInt());
-       }
-    }
-    else{
-        int sizeCollumns = this->ui->sessions->columnCount();
-        for(int s=0; s < this->ui->sessions->selectedItems().size(); s=s+sizeCollumns){
-            idSession.push_back(this->ui->sessions->selectedItems().at(s)->text().toUInt());
-        }
-    }
-
-    QVector<QString> infos;
-    QVector<double> sessionsTicks;
-    for (int i=0; i<idSession.size(); i++){
-        QList<Actions> actions = db.getSequence(idSession[i]);
-        QVariantList behavior_session;
-        QVariantList events;
-        for(int a = 0; a < actions.size(); a++){
-            Actions act = actions.at(a);
-            QVariant ev = act.getEventDescription();
-            behavior_session.push_back(ev);
-            if (statisticsTests){
-                events.push_back(ev);
+        if (this->ui->sessions->selectedItems().size() == 0){
+            for(int s=0; s < this->ui->sessions->rowCount(); s++){
+                idSession.push_back(this->ui->sessions->item(s,0)->text().toUInt());
             }
-        }
-        behaivors.insertMulti(db.subjectExist(db.getSession(idSession[i]).getSubject()),behavior_session);
-        behaivors_list.push_back(behavior_session);
-        sessionsLabels.push_back("S:"+QString::number(idSession[i]));
-        sessionsTicks.push_back(i+2);
-        infos.push_back(db.getSession(idSession[i]).getDescription().toString());
-        if (statisticsTests){
-            this->bootstrap_list.append(this->statsModule->bootstrap(events,this->nPermutations));
-        }
-    }
-
-    for(int s=0; s < this->sequences.size(); s++){
-        list_behavior list_us;
-        QString line_us;
-        for(int l=0; l < this->sequences.at(s)->count(); l++){
-            list_us.push_back(QVariantList());
-            QString line = this->sequences.at(s)->item(l)->text();
-            line_us.append(line);
-            line_us.append("; ");
-            line.remove(0,line.indexOf("{")+1);
-            line.remove("}");
-            line.remove(" ");
-            QStringList us = line.split(",",QString::SkipEmptyParts);
-            QString u;
-            foreach (u, us) {
-                list_us.last().push_back(u);
-            }
-        }
-        line_us.remove(line_us.size()-1,1);
-        set_line.push_back(line_us);
-        QList<QList<double> > result = this->calc_statistics(list_us, behaivors_list);
-        QList<double> E = result.at(0);
-        QList<double> O = result.at(1);
-        QList<double> R = result.at(2);
-        
-        if (statisticsTests){
-            QList<double> dist = this->statsModule->R(list_us,this->bootstrap_list);
-            Ps.push_back(this->statsModule->pvalue(R.last(),dist));
-        }
-        
-
-        QMap<int, QPair<double,double> > VE = this->statsModule->V_Map(list_us, behaivors, Expected);
-        QMap<int, QPair<double,double> > VO;
-        if (this->ui->absolut->isChecked()){
-            VO = this->statsModule->V_Map(list_us, behaivors, Observed);
         }
         else{
-            VO = this->statsModule->V_Map(list_us, behaivors, Probability);
+            int sizeCollumns = this->ui->sessions->columnCount();
+            for(int s=0; s < this->ui->sessions->selectedItems().size(); s=s+sizeCollumns){
+                idSession.push_back(this->ui->sessions->selectedItems().at(s)->text().toUInt());
+            }
         }
-        QMap<int, QPair<double,double> > VR = this->statsModule->V_Map(list_us, behaivors, Residue);
+
+        QVector<QString> infos;
+        QVector<double> sessionsTicks;
+        for (int i=0; i<idSession.size(); i++){
+            QList<Actions> actions = db.getSequence(idSession[i]);
+            QVariantList behavior_session;
+            QVariantList events;
+            for(int a = 0; a < actions.size(); a++){
+                Actions act = actions.at(a);
+                QVariant ev = act.getEventDescription();
+                behavior_session.push_back(ev);
+                if (statisticsTests){
+                    events.push_back(ev);
+                }
+            }
+            behaivors.insertMulti(db.subjectExist(db.getSession(idSession[i]).getSubject()),behavior_session);
+            behaivors_list.push_back(behavior_session);
+            sessionsLabels.push_back("S:"+QString::number(idSession[i]));
+            sessionsTicks.push_back(i+2);
+            infos.push_back(db.getSession(idSession[i]).getDescription().toString());
+            if (statisticsTests){
+                this->bootstrap_list.append(this->statsModule->bootstrap(events,this->nPermutations));
+            }
+        }
+
+        for(int s=0; s < this->sequences.size(); s++){
+            list_behavior list_us;
+            QString line_us;
+            for(int l=0; l < this->sequences.at(s)->count(); l++){
+                list_us.push_back(QVariantList());
+                QString line = this->sequences.at(s)->item(l)->text();
+                line_us.append(line);
+                line_us.append("; ");
+                line.remove(0,line.indexOf("{")+1);
+                line.remove("}");
+                line.remove(" ");
+                QStringList us = line.split(",",QString::SkipEmptyParts);
+                QString u;
+                foreach (u, us) {
+                    list_us.last().push_back(u);
+                }
+            }
+            line_us.remove(line_us.size()-1,1);
+            set_line.push_back(line_us);
+            QList<QList<double> > result = this->calc_statistics(list_us, behaivors_list);
+            QList<double> E = result.at(0);
+            QList<double> O = result.at(1);
+            QList<double> R = result.at(2);
+
+            if (statisticsTests){
+                QList<double> dist = this->statsModule->R(list_us,this->bootstrap_list);
+                Ps.push_back(this->statsModule->pvalue(R.last(),dist));
+            }
 
 
-        QPair<double, double> E_all = this->statsModule->V(VE);
-        QPair<double, double> O_all = this->statsModule->V(VO);
-        QPair<double, double> R_all = this->statsModule->V(VR);
-        sessionsTicks.push_front(1);
-        VE.insertMulti(-1,E_all);
-        VO.insertMulti(-1,O_all);
-        VR.insertMulti(-1,R_all);
+            QMap<int, QPair<double,double> > VE = this->statsModule->V_Map(list_us, behaivors, Expected);
+            QMap<int, QPair<double,double> > VO;
+            if (this->ui->absolut->isChecked()){
+                VO = this->statsModule->V_Map(list_us, behaivors, Observed);
+            }
+            else{
+                VO = this->statsModule->V_Map(list_us, behaivors, Probability);
+            }
+            QMap<int, QPair<double,double> > VR = this->statsModule->V_Map(list_us, behaivors, Residue);
 
-        set_VE.push_back(VE);
-        set_VO.push_back(VO);
-        set_VR.push_back(VR);
-        set_E.push_back(E);
-        set_O.push_back(O);
-        set_R.push_back(R);
-        set_infos.push_back(infos);
-        set_sessionsTicks.push_back(sessionsTicks);
+
+            QPair<double, double> E_all = this->statsModule->V(VE);
+            QPair<double, double> O_all = this->statsModule->V(VO);
+            QPair<double, double> R_all = this->statsModule->V(VR);
+            sessionsTicks.push_front(1);
+            VE.insertMulti(-1,E_all);
+            VO.insertMulti(-1,O_all);
+            VR.insertMulti(-1,R_all);
+
+            set_VE.push_back(VE);
+            set_VO.push_back(VO);
+            set_VR.push_back(VR);
+            set_E.push_back(E);
+            set_O.push_back(O);
+            set_R.push_back(R);
+            set_infos.push_back(infos);
+            set_sessionsTicks.push_back(sessionsTicks);
+        }
+
+        this->showResults(set_line,set_E,set_O,set_R,
+                          set_VE,set_VO,set_VR,
+                          sessionsLabels,
+                          set_infos,
+                          set_sessionsTicks,
+                          Ps);
     }
-
-    this->showResults(set_line,set_E,set_O,set_R,
-                      set_VE,set_VO,set_VR,
-                      sessionsLabels,
-                      set_infos,
-                      set_sessionsTicks,
-                      Ps);
-
-
 }
 
 void AnalysisWindow::showResults(QList<QString> set_line,
@@ -538,15 +538,9 @@ void AnalysisWindow::showResults(QList<QString> set_line,
                                  QList<QPair<double, double> > set_pvalues){
 
     switch (this->showtype) {
-    case 0:{
-//        for (int i=0;i<set_line.size();i++){
-//            this->showGraphicStats(set_E.at(i),set_O.at(i),set_R.at(i),
-//                                   set_sessionsLabels,set_infos.at(i),
-//                                   set_sessionsTicks.at(i));
-//        }
+    case 0:
         this->showGraphicStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos, set_pvalues);
         break;
-    }
     case 1:
         this->showTableStats(set_line,set_E,set_O,set_R,set_VE,set_VO,set_VR,set_sessionsLabels,set_infos, set_pvalues);
         break;
@@ -637,10 +631,10 @@ void AnalysisWindow::showPermutationStats()
     this->statsModule->setTailedAlpha(this->tailed,this->alfa);
     this->statsModule->setFilterPvalue(this->filterPvalue);
     this->ui->genSeq->setEnabled(false);
+    this->hasData = false;
     this->statsModule->start();
     this->ui->progressBar->setStyleSheet("QProgressBar::chunk {background-color: blue; width: 10px;margin: 0.5px;}");
     this->ui->cancelProcess->setEnabled(true);
-    this->hasData = false;
 }
 
 void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp_E, QList<QList<double> > tmp_O,
@@ -674,11 +668,11 @@ void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp
                 E.push_back(tmp_E.at(j).at(i));
                 O.push_back(tmp_O.at(j).at(i));
                 Rs.push_back(tmp_Rs.at(j).at(i));
-//                sessionsLabels.push_back(tmp_sessionsLabels.at(j));
-//                sessionsLabels.push_back(tmp_sessionsLabels.at(j).at(i));
-//                tick++;
-//                sessionsTicks.push_back(tick);
-//                infos.push_back(tmp_infos.at(j).at(i));
+                //                sessionsLabels.push_back(tmp_sessionsLabels.at(j));
+                //                sessionsLabels.push_back(tmp_sessionsLabels.at(j).at(i));
+                //                tick++;
+                //                sessionsTicks.push_back(tick);
+                //                infos.push_back(tmp_infos.at(j).at(i));
             }
             else{
                 E.push_back(false);
@@ -751,7 +745,7 @@ void AnalysisWindow::showGraphicStats(QList<double> E, QList<double> O, QList<do
         labY = tr("P-Valor");
         title = tr("P-Valor - Sequência - Análise ")+QString::number(this->nwin);
         PlotWindow* panelP = this->showHistogram(pvalues.toVector(),sessionsTicks,VP,sessionsLabels,
-                                                      labX,labY,title,this->colorUpper);
+                                                 labX,labY,title,this->colorUpper);
         statsWidget->addTab(panelP,labY);
     }
 
@@ -894,15 +888,17 @@ void AnalysisWindow::saveFileStats(QList<QString> set_line,
 }
 
 void AnalysisWindow::showGraphicStats(QList<QString> set_line, QList<QList<double> > E, QList<QList<double> > O, QList<QList<double> > R,
-                                    QList<QMap<int, QPair<double, double> > > VE,
-                                    QList<QMap<int, QPair<double, double> > > VO,
-                                    QList<QMap<int, QPair<double, double> > > VR,
-                                    QVector<QString> sessionsLabels,
-                                    QList<QVector<QString> > infos,
-                                    QList<QPair<double, double> > pvalues)
+                                      QList<QMap<int, QPair<double, double> > > VE,
+                                      QList<QMap<int, QPair<double, double> > > VO,
+                                      QList<QMap<int, QPair<double, double> > > VR,
+                                      QVector<QString> sessionsLabels,
+                                      QList<QVector<QString> > infos,
+                                      QList<QPair<double, double> > pvalues)
 {
     ViewGraphicStats* view = new ViewGraphicStats(this->mdi);
-    view->setData(set_line,sessionsLabels,infos,O,E,R,pvalues,VE,VO,VR);
+    Statistics st;
+    QList< QPair<bool,double> > p = st.isSignificativePvalue(pvalues);
+    view->setData(set_line,sessionsLabels,infos,O,E,R,p,VE,VO,VR);
     this->mdi->addSubWindow(view);
     view->show();
 }
@@ -1198,8 +1194,8 @@ void AnalysisWindow::showPhyloMtx()
 void AnalysisWindow::calcPhyloMtx()
 {
     this->phyloModule->loadData(this->mapSequences,this->sortedSpecies,
-                     this->phyloStats->getPermutation_us(),this->ui->sizeSeq->value(),
-                     this->ui->mtxIntervals->value(),this->ui->stepsSize->value(),this->ui->absValMtx->isChecked());
+                                this->phyloStats->getPermutation_us(),this->ui->sizeSeq->value(),
+                                this->ui->mtxIntervals->value(),this->ui->stepsSize->value(),this->ui->absValMtx->isChecked());
     this->phyloStats->deleteLater();
     this->phyloModule->start();
 }

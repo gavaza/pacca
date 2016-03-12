@@ -21,6 +21,8 @@ public:
     explicit PlotWindow(QWidget *parent = 0);
     ~PlotWindow();
     void showHistogram(QVector<double> data, QVector<double> ticks, QPair<double, double> variances,
+                                   QVector<QString> labels, QString labX, QString labY, QString title, QColor color);
+    void showHistogram(QVector<double> data, QVector<double> ticks, QVector<double> variances, double mean,
                               QVector<QString> labels, QString labX, QString labY, QString title, QColor color);
     void showStackHistogram(QVector<double> lower, QVector<double> upper, QVector<double> ticks,
                                    QVector<QString> labels, QString labX, QString labY, QString title, QColor lColor, QColor uColor);

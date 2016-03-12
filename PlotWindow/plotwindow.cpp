@@ -40,6 +40,15 @@ PlotWindow::~PlotWindow()
 void PlotWindow::showHistogram(QVector<double> data, QVector<double> ticks, QPair<double, double> variances,
                                QVector<QString> labels, QString labX, QString labY, QString title, QColor color)
 {
+    QVector<double> var;
+    for(int d=0; d < data.size(); ++d)
+        var.push_back(variances.second);
+    this->showHistogram(data,ticks,var,variances.first,labels,labX,labY,title,color);
+}
+
+void PlotWindow::showHistogram(QVector<double> data, QVector<double> ticks, QVector<double> variances, double mean,
+                               QVector<QString> labels, QString labX, QString labY, QString title, QColor color)
+{
     ui->customPlot->clearPlottables();
     ui->customPlot->clearGraphs();
     ui->customPlot->clearItems();
@@ -66,20 +75,16 @@ void PlotWindow::showHistogram(QVector<double> data, QVector<double> ticks, QPai
         QPen pen;
         pen.setStyle(Qt::DotLine);
         pen.setWidth(1);
-        pen.setColor(QColor(180,180,180));
-        ui->customPlot->addGraph(); ngraphs++;
+        pen.setColor(this->colorVar);
+
+        ui->customPlot->addGraph(); ++ngraphs;
+        ui->customPlot->graph(ngraphs)->setPen(pen);
+        ui->customPlot->graph(ngraphs)->setLineStyle(QCPGraph::lsNone);
+        ui->customPlot->graph(ngraphs)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::red, Qt::white, 7));
+        ui->customPlot->graph(ngraphs)->setErrorType(QCPGraph::etValue);
         ui->customPlot->graph(ngraphs)->setName(tr("Variância"));
-        ui->customPlot->graph(ngraphs)->setPen(pen);
-        ui->customPlot->graph(ngraphs)->setBrush(QBrush(this->colorVar));
-        ui->customPlot->addGraph(); ngraphs++;
-//        ui->customPlot->legend->removeItem(ui->customPlot->legend->itemCount()-1);
-        ui->customPlot->graph(ngraphs)->setPen(pen);
-        ui->customPlot->graph(ngraphs-1)->setChannelFillGraph(ui->customPlot->graph(ngraphs));
-        ui->customPlot->graph(ngraphs-1)->addData(1,variances.first+variances.second);
-        ui->customPlot->graph(ngraphs-1)->addData(data.size(),variances.first+variances.second);
-        ui->customPlot->graph(ngraphs)->addData(1,variances.first-variances.second);
-        ui->customPlot->graph(ngraphs)->addData(data.size(),variances.first-variances.second);
-        ui->customPlot->graph(ngraphs)->rescaleAxes(true);
+
+        ui->customPlot->graph(ngraphs)->setDataValueError(ticks,data,variances);
     }
 
     if(this->showMean){
@@ -88,8 +93,8 @@ void PlotWindow::showHistogram(QVector<double> data, QVector<double> ticks, QPai
         QPen pen; pen.setColor(this->colorMean); pen.setWidth(2); pen.setStyle(Qt::SolidLine);
         ui->customPlot->graph(ngraphs)->setPen(pen);
         ui->customPlot->graph(ngraphs)->setLineStyle(QCPGraph::lsLine);
-        ui->customPlot->graph(ngraphs)->addData(1,variances.first);
-        ui->customPlot->graph(ngraphs)->addData(data.size(),variances.first);
+        ui->customPlot->graph(ngraphs)->addData(1,mean);
+        ui->customPlot->graph(ngraphs)->addData(data.size(),mean);
         ui->customPlot->graph(ngraphs)->rescaleAxes(true);
     }
 
@@ -109,10 +114,10 @@ void PlotWindow::showHistogram(QVector<double> data, QVector<double> ticks, QPai
     ui->customPlot->xAxis->setTickVector(ticks);
     ui->customPlot->xAxis->setTickVectorLabels(labels);
     ui->customPlot->xAxis->setRange(minx,maxx);
-    ui->customPlot->yAxis->setAutoTickStep(false);
-    ui->customPlot->yAxis->setAutoSubTicks(false);
-    ui->customPlot->yAxis->setTickStep((maxy-miny)*0.1);
-    ui->customPlot->yAxis->setSubTickCount(9);
+//    ui->customPlot->yAxis->setAutoTickStep(false);
+//    ui->customPlot->yAxis->setAutoSubTicks(false);
+//    ui->customPlot->yAxis->setTickStep((maxy-miny)*0.1);
+//    ui->customPlot->yAxis->setSubTickCount(9);
     ui->customPlot->yAxis->setNumberPrecision(2);
     ui->customPlot->addPlottable(hist);
     ui->customPlot->legend->removeItem(ui->customPlot->legend->itemCount()-1);

@@ -6,6 +6,11 @@ ViewTableStats::ViewTableStats(QWidget *parent) :
     ui(new Ui::ViewTableStats)
 {
     ui->setupUi(this);
+    Database db;
+    QList<Subjects> subjects = db.getAllSubjects();
+    this->subjectsNames.insert(-1,tr("Todos"));
+    for(int k = 0; k < subjects.size(); ++k)
+        this->subjectsNames.insert(subjects[k].getId().toInt(),subjects[k].getName().toString());
     connect(this->ui->list,SIGNAL(currentRowChanged(int)),this,SLOT(alter_line(int)));
 }
 
@@ -149,7 +154,7 @@ void ViewTableStats::alter_line(int i){
         if (VarE.toInt() == -1) VarE = "-";
         if (VarO.toInt() == -1) VarO = "-";
         if (VarR.toInt() == -1) VarR = "-";
-        this->insertTable2Line(key,
+        this->insertTable2Line(this->subjectsNames.value(key),
                                MeanVarO.first,
                                VarO,
                                MeanVarE.first,
