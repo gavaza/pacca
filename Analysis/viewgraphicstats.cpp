@@ -69,12 +69,12 @@ void ViewGraphicStats::alter_line(int i){
         this->obsData.push_back(this->observed.at(i).at(j));
         this->expData.push_back(this->expected.at(i).at(j));
         this->resData.push_back(this->residue.at(i).at(j));
-        this->pvalData.push_back(this->pvalues.at(i).at(j).second);
+        if(this->pvalues.at(i).size() != 0) this->pvalData.push_back(this->pvalues.at(i).at(j).second);
+        else this->pvalData.push_back(0);
         this->labels.push_back(this->session.at(j));
         this->ticks.push_back(j+1);
     }
     this->plotSessions();
-
     QList<int> keys = this->VE.at(i).uniqueKeys();
     QListIterator<int> j(keys);
     int pos = 0;
@@ -96,7 +96,8 @@ void ViewGraphicStats::alter_line(int i){
         this->obsData.push_back(MeanVarO.first);
         this->expData.push_back(MeanVarE.first);
         this->resData.push_back(MeanVarR.first);
-        this->pvalData.push_back(this->VP.at(i).value(key).second);
+        if(this->VP.at(i).size() != 0) this->pvalData.push_back(this->VP.at(i).value(key).second);
+        else this->pvalData.push_back(0);
         this->voData.push_back(VarO);
         this->veData.push_back(VarE);
         this->vrData.push_back(VarR);

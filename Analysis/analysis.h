@@ -192,6 +192,7 @@ private slots:
                   QList<QMap<int, QPair<double, double> > > VE,
                   QList<QMap<int, QPair<double, double> > > VO,
                   QList<QMap<int, QPair<double, double> > > VR,
+                  QList<QMap<int, QPair<double, double> > > VP,
                   QVector<QString> sessionsLabels, QList<QVector<QString> > tmp_infos, int s,
                   QList<QList<QPair<double, double> > > Ps = QList<QList< QPair<double,double> > >());
     void showGraphicStats(QList<double> E, QList<double> O, QList<double> R,

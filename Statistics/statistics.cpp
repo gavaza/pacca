@@ -178,6 +178,11 @@ QList<QMap<int, QPair<double,double> > > Statistics::getVR(){
     return this->VR;
 }
 
+QList<QMap<int, QPair<double, double> > > Statistics::getVP()
+{
+    return this->VP;
+}
+
 QList<QList<QPair<double, double> > > Statistics::getP()
 {
     return this->dataP;
@@ -499,29 +504,28 @@ QPair<bool,double> Statistics::isSignificativePvalue(QPair<double, double> pv)
     s.endGroup();
 
     bool valid = false;
-    double pvalue;
+    double pvalue = qMin(pv.first,pv.second);
     if(filterPvalue){
         double reference = alfa;
         if(tailed == 0){
             reference = alfa/2.0;
-            double p;
-            if(pv.first < pv.second) p=pv.first;
-            else p=pv.second;
+            double p = qMin(pv.first,pv.second);
             if(p<=reference){
                 pvalue=p;
                 valid=true;
             }
-        } else if((pv.first < pv.second) && tailed == -1 && (pv.first <= reference)){
-            pvalue=pv.first;
-            valid=true;
-        } else if((pv.first >= pv.second) && tailed == 1 && (pv.second <= reference)){
-            pvalue=pv.second;
-            valid=true;
+        } else {
+            if((pv.first < pv.second) && tailed == -1 && (pv.first <= reference)){
+                pvalue=pv.first;
+                valid=true;
+
+            } else if((pv.first >= pv.second) && tailed == 1 && (pv.second <= reference)){
+                pvalue=pv.second;
+                valid=true;
+            }
         }
     }else {
         valid=true;
-        if(pv.first < pv.second) pvalue=pv.first;
-        else pvalue=pv.second;
     }
     return QPair<bool,double>(valid,pvalue);
 }
@@ -733,23 +737,16 @@ void Statistics::calcPermutation()
         this->set_us.clear();
 
         int totalSessions = sessions.size();
-        QList<StatisticMap> distributions;
+        QList<StatisticMap> distributions_map;
+        QList<list_behavior> distributions_list;
         StatisticMap behaivors;
 
-
-
-        for(int d=0; d < this->nPermutations; d++){
-            StatisticMap tmp;
-            distributions.push_back(tmp);
-        }
         for(int s=0; s < totalSessions; s++){
-            list_behavior bootstrap_list = this->bootstrap(this->events.at(s),this->nPermutations);
+            distributions_list.push_back(this->bootstrap(this->events.at(s),this->nPermutations));
             int subject = this->sessionsSubjects.at(s);
             behaivors.insertMulti(subject,this->sessions.at(s));
-            for(int p=0; p < this->nPermutations; p++){
-                distributions[p].insertMulti(subject,bootstrap_list.at(p));
-            }
         }
+        distributions_map = this->randomize(behaivors);
         int totalPermutations = this->permutation_list.size();
         QVector<QString> infos;
         for(int s=0; s < totalPermutations; s++){
@@ -774,14 +771,19 @@ void Statistics::calcPermutation()
             }
             this->dataR.push_back(this->R(set_us,behaivors.values()));
 
-
-            QList<double> rand_dist;
-            for(int d=0; d < this->nPermutations; d++){
-                rand_dist.push_back(this->V(set_us,distributions.at(d),Residue).first);
+            QList< QPair<double,double> > Ps;
+            for(int r = 0; r < distributions_list.size(); ++r){
+                QList<double> dist = this->R(set_us,distributions_list.at(r));
+                Ps.push_back(this->pvalue(this->dataR.last().at(r),dist));
             }
+            this->dataP.push_back(Ps);
 
-            QList<QPair<double,double> > P_value = this->pvalue(this->dataR.last(),rand_dist);
-            this->dataP.push_back(P_value);
+//            QList<double> rand_dist;
+//            for(int d=0; d < this->nPermutations; d++){
+//                rand_dist.push_back(this->V(set_us,distributions.at(d),Residue).first);
+//            }
+
+//            QList<QPair<double,double> > P_value = this->pvalue(this->dataR.last(),rand_dist);
 
             int tick = this->sessionsLabels.size();
             this->sessionsTicks.push_back(tick);
@@ -803,6 +805,27 @@ void Statistics::calcPermutation()
             this->VE.last().insertMulti(-1,E_all);
             this->VO.last().insertMulti(-1,O_all);
             this->VR.last().insertMulti(-1,R_all);
+
+            QList< QMap<int, QPair<double,double> > > dist;
+            for(int r=0; r<distributions_map.size(); r++){
+                StatisticMap rand_behavior; rand_behavior = distributions_map[r];
+                QMap<int, QPair<double,double> > tmp = this->V_Map(set_us,rand_behavior,Residue);
+                tmp.insertMulti(-1,this->V(tmp));
+                dist.push_back(tmp);
+            }
+
+            QMap<int, QPair<double,double> > oneVP;
+            QList<int> keys = this->VR.last().keys();
+            int key;
+            foreach (key, keys) {
+                QList<double> dist_values;
+                for(int r=0; r<dist.size(); r++){
+                    dist_values.push_back(dist.at(r).value(key).first);
+                }
+                double base = this->VR.last().value(key).first;
+                oneVP.insertMulti(key,this->pvalue(base,dist_values));
+            }
+            this->VP.push_back(oneVP);
 
             double ratio = ((double) s)/totalPermutations;
             emit this->statusProcess(ratio);

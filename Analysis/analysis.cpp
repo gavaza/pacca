@@ -510,6 +510,7 @@ void AnalysisWindow::showSequenceStats(bool statisticsTests)
 
             QList<StatisticMap> randomized;
             QList< QMap<int, QPair<double,double> > > dist;
+            QMap<int, QPair<double,double> > VP;
             if (statisticsTests){
                 randomized = this->statsModule->randomize(behaivors);
                 for(int r=0; r<randomized.size(); r++){
@@ -518,19 +519,18 @@ void AnalysisWindow::showSequenceStats(bool statisticsTests)
                     tmp.insertMulti(-1,this->statsModule->V(tmp));
                     dist.push_back(tmp);
                 }
+                QList<int> keys = VR.keys();
+                int key;
+                foreach (key, keys) {
+                    QList<double> dist_values;
+                    for(int r=0; r<dist.size(); r++){
+                        dist_values.push_back(dist.at(r).value(key).first);
+                    }
+                    double base = VR.value(key).first;
+                    VP.insertMulti(key,this->statsModule->pvalue(base,dist_values));
+                }
             }
 
-            QMap<int, QPair<double,double> > VP;
-            QList<int> keys = VR.keys();
-            int key;
-            foreach (key, keys) {
-                QList<double> dist_values;
-                for(int r=0; r<randomized.size(); r++){
-                    dist_values.push_back(dist.at(r).value(key).first);
-                }
-                double base = VR.value(key).first;
-                VP.insertMulti(key,this->statsModule->pvalue(base,dist_values));
-            }
 
             set_VE.push_back(VE);
             set_VO.push_back(VO);
@@ -670,6 +670,7 @@ void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp
                               QList<QList<double> > tmp_Rs, QList<QMap<int, QPair<double, double> > > VE,
                               QList<QMap<int, QPair<double, double> > > VO,
                               QList<QMap<int, QPair<double, double> > > VR,
+                              QList<QMap<int, QPair<double, double> > > VP,
                               QVector<QString> sessionsLabels,
                               QList<QVector<QString> > tmp_infos,
                               int s,
@@ -716,11 +717,15 @@ void AnalysisWindow::showData(QList<QString> set_line, QList<QList<double> > tmp
         set_infos.push_back(infos);
     }
 
+    //Removing the filter, thing about it later
+    set_O = tmp_O;
+    set_E = tmp_E;
+    set_Rs = tmp_Rs;
     this->showResults(set_line,set_E,set_O,set_Rs,
                       VE,VO,VR,
                       sessionsLabels,
                       set_infos,
-                      set_sessionsTicks);
+                      set_sessionsTicks,Ps,VP);
 }
 
 PlotWindow* AnalysisWindow::showFrequenceStats(QVariantList data, QString xlabel, QString title, QString legend, bool sorted)
@@ -893,12 +898,14 @@ void AnalysisWindow::saveFileStats(QList<QString> set_line,
             xlsx.write(currentRow,4,tr("Resíduo"),formatSessions);
             xlsx.write(currentRow,5,tr("P-Valor"),formatSessions);
             for (int j=0; j< sessionsLabels.size(); j++){
+                double pv = 0;
+                if(set_p.at(i).size() != 0) pv = set_p.at(i).at(j).second;
                 ++currentRow;
                 xlsx.write(currentRow,1,sessionsLabels.at(j));
                 xlsx.write(currentRow,2,O.at(i).at(j));
                 xlsx.write(currentRow,3,E.at(i).at(j));
                 xlsx.write(currentRow,4,R.at(i).at(j));
-                xlsx.write(currentRow,5,set_p.at(i).at(j).second);
+                xlsx.write(currentRow,5,pv);
             }
             ++currentRow;
             xlsx.write(currentRow,1,tr("Indivíduo"),formatSubjects);
@@ -923,6 +930,8 @@ void AnalysisWindow::saveFileStats(QList<QString> set_line,
                 if (VarE.toInt() == -1) VarE = "-";
                 if (VarO.toInt() == -1) VarO = "-";
                 if (VarR.toInt() == -1) VarR = "-";
+                double pv = 0;
+                if(set_VP.at(i).size() != 0) pv = set_VP.at(i).value(key).second;
                 xlsx.write(currentRow,1,subjectsNames.value(key));
                 xlsx.write(currentRow,2,MeanVarO.first);
                 xlsx.write(currentRow,3,VarO);
@@ -930,7 +939,7 @@ void AnalysisWindow::saveFileStats(QList<QString> set_line,
                 xlsx.write(currentRow,5,VarE);
                 xlsx.write(currentRow,6,MeanVarR.first);
                 xlsx.write(currentRow,7,VarR);
-                xlsx.write(currentRow,8,set_VP.at(i).value(key).second);
+                xlsx.write(currentRow,8,pv);
             }
             ++currentRow;
             ++currentRow; //to create a blank line between the data.
@@ -964,7 +973,6 @@ void AnalysisWindow::showGraphicStats(QList<QString> set_line, QList<QList<doubl
         }
         set_VP.push_back(tmp);
     }
-
     view->setData(set_line,sessionsLabels,infos,O,E,R,set_p,VE,VO,VR,set_VP);
     this->mdi->addSubWindow(view);
     view->show();
@@ -1144,7 +1152,7 @@ void AnalysisWindow::showProcessedDataPermutation()
         set_line.push_back(a);
     }
     this->showData(set_line, this->statsModule->getE(),this->statsModule->getO(),this->statsModule->getR(),
-                   this->statsModule->getVE(), this->statsModule->getVO(), this->statsModule->getVR(),
+                   this->statsModule->getVE(), this->statsModule->getVO(), this->statsModule->getVR(), this->statsModule->getVP(),
                    this->statsModule->getLabels(),this->statsModule->getInfos(),-1,this->statsModule->getP());
 }
 

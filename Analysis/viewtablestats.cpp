@@ -143,11 +143,13 @@ void ViewTableStats::alter_line(int i){
     this->ui->table->setRowCount(0);
     this->ui->table_2->setRowCount(0);
     for (int j=0; j<this->session.size(); j++){
+        QVariant pv = 0;
+        if(this->pvalor.at(i).size() != 0) pv = this->pvalor.at(i).at(j).second;
         this->insertTableLine(this->session.at(j),
                               this->obs.at(i).at(j),
                               this->spec.at(i).at(j),
                               this->res.at(i).at(j),
-                              this->pvalor.at(i).at(j).second);
+                              pv);
     }
     QList<int> keys = this->VE.at(i).uniqueKeys();
     QListIterator<int> j(keys);
@@ -162,12 +164,14 @@ void ViewTableStats::alter_line(int i){
         if (VarE.toInt() == -1) VarE = "-";
         if (VarO.toInt() == -1) VarO = "-";
         if (VarR.toInt() == -1) VarR = "-";
+        QVariant pv = 0;
+        if(this->VP.at(i).size() != 0) pv = this->VP.at(i).value(key).second;
         this->insertTable2Line(this->subjectsNames.value(key),
                                MeanVarO.first,
                                VarO,
                                MeanVarE.first,
                                VarE,
                                MeanVarR.first,
-                               VarR,this->VP.at(i).value(key).second);
+                               VarR,pv);
     }
 }

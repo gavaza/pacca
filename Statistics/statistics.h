@@ -72,6 +72,7 @@ public:
     QList<QMap<int, QPair<double,double> > > getVE();
     QList<QMap<int, QPair<double,double> > > getVO();
     QList<QMap<int, QPair<double,double> > > getVR();
+    QList<QMap<int, QPair<double,double> > > getVP();
     QList<QList< QPair<double,double> > > getP();
     list_behavior getUs(int i);
     QList<list_behavior> getUs();
@@ -218,6 +219,7 @@ private:
     QList<QMap<int, QPair<double,double> > > VE;
     QList<QMap<int, QPair<double,double> > > VO;
     QList<QMap<int, QPair<double,double> > > VR;
+    QList<QMap<int, QPair<double,double> > > VP;
 
     QList<QList< QPair<double,double> > > dataP;
     QList<QString> us;
