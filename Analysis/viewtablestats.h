@@ -23,7 +23,7 @@ public:
                          QVariant res, QVariant pvalor = -1);
     void insertTable2Line(QVariant subject, QVariant MO, QVariant vobs,
                                          QVariant ME, QVariant vspec,
-                                         QVariant MR, QVariant vres);
+                                         QVariant MR, QVariant vres, QVariant pvalor);
 
     void setData(QList<QString> set_line,
                  QVector<QString> sessionLabels,
@@ -31,10 +31,11 @@ public:
                  QList<QList<double> > obs,
                  QList<QList<double> > spec,
                  QList<QList<double> > res,
-                 QList<QPair<double, double> > pvalor,
+                 QList<QList<QPair<bool, double> > > pvalor,
                  QList<QMap<int, QPair<double,double> > > VE,
                  QList<QMap<int, QPair<double,double> > > VO,
-                 QList<QMap<int, QPair<double,double> > > VR);
+                 QList<QMap<int, QPair<double,double> > > VR,
+                 QList<QMap<int, QPair<bool, double> > > VP);
 
 private slots:
     void alter_line(int i);
@@ -45,10 +46,11 @@ private:
     QList<QList<double> > obs;
     QList<QList<double> > spec;
     QList<QList<double> > res;
-    QList<QPair<double,double> > pvalor;
+    QList< QList< QPair<bool, double> > > pvalor;
     QList<QMap<int, QPair<double,double> > > VE;
     QList<QMap<int, QPair<double,double> > > VO;
     QList<QMap<int, QPair<double,double> > > VR;
+    QList<QMap<int, QPair<bool, double> > > VP;
     QMap<int,QString> subjectsNames;
 
     Ui::ViewTableStats *ui;

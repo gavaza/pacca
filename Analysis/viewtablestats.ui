@@ -132,6 +132,11 @@
        <string>Variância Resíduo</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>P-Valor do Resíduo</string>
+      </property>
+     </column>
     </widget>
    </item>
   </layout>

@@ -18,8 +18,9 @@ ViewGraphicStats::~ViewGraphicStats()
 void ViewGraphicStats::setData(QList<QString> set_line, QVector<QString> sessionLabels,
                                QList<QVector<QString> > infos, QList<QList<double> > obs,
                                QList<QList<double> > spec, QList<QList<double> > res,
-                               QList< QPair<bool,double> > pvalor, QList<QMap<int, QPair<double, double> > > VE,
-                               QList<QMap<int, QPair<double, double> > > VO, QList<QMap<int, QPair<double, double> > > VR)
+                               QList< QList< QPair<bool, double> > > pvalor, QList<QMap<int, QPair<double, double> > > VE,
+                               QList<QMap<int, QPair<double, double> > > VO, QList<QMap<int, QPair<double, double> > > VR,
+                               QList<QMap<int, QPair<bool, double> > > VP)
 {
     this->ui->list->addItems(set_line);
 
@@ -32,13 +33,7 @@ void ViewGraphicStats::setData(QList<QString> set_line, QVector<QString> session
     this->VE = VE;
     this->VO = VO;
     this->VR = VR;
-    if(this->pvalues.size() > 0){
-        for(int p=0; p < set_line.size(); ++p){
-            this->ticksPvalue.push_back(p+1);
-            this->labelsPvalue.push_back(set_line.at(p));
-            this->pvalData.push_back(this->pvalues.at(p).second);
-        }
-    }
+    this->VP = VP;
     if(this->ui->list->count() > 0){
         this->ui->list->item(0)->setSelected(true);
         this->alter_line(0);
@@ -74,7 +69,7 @@ void ViewGraphicStats::alter_line(int i){
         this->obsData.push_back(this->observed.at(i).at(j));
         this->expData.push_back(this->expected.at(i).at(j));
         this->resData.push_back(this->residue.at(i).at(j));
-//        this->pvalData.push_back(this->pvalues.at(i).at(j));
+        this->pvalData.push_back(this->pvalues.at(i).at(j).second);
         this->labels.push_back(this->session.at(j));
         this->ticks.push_back(j+1);
     }
@@ -101,6 +96,7 @@ void ViewGraphicStats::alter_line(int i){
         this->obsData.push_back(MeanVarO.first);
         this->expData.push_back(MeanVarE.first);
         this->resData.push_back(MeanVarR.first);
+        this->pvalData.push_back(this->VP.at(i).value(key).second);
         this->voData.push_back(VarO);
         this->veData.push_back(VarE);
         this->vrData.push_back(VarR);
@@ -116,7 +112,7 @@ void ViewGraphicStats::plotSessions()
                                              tr("Sessões"),tr("Esperado"),tr("Valor Esperado - Sessões"),this->colorExpected);
     this->ui->plotResSessions->showHistogram(this->resData,this->ticks,QPair<double,double>(0,0),this->labels,
                                              tr("Sessões"),tr("Resíduo"),tr("Valor do Resíduo - Sessões"),this->colorResidue);
-    this->ui->plotPvalSessions->showHistogram(this->pvalData,this->ticksPvalue,QPair<double,double>(0,0),this->labelsPvalue,
+    this->ui->plotPvalSessions->showHistogram(this->pvalData,this->ticks,QPair<double,double>(0,0),this->labels,
                                              tr("Sessões"),tr("P-Valor"),tr("P-Valores - Sessões"),this->colorUpper);
 }
 
@@ -128,7 +124,7 @@ void ViewGraphicStats::plotSubjects()
                                              tr("Indivíduos"),tr("Esperado"),tr("Valor Esperado - Indivíduos"),this->colorExpected);
     this->ui->plotResSubjects->showHistogram(this->resData,this->ticks,this->vrData,0,this->labels,
                                              tr("Indivíduos"),tr("Resíduo"),tr("Valor do Resíduo - Indivíduos"),this->colorResidue);
-    this->ui->plotPvalSubjects->showHistogram(this->pvalData,this->ticksPvalue,QPair<double,double>(0,0),this->labelsPvalue,
+    this->ui->plotPvalSubjects->showHistogram(this->pvalData,this->ticks,QPair<double,double>(0,0),this->labels,
                                              tr("Indivíduos"),tr("P-valor"),tr("P-Valores - Indivíduos"),this->colorUpper);
 }
 
@@ -137,7 +133,7 @@ void ViewGraphicStats::clearAll()
     this->obsData.clear();
     this->expData.clear();
     this->resData.clear();
-//    this->pvalData.clear();
+    this->pvalData.clear();
     this->voData.clear();
     this->veData.clear();
     this->vrData.clear();

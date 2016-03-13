@@ -196,6 +196,7 @@ public:
     QPair<bool,double> isSignificativePvalue(QPair<double,double> pv);
     QList< QPair<bool,double> > isSignificativePvalue(QList< QPair<double,double> > list_pv);
 
+    QList<StatisticMap> randomize(StatisticMap sessions);
 private:
     void calcPermutation();
     unsigned int elements(int size_u, int size_behavior);

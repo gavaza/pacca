@@ -141,7 +141,8 @@ private:
                      QVector<QString> set_sessionsLabels,
                      QList<QVector<QString> > set_infos,
                      QList<QVector<double> > set_sessionsTicks = QList<QVector<double> > (),
-                     QList<QPair<double,double> > set_pvalues = QList<QPair<double, double> > ());
+                     QList<QList< QPair<double, double> > > set_pvalues = QList<QList< QPair<double, double> > > (),
+                     QList<QMap<int, QPair<double, double> > > set_VP = QList<QMap<int, QPair<double, double> > >());
 
 private slots:
     void hideSubWindow(QMdiSubWindow* w);
@@ -209,7 +210,8 @@ private slots:
                         QList<QMap<int, QPair<double,double> > > VR,
                         QVector<QString> sessionsLabels,
                         QList<QVector<QString> > infos,
-                        QList<QPair<double,double> > pvalues = QList<QPair<double,double> >());
+                        QList<QList<QPair<double, double> > > pvalues = QList< QList<QPair<double,double> > >(),
+                        QList<QMap<int, QPair<double, double> > > VP = QList<QMap<int, QPair<double, double> > >());
     void showGraphicStats(QList<QString> set_line,
                         QList<QList<double> > E,
                         QList<QList<double> > O,
@@ -219,7 +221,8 @@ private slots:
                         QList<QMap<int, QPair<double,double> > > VR,
                         QVector<QString> sessionsLabels,
                         QList<QVector<QString> > infos,
-                        QList<QPair<double,double> > pvalues = QList<QPair<double,double> >());
+                        QList<QList<QPair<double, double> > > pvalues = QList<QList<QPair<double, double> > >(),
+                        QList<QMap<int, QPair<double, double> > > VP = QList<QMap<int, QPair<double, double> > >());
     void showTableStats(QList<QString> set_line,
                         QList<QList<double> > E,
                         QList<QList<double> > O,
@@ -229,7 +232,8 @@ private slots:
                         QList<QMap<int, QPair<double,double> > > VR,
                         QVector<QString> sessionsLabels,
                         QList<QVector<QString> > infos,
-                        QList<QPair<double,double> > pvalues = QList<QPair<double,double> >());
+                        QList<QList<QPair<double, double> > > pvalues = QList< QList< QPair<double, double> > >(),
+                        QList<QMap<int, QPair<double, double> > > VP = QList<QMap<int, QPair<double, double> > >());
 
     void showNetStats(QList<double> E, QList<double> O, QList<double> R,
                       QVector<QString> sessionsLabels, QVector<QString> infos,

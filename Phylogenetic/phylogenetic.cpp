@@ -48,7 +48,7 @@ void Phylogenetic::calcData()
         StatisticMap sessions = this->sessions.value(spc); //getting all sessions of SPC
         StatisticMap s = sessions;
         QList< QPair<double, double> > tmpMO, tmpME, tmpMR, tmpMP;
-        QList< StatisticMap > randomized = this->randomize(sessions); //ramdomizing the lists
+        QList< StatisticMap > randomized = this->statsModule->randomize(sessions); //ramdomizing the lists
         for(int j=0; j < nCols; j++){ //for each behavior (the permutation of events) eg. all diades
             if(this->stopThread){ //control of thread
                 emit this->statusProcess(0.0);

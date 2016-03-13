@@ -854,3 +854,36 @@ void Statistics::combinations(QList<QString> V, int depth,int expected_length, Q
         emit this->statusEventsProcess(ratio);
     }
 }
+
+QList<StatisticMap> Statistics::randomize(StatisticMap sessions)
+{
+    QList< StatisticMap > randomized;
+    QSettings s("NuEvo","Pacca");
+    s.beginGroup("ConfigAnalysis");
+    int nperm = s.value("nPermutation",50).toInt();
+    s.endGroup();
+    QMapIterator<int,QVariantList> j(sessions);
+    QList< QList<int> > indexes;
+    while(j.hasNext()){
+        j.next();
+        int size = j.value().size();
+        QList<int> idx;
+        for(int n=0; n < size; n++) idx.push_back(n);
+        indexes.push_back(idx);
+    }
+    for(int n=0; n<nperm; n++){
+        StatisticMap tmp;
+        randomized.push_back(tmp);
+    }
+    unsigned int idx = 0;
+    QMapIterator<int,QVariantList> i(sessions);
+    while(i.hasNext()){
+        i.next();
+        QVariantList session = i.value();
+        QList<QVariantList> r = this->bootstrap(session,indexes.at(idx),nperm);
+        for(int n=0; n<nperm; n++)
+            randomized[n].insertMulti(i.key(),r.at(n));
+        idx++;
+    }
+    return randomized;
+}

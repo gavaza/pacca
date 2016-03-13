@@ -31,10 +31,11 @@ public:
                  QList<QList<double> > obs,
                  QList<QList<double> > spec,
                  QList<QList<double> > res,
-                 QList<QPair<bool, double> > pvalor,
+                 QList<QList<QPair<bool, double> > > pvalor,
                  QList<QMap<int, QPair<double,double> > > VE,
                  QList<QMap<int, QPair<double,double> > > VO,
-                 QList<QMap<int, QPair<double,double> > > VR);
+                 QList<QMap<int, QPair<double,double> > > VR,
+                 QList<QMap<int, QPair<bool, double> > > VP);
 
 
 private:
@@ -45,10 +46,11 @@ private:
     QList<QList<double> > observed;
     QList<QList<double> > expected;
     QList<QList<double> > residue;
-    QList< QPair<bool,double> > pvalues;
+    QList< QList< QPair<bool, double> > > pvalues;
     QList<QMap<int, QPair<double,double> > > VE;
     QList<QMap<int, QPair<double,double> > > VO;
     QList<QMap<int, QPair<double,double> > > VR;
+    QList<QMap<int, QPair<bool, double> > > VP;
 
     QVector<double> obsData;
     QVector<double> expData;
