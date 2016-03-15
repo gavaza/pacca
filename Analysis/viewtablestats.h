@@ -38,7 +38,8 @@ public:
                  QList<QMap<int, QPair<bool, double> > > VP);
 
 private slots:
-    void alter_line(int i);
+    void alter_line(int i); 
+    void update();
 
 private:
     QVector<QString> session;
@@ -52,6 +53,8 @@ private:
     QList<QMap<int, QPair<double,double> > > VR;
     QList<QMap<int, QPair<bool, double> > > VP;
     QMap<int,QString> subjectsNames;
+
+    int currentRow;
 
     Ui::ViewTableStats *ui;
 };

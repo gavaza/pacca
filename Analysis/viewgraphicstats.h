@@ -71,6 +71,8 @@ private:
     QColor colorUpper;
     bool filterPvalue;
 
+    int currentRow;
+
     void createConnections();
     void loadConfig();
 
@@ -79,6 +81,7 @@ private slots:
     void plotSessions();
     void plotSubjects();
     void clearAll();
+    void update();
 };
 
 #endif // VIEWGRAPHICSTATS_H

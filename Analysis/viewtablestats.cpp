@@ -12,6 +12,7 @@ ViewTableStats::ViewTableStats(QWidget *parent) :
     for(int k = 0; k < subjects.size(); ++k)
         this->subjectsNames.insert(subjects[k].getId().toInt(),subjects[k].getName().toString());
     connect(this->ui->list,SIGNAL(currentRowChanged(int)),this,SLOT(alter_line(int)));
+    connect(this->ui->filter,SIGNAL(clicked(bool)),this,SLOT(update()));
 }
 
 ViewTableStats::~ViewTableStats()
@@ -140,16 +141,23 @@ void ViewTableStats::setData(QList<QString> set_line,
 }
 
 void ViewTableStats::alter_line(int i){
+    this->currentRow=i;
     this->ui->table->setRowCount(0);
     this->ui->table_2->setRowCount(0);
     for (int j=0; j<this->session.size(); j++){
         QVariant pv = 0;
-        if(this->pvalor.at(i).size() != 0) pv = this->pvalor.at(i).at(j).second;
-        this->insertTableLine(this->session.at(j),
-                              this->obs.at(i).at(j),
-                              this->spec.at(i).at(j),
-                              this->res.at(i).at(j),
-                              pv);
+        bool signif = true;
+        if(this->pvalor.at(i).size() != 0){
+            signif = this->pvalor.at(i).at(j).first;
+            pv = this->pvalor.at(i).at(j).second;
+        }
+        if(signif || !this->ui->filter->isChecked()){
+            this->insertTableLine(this->session.at(j),
+                                  this->obs.at(i).at(j),
+                                  this->spec.at(i).at(j),
+                                  this->res.at(i).at(j),
+                                  pv);
+        }
     }
     QList<int> keys = this->VE.at(i).uniqueKeys();
     QListIterator<int> j(keys);
@@ -165,13 +173,24 @@ void ViewTableStats::alter_line(int i){
         if (VarO.toInt() == -1) VarO = "-";
         if (VarR.toInt() == -1) VarR = "-";
         QVariant pv = 0;
-        if(this->VP.at(i).size() != 0) pv = this->VP.at(i).value(key).second;
-        this->insertTable2Line(this->subjectsNames.value(key),
-                               MeanVarO.first,
-                               VarO,
-                               MeanVarE.first,
-                               VarE,
-                               MeanVarR.first,
-                               VarR,pv);
+        bool signif = true;
+        if(this->VP.at(i).size() != 0){
+            signif = this->VP.at(i).value(key).first;
+            pv = this->VP.at(i).value(key).second;
+        }
+        if(signif || !this->ui->filter->isChecked()){
+            this->insertTable2Line(this->subjectsNames.value(key),
+                                   MeanVarO.first,
+                                   VarO,
+                                   MeanVarE.first,
+                                   VarE,
+                                   MeanVarR.first,
+                                   VarR,pv);
+        }
     }
+}
+
+void ViewTableStats::update()
+{
+    this->alter_line(this->currentRow);
 }

@@ -14,70 +14,7 @@
    <string>Estatísticas</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QListWidget" name="list">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContents</enum>
-     </property>
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QTableWidget" name="table">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContents</enum>
-     </property>
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
-     </property>
-     <column>
-      <property name="text">
-       <string>Sessão</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Observado</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Esperado</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Resíduo</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>P-Valor</string>
-      </property>
-     </column>
-    </widget>
-   </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="QTableWidget" name="table_2">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -137,6 +74,76 @@
        <string>P-Valor do Resíduo</string>
       </property>
      </column>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QTableWidget" name="table">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>Sessão</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Observado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Esperado</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Resíduo</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>P-Valor</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QListWidget" name="list">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="filter">
+     <property name="text">
+      <string>Significantes</string>
+     </property>
     </widget>
    </item>
   </layout>
